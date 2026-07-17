@@ -24,7 +24,7 @@ def open_settings(page, lang, on_settings_saved):
         value=is_direct,
         label=STRINGS[lang]["direct_mode_label"],
         active_color="#00F0FF",
-        label_style=ft.TextStyle(color="#E2E8F0", size=13)
+        label_text_style=ft.TextStyle(color="#E2E8F0", size=13)
     )
     
     # Helper to show alerts inside settings
@@ -38,8 +38,7 @@ def open_settings(page, lang, on_settings_saved):
             content=ft.Text(text, color="#E2E8F0"),
             actions=[ft.TextButton(STRINGS[lang]["btn_close"], on_click=close_inner_dlg)],
             actions_alignment=ft.MainAxisAlignment.END,
-            bgcolor="#1E293B",
-            border=ft.Border.all(1, "#334155")
+            bgcolor="#1E293B"
         )
         page.dialog.open = True
         page.update()
@@ -111,8 +110,7 @@ def open_settings(page, lang, on_settings_saved):
             ft.TextButton(STRINGS[lang]["btn_no"], on_click=lambda _: close_dlg()),
             ft.ElevatedButton(STRINGS[lang]["btn_save"], on_click=save_settings, bgcolor="#008DDA", color="#FFFFFF")
         ],
-        bgcolor="#151E33",
-        border=ft.Border.all(1, "#2E3C56")
+        bgcolor="#151E33"
     )
     
     def close_dlg():

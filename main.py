@@ -95,8 +95,7 @@ def main(page: ft.Page):
             content=ft.Text(text, color="#E2E8F0"),
             actions=[ft.TextButton(STRINGS[current_lang]["btn_close"], on_click=close_dlg)],
             actions_alignment=ft.MainAxisAlignment.END,
-            bgcolor="#1E293B",
-            border=ft.Border.all(1, "#334155")
+            bgcolor="#1E293B"
         )
         page.dialog.open = True
         page.update()
@@ -459,8 +458,7 @@ def main(page: ft.Page):
                         ft.TextButton(STRINGS[current_lang]["btn_no"], on_click=reject_custom_binary),
                         ft.ElevatedButton(STRINGS[current_lang]["btn_yes"], on_click=approve_custom_binary, bgcolor="#008DDA", color="#FFFFFF")
                     ],
-                    bgcolor="#151E33",
-                    border=ft.Border.all(1, "#2E3C56")
+                    bgcolor="#151E33"
                 )
                 page.dialog.open = True
                 page.update()
