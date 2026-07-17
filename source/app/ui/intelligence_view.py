@@ -1,4 +1,5 @@
 import os
+import sys
 import threading
 import subprocess
 import json
@@ -6,6 +7,8 @@ import webbrowser
 import flet as ft
 from ..config import STRINGS, CLI_BINARY_NAME
 from .theme import make_stat_card, make_engine_row
+
+_NO_WINDOW = subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0
 
 class IntelligenceView:
     def __init__(self, search_states, current_lang, show_alert_fn, get_temp_bin_path_fn, thread_safe_build_fn, build_ui_fn, page: ft.Page):
@@ -169,7 +172,7 @@ class IntelligenceView:
                             vt_path = self.get_temp_bin_path_fn()
                             downloads_dir = os.path.join(os.path.expanduser("~"), "Downloads")
                             cmd = [vt_path, 'download', file_hash, '-o', downloads_dir]
-                            proc = subprocess.run(cmd, capture_output=True, text=True, encoding='utf-8')
+                            proc = subprocess.run(cmd, capture_output=True, text=True, encoding='utf-8', creationflags=_NO_WINDOW)
                             if proc.returncode == 0:
                                 self.page.show_dialog(
                                     ft.SnackBar(
@@ -353,7 +356,8 @@ class IntelligenceView:
                     capture_output=True,
                     text=True,
                     encoding='utf-8',
-                    errors='replace'
+                    errors='replace',
+                    creationflags=_NO_WINDOW
                 )
                 if proc.returncode != 0:
                     err_msg = proc.stderr or proc.stdout

@@ -260,7 +260,8 @@ def _detect_system_lang():
                 lang_id = ctypes.windll.kernel32.GetUserDefaultUILanguage() & 0x3FF
                 # Windows LCID sublanguage bits
                 win_lang_map = {
-                    0x01: "ru", 0x19: "uk",  # Russian, Ukrainian
+                    0x19: "ru",  # LANG_RUSSIAN
+                    0x22: "uk",  # LANG_UKRAINIAN
                     0x09: "en",
                     0x0A: "es",
                     0x07: "de",

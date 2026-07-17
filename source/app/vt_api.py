@@ -2,7 +2,10 @@ import json
 import urllib.request
 import urllib.error
 import subprocess
+import sys
 import os
+
+_NO_WINDOW = subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0
 
 def check_file_exists_direct(sha256, api_key):
     """Check if the file hash already exists on VirusTotal using HTTP API."""
@@ -32,7 +35,8 @@ def check_file_exists_vt(vt_path, sha256):
             capture_output=True,
             text=True,
             encoding='utf-8',
-            errors='replace'
+            errors='replace',
+            creationflags=_NO_WINDOW
         )
         if proc.returncode == 0:
             data = json.loads(proc.stdout)

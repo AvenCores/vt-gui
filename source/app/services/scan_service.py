@@ -1,4 +1,5 @@
 import os
+import sys
 import time
 import json
 import subprocess
@@ -6,6 +7,8 @@ import threading
 from ..config import STRINGS, get_api_key, CLI_BINARY_NAME
 from ..cli_manager import get_temp_bin_path, compute_sha256
 from ..vt_api import check_file_exists_direct, check_file_exists_vt
+
+_NO_WINDOW = subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0
 
 
 def resolve_scan_status(scan, lang):
@@ -110,7 +113,8 @@ class ScanService:
                 capture_output=True,
                 text=True,
                 encoding='utf-8',
-                errors='replace'
+                errors='replace',
+                creationflags=_NO_WINDOW
             )
             if proc.returncode != 0:
                 raise ValueError(f"vt CLI upload failed: {proc.stderr or proc.stdout}")
@@ -153,7 +157,8 @@ class ScanService:
                     capture_output=True,
                     text=True,
                     encoding='utf-8',
-                    errors='replace'
+                    errors='replace',
+                    creationflags=_NO_WINDOW
                 )
                 if status_proc.returncode == 0:
                     try:
