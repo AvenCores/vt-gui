@@ -3,11 +3,11 @@ import webbrowser
 
 def build_footer():
     """Builds a sticky, premium footer containing social links with hover animations."""
-    def make_social_link(icon_url, dest_url, tooltip):
+    def make_social_link(icon_name, dest_url, tooltip):
         img = ft.Image(
-            src=icon_url,
-            width=20,
-            height=20,
+            src=icon_name,
+            width=24,
+            height=24,
             color="#94A3B8"
         )
         
@@ -28,17 +28,27 @@ def build_footer():
         content=ft.Row(
             [
                 make_social_link(
-                    "https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/youtube.svg",
-                    "https://youtube.com/@avencores",
+                    "youtube.svg",
+                    "https://www.youtube.com/@avencores/",
                     "YouTube"
                 ),
                 make_social_link(
-                    "https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/telegram.svg",
+                    "telegram.svg",
                     "https://t.me/avencoresyt",
                     "Telegram"
                 ),
                 make_social_link(
-                    "https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/github.svg",
+                    "vk.svg",
+                    "https://vk.ru/avencoresreuploads",
+                    "VK"
+                ),
+                make_social_link(
+                    "dzen.svg",
+                    "https://dzen.ru/avencores",
+                    "Dzen"
+                ),
+                make_social_link(
+                    "github.svg",
                     "https://github.com/AvenCores",
                     "GitHub"
                 ),
