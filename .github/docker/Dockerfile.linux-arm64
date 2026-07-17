@@ -20,7 +20,7 @@ COPY . .
 # Build the binary
 RUN pyinstaller --onefile \
         --add-data="assets:assets" \
-        --add-data="src/strings.json:src" \
+        --add-data="app/strings.json:app" \
         --name="VirusTotal_File_Scanner_Linux_arm64" \
         --clean \
         main.py
