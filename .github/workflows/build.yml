@@ -192,6 +192,7 @@ jobs:
           --name="VirusTotal_File_Scanner_macOS"
           --add-data="assets:assets"
           --add-data="app/strings.json:app"
+          --codesign-identity=""
           --clean
           main.py
         working-directory: source
