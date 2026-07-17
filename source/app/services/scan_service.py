@@ -7,17 +7,40 @@ from ..config import STRINGS, get_api_key, CLI_BINARY_NAME
 from ..cli_manager import get_temp_bin_path, compute_sha256
 from ..vt_api import check_file_exists_direct, check_file_exists_vt
 
+
+def resolve_scan_status(scan, lang):
+    """Re-resolve a scan's status_text using the given language code."""
+    resolver = scan.get("status_resolver")
+    if resolver is None:
+        return
+    new_text = resolver(lang)
+    scan["status_text"] = new_text
+    widget = scan.get("_status_text_widget")
+    if widget is not None:
+        widget.value = new_text
+
+
 class ScanService:
     def __init__(self, active_scans, current_lang, thread_safe_build_fn, show_alert_fn, page):
         self.active_scans = active_scans
-        self.current_lang = current_lang
+        self._current_lang = current_lang
         self.thread_safe_build_fn = thread_safe_build_fn
         self.show_alert_fn = show_alert_fn
         self.page = page
 
+    @property
+    def current_lang(self):
+        return self._current_lang
+
+    @current_lang.setter
+    def current_lang(self, value):
+        self._current_lang = value
+
     def run_single_scan_pipeline(self, idx, file_path):
-        def set_scan_status(text, progress_value, rebuild=False):
+        def set_scan_status(text, progress_value, rebuild=False, resolver=None):
             self.active_scans[idx]["status_text"] = text
+            if resolver is not None:
+                self.active_scans[idx]["status_resolver"] = resolver
             if progress_value is not None:
                 self.active_scans[idx]["progress"] = progress_value
             # Update widgets directly if references exist, avoiding full UI rebuild
@@ -38,7 +61,8 @@ class ScanService:
 
         try:
             # 1. Compute Hash
-            set_scan_status(STRINGS[self.current_lang]["computing_hash"], 0.1)
+            set_scan_status(STRINGS[self.current_lang]["computing_hash"], 0.1,
+                            resolver=lambda lang: STRINGS[lang]["computing_hash"])
             sha256 = compute_sha256(file_path)
             if not sha256:
                 raise ValueError("Could not compute target file SHA-256 hash.")
@@ -50,7 +74,8 @@ class ScanService:
                 raise ValueError(STRINGS[self.current_lang]["api_key_missing"])
                 
             # 3. Check Database
-            set_scan_status(STRINGS[self.current_lang]["checking_vt"], 0.25)
+            set_scan_status(STRINGS[self.current_lang]["checking_vt"], 0.25,
+                            resolver=lambda lang: STRINGS[lang]["checking_vt"])
             
             vt_path = get_temp_bin_path()
             if not os.path.exists(vt_path):
@@ -74,7 +99,8 @@ class ScanService:
                 return
                 
             # 4. Upload file
-            set_scan_status(STRINGS[self.current_lang]["uploading_file"], 0.4)
+            set_scan_status(STRINGS[self.current_lang]["uploading_file"], 0.4,
+                            resolver=lambda lang: STRINGS[lang]["uploading_file"])
             analysis_id = None
             
             vt_path = get_temp_bin_path()
@@ -109,7 +135,8 @@ class ScanService:
                 analysis_id = analysis_id.split('/')[-1]
                 
             # 5. Poll Analysis status
-            set_scan_status(STRINGS[self.current_lang]["waiting_analysis"], 0.7)
+            set_scan_status(STRINGS[self.current_lang]["waiting_analysis"], 0.7,
+                            resolver=lambda lang: STRINGS[lang]["waiting_analysis"])
             start_time = time.time()
             max_wait = 300  # 5 minutes timeout
             
@@ -143,7 +170,10 @@ class ScanService:
                 elapsed = int(time.time() - start_time)
                 # Animate progress from 0.7 to 0.95 over the timeout window
                 progress = 0.7 + 0.25 * min(elapsed / max_wait, 1.0)
-                set_scan_status(f"{STRINGS[self.current_lang]['waiting_analysis']} ({elapsed}s)...", progress)
+                def _waiting_resolver(lang, _el=elapsed):
+                    return f"{STRINGS[lang]['waiting_analysis']} ({_el}s)..."
+                set_scan_status(f"{STRINGS[self.current_lang]['waiting_analysis']} ({elapsed}s)...", progress,
+                                resolver=_waiting_resolver)
                 time.sleep(5)
                 
             # 6. Success! Fetch final file details.

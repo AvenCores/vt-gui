@@ -33,7 +33,7 @@ from app.ui.results_view import build_results_view
 from app.ui.settings_dialog import open_settings
 from app.ui.intelligence_view import IntelligenceView
 from app.ui.footer import build_footer
-from app.services.scan_service import ScanService
+from app.services.scan_service import ScanService, resolve_scan_status
 
 # Parse CLI arguments for context-menu invocation
 init_file_path = None
@@ -88,6 +88,7 @@ def main(page: ft.Page):
     # State variables
     app_state = "scanner"  # scanner, scans, install_cli
     active_scans = []
+    scan_service = None
     current_tab_index = 0
     
     # State for lookup tabs
@@ -131,10 +132,16 @@ def main(page: ft.Page):
         
         # Header Language Switcher
         def change_language(lang_code):
-            nonlocal current_lang
+            nonlocal current_lang, scan_service
             current_lang = lang_code
             write_env_var("LANGUAGE", lang_code)
             page.title = STRINGS[current_lang]["app_title"]
+            # Re-translate active scan statuses for the new language
+            for scan in active_scans:
+                if scan["status"] == "scanning":
+                    resolve_scan_status(scan, lang_code)
+            if scan_service is not None:
+                scan_service.current_lang = lang_code
             build_ui()
 
         available_langs = get_available_langs()
@@ -523,7 +530,7 @@ def main(page: ft.Page):
         if not files:
             return
             
-        nonlocal active_scans, app_state, current_tab_index
+        nonlocal active_scans, app_state, current_tab_index, scan_service
         active_scans = []
         current_tab_index = 0
         app_state = "scans"
