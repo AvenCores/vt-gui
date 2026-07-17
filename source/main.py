@@ -190,7 +190,7 @@ def main(page: ft.Page):
                     thread_safe_update()
                 
                 try:
-                    download_and_install_cli(progress_callback=progress_cb)
+                    download_and_install_cli(progress_callback=progress_cb, lang=current_lang)
                     cli_status, _ = check_installed_binary()
                     if cli_status in ('verified', 'custom'):
                         status_text_widget.value = STRINGS[current_lang]["reinstall_success"]
@@ -251,7 +251,7 @@ def main(page: ft.Page):
                         thread_safe_update()
                         
                     try:
-                        download_and_install_cli(progress_callback=progress_cb)
+                        download_and_install_cli(progress_callback=progress_cb, lang=current_lang)
                         
                         # Verify installation status
                         cli_status, _ = check_installed_binary()

@@ -105,7 +105,13 @@
         "btn_reinstall_cli": "Reinstall VT CLI",
         "reinstalling_cli": "Reinstalling VT CLI...",
         "reinstall_success": "VT CLI successfully reinstalled!",
-        "reinstall_fail": "Reinstall failed: {e}"
+        "reinstall_fail": "Reinstall failed: {e}",
+        "cli_connecting": "Connecting to GitHub...",
+        "cli_downloading": "Downloading: {percent}%",
+        "cli_extracting": "Extracting CLI binary...",
+        "cli_verifying": "Verifying binary hash...",
+        "cli_installing": "Installing...",
+        "cli_done": "Done!"
     },
     "ru": {
         "app_title": "Сканер файлов VirusTotal",
@@ -213,7 +219,13 @@
         "btn_reinstall_cli": "Переустановить VT CLI",
         "reinstalling_cli": "Переустановка VT CLI...",
         "reinstall_success": "VT CLI успешно переустановлен!",
-        "reinstall_fail": "Ошибка переустановки: {e}"
+        "reinstall_fail": "Ошибка переустановки: {e}",
+        "cli_connecting": "Подключение к GitHub...",
+        "cli_downloading": "Загрузка: {percent}%",
+        "cli_extracting": "Извлечение бинарного файла CLI...",
+        "cli_verifying": "Проверка хэша бинарного файла...",
+        "cli_installing": "Установка...",
+        "cli_done": "Готово!"
     },
     "es": {
         "app_title": "Escáner de Archivos VirusTotal",
@@ -321,7 +333,13 @@
         "btn_reinstall_cli": "Reinstalar VT CLI",
         "reinstalling_cli": "Reinstalando VT CLI...",
         "reinstall_success": "VT CLI reinstalado exitosamente!",
-        "reinstall_fail": "Error en la reinstalación: {e}"
+        "reinstall_fail": "Error en la reinstalación: {e}",
+        "cli_connecting": "Conectando a GitHub...",
+        "cli_downloading": "Descargando: {percent}%",
+        "cli_extracting": "Extrayendo binario CLI...",
+        "cli_verifying": "Verificando hash del binario...",
+        "cli_installing": "Instalando...",
+        "cli_done": "Listo!"
     },
     "de": {
         "app_title": "VirusTotal Dateiscanner",
@@ -429,7 +447,13 @@
         "btn_reinstall_cli": "VT CLI neu installieren",
         "reinstalling_cli": "VT CLI wird neu installiert...",
         "reinstall_success": "VT CLI erfolgreich neu installiert!",
-        "reinstall_fail": "Neuinstallation fehlgeschlagen: {e}"
+        "reinstall_fail": "Neuinstallation fehlgeschlagen: {e}",
+        "cli_connecting": "Verbindung zu GitHub wird hergestellt...",
+        "cli_downloading": "Herunterladen: {percent}%",
+        "cli_extracting": "CLI-Binary wird extrahiert...",
+        "cli_verifying": "Binary-Hash wird überprüft...",
+        "cli_installing": "Installation...",
+        "cli_done": "Fertig!"
     },
     "fr": {
         "app_title": "Scanner de Fichiers VirusTotal",
@@ -537,7 +561,13 @@
         "btn_reinstall_cli": "Réinstaller VT CLI",
         "reinstalling_cli": "Réinstallation de VT CLI...",
         "reinstall_success": "VT CLI réinstallé avec succès !",
-        "reinstall_fail": "Échec de la réinstallation : {e}"
+        "reinstall_fail": "Échec de la réinstallation : {e}",
+        "cli_connecting": "Connexion à GitHub...",
+        "cli_downloading": "Téléchargement : {percent}%",
+        "cli_extracting": "Extraction du binaire CLI...",
+        "cli_verifying": "Vérification du hash du binaire...",
+        "cli_installing": "Installation...",
+        "cli_done": "Terminé !"
     },
     "pt": {
         "app_title": "Scanner de Arquivos VirusTotal",
@@ -645,7 +675,13 @@
         "btn_reinstall_cli": "Reinstalar VT CLI",
         "reinstalling_cli": "Reinstalando VT CLI...",
         "reinstall_success": "VT CLI reinstalado com sucesso!",
-        "reinstall_fail": "Falha na reinstalação: {e}"
+        "reinstall_fail": "Falha na reinstalação: {e}",
+        "cli_connecting": "Conectando ao GitHub...",
+        "cli_downloading": "Baixando: {percent}%",
+        "cli_extracting": "Extraindo binário CLI...",
+        "cli_verifying": "Verificando hash do binário...",
+        "cli_installing": "Instalando...",
+        "cli_done": "Concluído!"
     },
     "tr": {
         "app_title": "VirusTotal Dosya Tarayıcı",
@@ -753,7 +789,13 @@
         "btn_reinstall_cli": "VT CLI'yi yeniden yükle",
         "reinstalling_cli": "VT CLI yeniden yükleniyor...",
         "reinstall_success": "VT CLI başarıyla yeniden yüklendi!",
-        "reinstall_fail": "Yeniden yükleme başarısız: {e}"
+        "reinstall_fail": "Yeniden yükleme başarısız: {e}",
+        "cli_connecting": "GitHub'a bağlanılıyor...",
+        "cli_downloading": "İndiriliyor: {percent}%",
+        "cli_extracting": "CLI ikili dosyası çıkarılıyor...",
+        "cli_verifying": "İkili dosya hashi doğrulanıyor...",
+        "cli_installing": "Yükleniyor...",
+        "cli_done": "Tamamlandı!"
     },
     "uk": {
         "app_title": "Сканер файлів VirusTotal",
@@ -861,7 +903,13 @@
         "btn_reinstall_cli": "Перевстановити VT CLI",
         "reinstalling_cli": "Перевстановлення VT CLI...",
         "reinstall_success": "VT CLI успішно перевстановлено!",
-        "reinstall_fail": "Помилка перевстановлення: {e}"
+        "reinstall_fail": "Помилка перевстановлення: {e}",
+        "cli_connecting": "Підключення до GitHub...",
+        "cli_downloading": "Завантаження: {percent}%",
+        "cli_extracting": "Вилучення бінарного файлу CLI...",
+        "cli_verifying": "Перевірка хешу бінарного файлу...",
+        "cli_installing": "Встановлення...",
+        "cli_done": "Готово!"
     },
     "zh": {
         "app_title": "VirusTotal 文件扫描器",
@@ -969,7 +1017,13 @@
         "btn_reinstall_cli": "重新安装 VT CLI",
         "reinstalling_cli": "正在重新安装 VT CLI...",
         "reinstall_success": "VT CLI 重新安装成功！",
-        "reinstall_fail": "重新安装失败: {e}"
+        "reinstall_fail": "重新安装失败: {e}",
+        "cli_connecting": "正在连接 GitHub...",
+        "cli_downloading": "下载中: {percent}%",
+        "cli_extracting": "正在提取 CLI 二进制文件...",
+        "cli_verifying": "正在验证二进制文件哈希...",
+        "cli_installing": "正在安装...",
+        "cli_done": "完成!"
     },
     "ja": {
         "app_title": "VirusTotal ファイルスキャナー",
@@ -1077,7 +1131,13 @@
         "btn_reinstall_cli": "VT CLIを再インストール",
         "reinstalling_cli": "VT CLIを再インストール中...",
         "reinstall_success": "VT CLIの再インストールが完了しました！",
-        "reinstall_fail": "再インストールに失敗しました: {e}"
+        "reinstall_fail": "再インストールに失敗しました: {e}",
+        "cli_connecting": "GitHubに接続中...",
+        "cli_downloading": "ダウンロード中: {percent}%",
+        "cli_extracting": "CLIバイナリを展開中...",
+        "cli_verifying": "バイナリハッシュを検証中...",
+        "cli_installing": "インストール中...",
+        "cli_done": "完了!"
     },
     "ko": {
         "app_title": "VirusTotal 파일 스캐너",
@@ -1185,7 +1245,13 @@
         "btn_reinstall_cli": "VT CLI 다시 설치",
         "reinstalling_cli": "VT CLI 다시 설치 중...",
         "reinstall_success": "VT CLI 다시 설치 완료!",
-        "reinstall_fail": "다시 설치 실패: {e}"
+        "reinstall_fail": "다시 설치 실패: {e}",
+        "cli_connecting": "GitHub에 연결 중...",
+        "cli_downloading": "다운로드 중: {percent}%",
+        "cli_extracting": "CLI 바이너리 추출 중...",
+        "cli_verifying": "바이너리 해시 검증 중...",
+        "cli_installing": "설치 중...",
+        "cli_done": "완료!"
     },
     "ar": {
         "app_title": "ماسح ملفات VirusTotal",
@@ -1293,6 +1359,12 @@
         "btn_reinstall_cli": "إعادة تثبيت VT CLI",
         "reinstalling_cli": "جارٍ إعادة تثبيت VT CLI...",
         "reinstall_success": "تم إعادة تثبيت VT CLI بنجاح!",
-        "reinstall_fail": "فشلت إعادة التثبيت: {e}"
+        "reinstall_fail": "فشلت إعادة التثبيت: {e}",
+        "cli_connecting": "جارٍ الاتصال بـ GitHub...",
+        "cli_downloading": "التنزيل: {percent}%",
+        "cli_extracting": "استخراج الملف الثنائي للـ CLI...",
+        "cli_verifying": "التحقق من تجزئة الملف الثنائي...",
+        "cli_installing": "جارٍ التثبيت...",
+        "cli_done": "تم!"
     }
 }

@@ -94,19 +94,20 @@ def compute_sha256(file_path):
     except Exception:
         return None
 
-def download_and_install_cli(progress_callback=None):
+def download_and_install_cli(progress_callback=None, lang="en"):
     """Downloads the official vt CLI zip for the current platform, verifies its hash, and extracts it.
     progress_callback signature: (status_text, progress_val)
     Raises Exception on error."""
     import urllib.request
     import io
-    from .config import get_release_zip_name
+    from .config import get_release_zip_name, STRINGS
 
+    strings = STRINGS.get(lang, STRINGS.get("en", {}))
     filename = get_release_zip_name()
     url = f"https://github.com/VirusTotal/vt-cli/releases/download/1.3.1/{filename}"
 
     if progress_callback:
-        progress_callback("Connecting to GitHub...", 0.1)
+        progress_callback(strings.get("cli_connecting", "Connecting to GitHub..."), 0.1)
 
     try:
         req = urllib.request.Request(
@@ -128,10 +129,10 @@ def download_and_install_cli(progress_callback=None):
                 downloaded += len(block)
                 if total_size > 0 and progress_callback:
                     percent = downloaded / total_size
-                    progress_callback(f"Downloading: {int(percent * 100)}%", 0.1 + percent * 0.7)
+                    progress_callback(strings.get("cli_downloading", "Downloading: {percent}%").format(percent=int(percent * 100)), 0.1 + percent * 0.7)
 
         if progress_callback:
-            progress_callback("Extracting CLI binary...", 0.85)
+            progress_callback(strings.get("cli_extracting", "Extracting CLI binary..."), 0.85)
 
         with zipfile.ZipFile(io.BytesIO(data)) as z:
             vt_name = None
@@ -145,14 +146,14 @@ def download_and_install_cli(progress_callback=None):
             exe_data = z.read(vt_name)
 
         if progress_callback:
-            progress_callback("Verifying binary hash...", 0.9)
+            progress_callback(strings.get("cli_verifying", "Verifying binary hash..."), 0.9)
 
         exe_hash = hashlib.sha256(exe_data).hexdigest()
         if exe_hash not in KNOWN_HASHES:
             raise ValueError(f"Extracted binary hash is not recognized as an official release: {exe_hash}")
 
         if progress_callback:
-            progress_callback("Installing...", 0.95)
+            progress_callback(strings.get("cli_installing", "Installing..."), 0.95)
 
         temp_bin = get_temp_bin_path()
         with open(temp_bin, "wb") as f:
@@ -163,7 +164,7 @@ def download_and_install_cli(progress_callback=None):
             os.chmod(temp_bin, 0o755)
 
         if progress_callback:
-            progress_callback("Done!", 1.0)
+            progress_callback(strings.get("cli_done", "Done!"), 1.0)
 
         return True
     except Exception as e:
