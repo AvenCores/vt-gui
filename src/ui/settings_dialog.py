@@ -1,4 +1,5 @@
 import flet as ft
+import webbrowser
 from ..config import write_env_var, STRINGS, get_api_key
 
 def open_settings(page, lang, on_settings_saved):
@@ -17,6 +18,12 @@ def open_settings(page, lang, on_settings_saved):
         text_style=ft.TextStyle(color="#E2E8F0")
     )
     
+    get_api_key_btn = ft.TextButton(
+        content=ft.Text(STRINGS[lang]["btn_get_api_key"], color="#00F0FF", size=13),
+        icon=ft.Icons.OPEN_IN_NEW_ROUNDED,
+        on_click=lambda _: webbrowser.open("https://docs.virustotal.com/docs/please-give-me-an-api-key")
+    )
+    
     def save_settings(e):
         write_env_var("VT_APIKEY", api_key_field.value.strip())
         
@@ -28,10 +35,11 @@ def open_settings(page, lang, on_settings_saved):
         
     settings_content = ft.Column(
         [
-            api_key_field
+            api_key_field,
+            get_api_key_btn
         ],
-        spacing=15,
-        height=80,
+        spacing=10,
+        height=110,
         width=400
     )
     
