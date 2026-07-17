@@ -16,7 +16,8 @@ from src.cli_manager import (
     check_installed_binary,
     get_temp_bin_path,
     process_selected_binary,
-    compute_sha256
+    compute_sha256,
+    download_and_install_cli
 )
 from src.vt_api import (
     check_file_exists_direct,
@@ -79,6 +80,9 @@ def main(page: ft.Page):
     scan_status_text = ft.Text("", size=15, weight=ft.FontWeight.W_600, color="#00F0FF")
     scan_progress_bar = ft.ProgressBar(value=0, color="#00F0FF", bgcolor="#334155", height=6)
     scan_progress_ring = ft.ProgressRing(color="#00F0FF", width=48, height=48)
+    
+    install_status_text = ft.Text("", size=14, color="#94A3B8")
+    install_progress_bar = ft.ProgressBar(value=0, color="#00F0FF", bgcolor="#334155", height=6, visible=False)
     
     # Temporary variables for installer verification
     selected_installer_data = None
@@ -156,12 +160,50 @@ def main(page: ft.Page):
         main_content = ft.Container(expand=True)
         
         if app_state == "install_cli":
+            def on_auto_install_click(e):
+                install_progress_bar.visible = True
+                install_progress_bar.value = 0
+                install_status_text.value = STRINGS[current_lang]["installing_cli"]
+                page.update()
+                
+                def run_download():
+                    def progress_cb(status_text, progress_val):
+                        install_status_text.value = status_text
+                        install_progress_bar.value = progress_val
+                        thread_safe_update()
+                        
+                    try:
+                        download_and_install_cli(progress_callback=progress_cb)
+                        
+                        # Verify installation status
+                        cli_status, _ = check_installed_binary()
+                        if cli_status in ('verified', 'custom'):
+                            show_alert(STRINGS[current_lang]["app_title"], STRINGS[current_lang]["verify_success"])
+                            nonlocal app_state
+                            app_state = "scanner"
+                            thread_safe_build()
+                        else:
+                            raise ValueError("Installation succeeded but verification failed.")
+                    except Exception as ex:
+                        # Reset progress elements
+                        install_progress_bar.visible = False
+                        install_status_text.value = ""
+                        thread_safe_update()
+                        show_alert(STRINGS[current_lang]["verify_fail"].format(e=""), str(ex))
+                        
+                threading.Thread(target=run_download, daemon=True).start()
+
+            def on_manual_install_click(e):
+                on_cli_click(e)
+                
             main_content.content = build_install_view(
                 cli_status,
                 cli_hash,
                 current_lang,
-                file_picker_cli,
-                on_cli_click
+                install_status_text,
+                install_progress_bar,
+                on_auto_install_click,
+                on_manual_install_click
             )
         elif app_state == "scanning":
             main_content.content = build_scanning_view(scan_progress_ring, scan_status_text, scan_progress_bar)

@@ -66,3 +66,80 @@ def compute_sha256(file_path):
         return sha256_hash.hexdigest()
     except Exception:
         return None
+
+def download_and_install_cli(progress_callback=None):
+    """Downloads the official vt.exe zip, verifies its hash, and extracts it.
+    progress_callback signature: (status_text, progress_val)
+    Raises Exception on error."""
+    import struct
+    import urllib.request
+    import io
+    
+    is_64bit = struct.calcsize("P") * 8 == 64
+    filename = "Windows64.zip" if is_64bit else "Windows32.zip"
+    url = f"https://github.com/VirusTotal/vt-cli/releases/download/1.3.1/{filename}"
+    
+    if progress_callback:
+        progress_callback("Connecting to GitHub...", 0.1)
+        
+    try:
+        # Create a request
+        req = urllib.request.Request(
+            url,
+            headers={"User-Agent": "Mozilla/5.0"}
+        )
+        
+        # Download file
+        with urllib.request.urlopen(req) as response:
+            total_size = int(response.info().get('Content-Length', 0))
+            downloaded = 0
+            block_size = 8192
+            data = b""
+            
+            while True:
+                block = response.read(block_size)
+                if not block:
+                    break
+                data += block
+                downloaded += len(block)
+                if total_size > 0 and progress_callback:
+                    percent = downloaded / total_size
+                    progress_callback(f"Downloading: {int(percent * 100)}%", 0.1 + percent * 0.7)
+            
+        if progress_callback:
+            progress_callback("Extracting vt.exe...", 0.85)
+            
+        # Extract vt.exe from ZIP in memory
+        with zipfile.ZipFile(io.BytesIO(data)) as z:
+            vt_name = None
+            for name in z.namelist():
+                if name.endswith("vt.exe") or name == "vt.exe":
+                    vt_name = name
+                    break
+            if not vt_name:
+                raise ValueError("vt.exe not found inside the ZIP archive.")
+            exe_data = z.read(vt_name)
+            
+        if progress_callback:
+            progress_callback("Verifying binary hash...", 0.9)
+            
+        # Verify hash of the extracted binary against known official hashes
+        exe_hash = hashlib.sha256(exe_data).hexdigest()
+        if exe_hash not in KNOWN_HASHES:
+            raise ValueError(f"Extracted binary hash is not recognized as an official release: {exe_hash}")
+            
+        if progress_callback:
+            progress_callback("Installing...", 0.95)
+            
+        # Write to destination
+        temp_bin = get_temp_bin_path()
+        with open(temp_bin, "wb") as f:
+            f.write(exe_data)
+            
+        if progress_callback:
+            progress_callback("Done!", 1.0)
+            
+        return True
+    except Exception as e:
+        raise e
+
