@@ -145,6 +145,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v7
 
+      - name: Set up QEMU for ARM64 emulation
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64
+
       - name: Build inside ARM64 container
         uses: docker/build-push-action@v7
         with:
