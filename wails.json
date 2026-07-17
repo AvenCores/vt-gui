@@ -1,0 +1,13 @@
+{
+  "$schema": "https://wails.io/schemas/config.v2.json",
+  "name": "vt-gui",
+  "outputfilename": "vt-gui",
+  "frontend:install": "",
+  "frontend:build": "",
+  "frontend:dev:watcher": "",
+  "frontend:dev:serverUrl": "",
+  "author": {
+    "name": "AvenCores",
+    "email": "64781822+AvenCores@users.noreply.github.com"
+  }
+}

@@ -1,0 +1,29 @@
+# Compiled binaries and build outputs
+/build/bin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Wails generated files
+/frontend/bindings/
+
+# Operating system files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDEs and editors
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Temporary files and logs
+*.log
+/scratch/
+/tmp/
