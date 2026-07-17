@@ -5,7 +5,7 @@ import json
 import asyncio
 from ..config import STRINGS
 
-APP_VERSION = "V1.0.0"
+APP_VERSION = "V1.0.1"
 GITHUB_REPO = "AvenCores/vt-gui"
 RELEASES_URL = f"https://github.com/{GITHUB_REPO}/releases"
 API_URL = f"https://api.github.com/repos/{GITHUB_REPO}/releases/latest"
