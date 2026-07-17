@@ -149,13 +149,27 @@ def open_settings(page, lang, on_settings_saved, on_reinstall_cli=None):
     reinstall_container.data_on_click = on_reinstall_click
     reinstall_container.data_on_hover = on_reinstall_hover
 
+    vt_cli_link_btn = ft.IconButton(
+        icon=ft.Icons.LANGUAGE_ROUNDED,
+        icon_color="#94A3B8",
+        icon_size=20,
+        tooltip="GitHub",
+        on_click=lambda _: webbrowser.open("https://github.com/virustotal/vt-cli"),
+    )
+
+    reinstall_row = ft.Row(
+        [reinstall_container, vt_cli_link_btn],
+        alignment=ft.MainAxisAlignment.START,
+        spacing=5,
+    )
+
     settings_content = ft.Column(
         [
             api_key_field,
             get_api_key_btn,
             ft.Row([api_check_btn, api_check_row], alignment=ft.MainAxisAlignment.START, spacing=5),
             ft.Divider(height=1, color="#2E3C56"),
-            reinstall_container,
+            reinstall_row,
             status_row,
         ],
         spacing=10,
