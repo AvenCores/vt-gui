@@ -48,10 +48,18 @@
 * **Анализ IP-адресов:** Проверка репутации IP-адресов.
 * **Полнотекстовый поиск:** Поиск файлов и отчетов в базе VirusTotal по сложным запросам с возможностью скачивания образцов (требуется Premium-ключ API).
 
+### 📜 История сканирований
+* **Автоматическое сохранение:** Все сканирования файлов и проверки URL/доменов/IP автоматически сохраняются в историю.
+* **Повторный анализ:** Одним кликом можно повторить сканирование файла или вернуться к результатам проверки.
+* **Управление записями:** Удаление отдельных записей или полная очистка истории с подтверждением.
+* **Веб-отчёт:** Быстрый переход к полному отчёту на VirusTotal для любой записи из истории.
+
 ### 🛠️ Безопасность и автоматизация CLI
 * **Автоматическая установка:** Приложение само определяет операционную систему, разрядность процессора и скачивает официальный релиз `vt-cli` с GitHub.
 * **Контроль хэш-сумм:** Безопасность превыше всего. Все скачанные бинарные файлы проверяются по встроенному списку SHA-256 хэшей официальных версий.
 * **Пользовательский CLI:** Вы можете вручную загрузить свой бинарный файл `vt`/`vt.exe`, и приложение сохранит его хэш-сумму как доверенную после вашего подтверждения.
+* **Переустановка CLI:** Кнопка переустановки VirusTotal CLI прямо из настроек приложения.
+* **Проверка API ключа:** Встроенная проверка работоспособности API ключа с мгновенной обратной связью.
 * **Синхронизация конфигурации:** API-ключ автоматически синхронизируется с официальным файлом конфигурации `~/.vt.toml`.
 
 ### 🌍 Локализация и Дизайн
@@ -67,6 +75,7 @@
   * [app/config.py](file:///C:/Users/avencores/Desktop/vt-gui/source/app/config.py) — Настройки окружения (чтение/запись `.env` и `~/.vt.toml`), автоматическое определение языка системы, база официальных хэшей `vt-cli` и инициализация строк локализации.
   * [app/cli_manager.py](file:///C:/Users/avencores/Desktop/vt-gui/source/app/cli_manager.py) — Менеджер для работы с бинарным файлом `vt` (проверка наличия, хэширование, скачивание ZIP-архивов релизов с GitHub и распаковка в изолированную директорию).
   * [app/vt_api.py](file:///C:/Users/avencores/Desktop/vt-gui/source/app/vt_api.py) — Прямые запросы к HTTP API VirusTotal v3 для быстрого поиска хэша перед загрузкой.
+  * [app/history_manager.py](file:///C:/Users/avencores/Desktop/vt-gui/source/app/history_manager.py) — Менеджер истории сканирований (загрузка, сохранение, добавление и удаление записей из JSON).
   * [app/strings.json](file:///C:/Users/avencores/Desktop/vt-gui/source/app/strings.json) — Файл локализации со всеми текстовыми строками интерфейса.
   * **`services/`** — Сервисный слой бизнес-логики:
     * [scan_service.py](file:///C:/Users/avencores/Desktop/vt-gui/source/app/services/scan_service.py) — Многопоточный пайплайн сканирования файлов (вычисление хэша -> поиск в VT -> загрузка через CLI -> ожидание анализа -> вывод отчета).
@@ -76,8 +85,9 @@
     * [ui/scanning_view.py](file:///C:/Users/avencores/Desktop/vt-gui/source/app/ui/scanning_view.py) — Экран прогресса текущего сканирования.
     * [ui/results_view.py](file:///C:/Users/avencores/Desktop/vt-gui/source/app/ui/results_view.py) — Панель результатов с диаграммой вердикта, сводкой детектов и раскрывающимся полным списком антивирусов.
     * [ui/intelligence_view.py](file:///C:/Users/avencores/Desktop/vt-gui/source/app/ui/intelligence_view.py) — Логика и верстка вкладок для поиска по URL, IP, доменам и текстовым запросам.
+    * [ui/history_view.py](file:///C:/Users/avencores/Desktop/vt-gui/source/app/ui/history_view.py) — Экран истории сканирований с карточками записей и управлением.
     * [ui/install_view.py](file:///C:/Users/avencores/Desktop/vt-gui/source/app/ui/install_view.py) — Экран мастера установки `vt-cli` (автоматическая загрузка или ручной выбор файла).
-    * [ui/settings_dialog.py](file:///C:/Users/avencores/Desktop/vt-gui/source/app/ui/settings_dialog.py) — Модальное окно настроек для смены API-ключа.
+    * [ui/settings_dialog.py](file:///C:/Users/avencores/Desktop/vt-gui/source/app/ui/settings_dialog.py) — Модальное окно настроек для смены API-ключа, проверки ключа и переустановки CLI.
     * [ui/api_key_dialog.py](file:///C:/Users/avencores/Desktop/vt-gui/source/app/ui/api_key_dialog.py) — Диалог ввода API-ключа, блокирующий работу до момента его настройки при первом запуске.
     * [ui/footer.py](file:///C:/Users/avencores/Desktop/vt-gui/source/app/ui/footer.py) — Нижняя панель приложения со ссылками на социальные сети автора.
 
