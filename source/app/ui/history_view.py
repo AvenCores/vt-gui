@@ -141,6 +141,13 @@ def build_history_view(lang, page, on_back, on_rescan):
                     ], spacing=1, expand=True),
                     ft.Row([
                         ft.IconButton(
+                            icon=ft.Icons.REFRESH_ROUNDED,
+                            icon_color="#00F0FF",
+                            icon_size=18,
+                            tooltip=STRINGS[lang]["history_rescan"],
+                            on_click=on_rescan_click,
+                        ),
+                        ft.IconButton(
                             icon=ft.Icons.LANGUAGE_ROUNDED,
                             icon_color="#94A3B8",
                             icon_size=18,
