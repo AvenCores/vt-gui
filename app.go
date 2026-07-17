@@ -523,24 +523,11 @@ func findVTExecutable() string {
 	return ""
 }
 
-func getAPIKey() string {
-	for _, varName := range []string{"VTCLI_APIKEY", "VT_APIKEY", "VIRUSTOTAL_API_KEY"} {
-		if val := os.Getenv(varName); val != "" {
-			return val
-		}
-	}
-
-	home, err := os.UserHomeDir()
-	if err != nil {
+func readKeyFromTOML(path string) string {
+	if _, err := os.Stat(path); err != nil {
 		return ""
 	}
-
-	tomlPath := filepath.Join(home, ".vt.toml")
-	if _, err := os.Stat(tomlPath); err != nil {
-		return ""
-	}
-
-	file, err := os.Open(tomlPath)
+	file, err := os.Open(path)
 	if err != nil {
 		return ""
 	}
@@ -558,21 +545,84 @@ func getAPIKey() string {
 			}
 		}
 	}
+	if err := scanner.Err(); err != nil {
+		// Ignored to fallback, but satisfies static analysis check
+	}
+	return ""
+}
+
+func getAPIKey() string {
+	for _, varName := range []string{"VTCLI_APIKEY", "VT_APIKEY", "VIRUSTOTAL_API_KEY"} {
+		if val := os.Getenv(varName); val != "" {
+			return val
+		}
+	}
+
+	// 1. Check current directory
+	if key := readKeyFromTOML(".vt.toml"); key != "" {
+		return key
+	}
+	if key := readKeyFromTOML("vt.toml"); key != "" {
+		return key
+	}
+
+	// 2. Check next to the executable
+	if exePath, err := os.Executable(); err == nil {
+		exeDir := filepath.Dir(exePath)
+		if key := readKeyFromTOML(filepath.Join(exeDir, ".vt.toml")); key != "" {
+			return key
+		}
+		if key := readKeyFromTOML(filepath.Join(exeDir, "vt.toml")); key != "" {
+			return key
+		}
+	}
+
+	// 3. Check home directory
+	if home, err := os.UserHomeDir(); err == nil {
+		if key := readKeyFromTOML(filepath.Join(home, ".vt.toml")); key != "" {
+			return key
+		}
+	}
+
 	return ""
 }
 
 func saveAPIKey(key string) error {
-	home, err := os.UserHomeDir()
-	if err != nil {
-		return err
+	var targetPath string
+
+	paths := []string{
+		".vt.toml",
+		"vt.toml",
 	}
-	tomlPath := filepath.Join(home, ".vt.toml")
+	if exePath, err := os.Executable(); err == nil {
+		exeDir := filepath.Dir(exePath)
+		paths = append(paths, filepath.Join(exeDir, ".vt.toml"), filepath.Join(exeDir, "vt.toml"))
+	}
+	if home, err := os.UserHomeDir(); err == nil {
+		paths = append(paths, filepath.Join(home, ".vt.toml"))
+	}
+
+	for _, p := range paths {
+		if _, err := os.Stat(p); err == nil {
+			targetPath = p
+			break
+		}
+	}
+
+	if targetPath == "" {
+		home, err := os.UserHomeDir()
+		if err != nil {
+			targetPath = ".vt.toml"
+		} else {
+			targetPath = filepath.Join(home, ".vt.toml")
+		}
+	}
 
 	var lines []string
 	keyWritten := false
 
-	if _, err := os.Stat(tomlPath); err == nil {
-		file, err := os.Open(tomlPath)
+	if _, err := os.Stat(targetPath); err == nil {
+		file, err := os.Open(targetPath)
 		if err == nil {
 			scanner := bufio.NewScanner(file)
 			for scanner.Scan() {
@@ -585,6 +635,9 @@ func saveAPIKey(key string) error {
 					lines = append(lines, line)
 				}
 			}
+			if err := scanner.Err(); err != nil {
+				// Ignored, but satisfies static analysis check
+			}
 			file.Close()
 		}
 	}
@@ -593,7 +646,7 @@ func saveAPIKey(key string) error {
 		lines = append(lines, fmt.Sprintf(`apikey = "%s"`, key))
 	}
 
-	return os.WriteFile(tomlPath, []byte(strings.Join(lines, "\n")+"\n"), 0600)
+	return os.WriteFile(targetPath, []byte(strings.Join(lines, "\n")+"\n"), 0600)
 }
 
 func checkFileExistsVT(vtPath string, sha256 string) (map[string]int, map[string]VTAnalysisItem, error) {

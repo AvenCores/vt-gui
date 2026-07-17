@@ -1093,3 +1093,28 @@ input:checked + .slider:before {
 ::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 255, 255, 0.2);
 }
+
+/* Language Selection Button */
+.lang-btn {
+    margin-left: auto;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    padding: 6px;
+    border-radius: 6px;
+    transition: var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.lang-btn:hover {
+    color: var(--text-secondary);
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.lang-btn svg {
+    width: 20px;
+    height: 20px;
+}

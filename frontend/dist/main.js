@@ -1,15 +1,207 @@
 document.addEventListener("DOMContentLoaded", () => {
+    // --- Translations ---
+    const translations = {
+        en: {
+            brandSub: "VirusTotal Scanner",
+            apiConfig: "API Configuration",
+            apiKeyLabel: "VirusTotal API Key",
+            apiKeyPlaceholder: "Enter API Key...",
+            saveKey: "Save Key",
+            savedLocally: "Saved locally in config file",
+            settings: "Settings",
+            useCli: "Use vt.exe CLI",
+            useCliDesc: "Fallbacks to Direct API if missing",
+            cliChecking: "Checking vt.exe...",
+            cliFound: "vt.exe found in system",
+            cliNotFound: "vt.exe not found",
+            cliCheckFailed: "Check failed",
+            cliDownloadTipPrefix: "To use CLI mode, download ",
+            cliDownloadTipSuffix: " and place it in the application folder or PATH.",
+            version: "Version 1.0.0",
+            
+            // Alerts
+            alertWarning: "Warning",
+            alertSuccess: "Success",
+            alertDanger: "Error",
+            alertInitTitle: "Configure API Key",
+            alertInitMsg: "You need a free or premium VirusTotal API Key to scan files.",
+            alertRequiredTitle: "Input Required",
+            alertRequiredMsg: "API key cannot be empty.",
+            alertSaveFailed: "Save Failed",
+            alertSaveFailedMsg: "Failed to save key: ",
+            alertSavedSuccess: "API Key saved successfully.",
+            alertScanFailed: "Scan Failed",
+            alertScanErrorMsg: "Unknown scan error occurred.",
+            
+            // Drop Zone / States
+            dragDropTitle: "Drag & Drop File Here",
+            dragDropDesc: "or click to browse your computer",
+            selectFileBtn: "Select File",
+            readingSize: "Reading file size...",
+            calculatingHash: "Calculating fingerprint...",
+            willCompute: "Will be computed on scan",
+            startScanBtn: "Start Security Scan",
+            
+            // Scanning State
+            scanningHeader: "Scanning Target",
+            preparingFile: "Preparing file...",
+            uploadingFile: "Uploading File",
+            
+            // Results State
+            detectionRatio: "Detection Ratio",
+            verdictClean: "CLEAN & SAFE",
+            verdictCleanDesc: "All antivirus engines reported this file as harmless.",
+            verdictSuspicious: "SUSPICIOUS",
+            verdictSuspiciousDesc: "Flagged as suspicious by {count} engine{s}.",
+            verdictDangerous: "DANGEROUS",
+            verdictDangerousDesc: "Flagged as malicious by {count} engine{s}!",
+            labelName: "Name:",
+            labelSize: "Size:",
+            labelHash: "SHA-256:",
+            copied: "COPIED!",
+            
+            // Detections Table
+            avDetections: "Antivirus Detections",
+            flagsCount: "{count} flags",
+            thEngine: "Antivirus Engine",
+            thClass: "Threat Classification",
+            thSeverity: "Severity",
+            thMethod: "Method",
+            allEnginesPassed: "All Engines Passed",
+            cleanDesc: "The file is clean. VirusTotal analysis did not detect any known security threats.",
+            scanAnother: "Scan Another File",
+            viewReport: "View Full Report on VirusTotal",
+            
+            // Go Events Statuses
+            "Calculating file SHA-256 hash...": "Calculating file SHA-256 hash...",
+            "Checking if file was already analyzed...": "Checking if file was already analyzed...",
+            "File already analyzed! Loading results...": "File already analyzed! Loading results...",
+            "File not found in VirusTotal database. Uploading file...": "File not found in VirusTotal database. Uploading file...",
+            "File is larger than 32MB. Requesting custom upload URL...": "File is larger than 32MB. Requesting custom upload URL...",
+            "Upload finished! Waiting for analysis to complete...": "Upload finished! Waiting for analysis to complete...",
+            "Analyzing on server": "Analyzing on server"
+        },
+        ru: {
+            brandSub: "Сканер VirusTotal",
+            apiConfig: "Настройка API",
+            apiKeyLabel: "API-ключ VirusTotal",
+            apiKeyPlaceholder: "Введите API-ключ...",
+            saveKey: "Сохранить ключ",
+            savedLocally: "Сохранено в конфигурационном файле",
+            settings: "Настройки",
+            useCli: "Использовать vt.exe CLI",
+            useCliDesc: "Прямой API при отсутствии",
+            cliChecking: "Проверка vt.exe...",
+            cliFound: "vt.exe найден в системе",
+            cliNotFound: "vt.exe не найден",
+            cliCheckFailed: "Ошибка проверки",
+            cliDownloadTipPrefix: "Чтобы использовать CLI-режим, скачайте ",
+            cliDownloadTipSuffix: " и поместите его в папку приложения или PATH.",
+            version: "Версия 1.0.0",
+            
+            // Alerts
+            alertWarning: "Предупреждение",
+            alertSuccess: "Успешно",
+            alertDanger: "Ошибка",
+            alertInitTitle: "Настройте API-ключ",
+            alertInitMsg: "Вам нужен бесплатный или премиум API-ключ VirusTotal для сканирования файлов.",
+            alertRequiredTitle: "Требуется ввод",
+            alertRequiredMsg: "API-ключ не может быть пустым.",
+            alertSaveFailed: "Ошибка сохранения",
+            alertSaveFailedMsg: "Не удалось сохранить ключ: ",
+            alertSavedSuccess: "API-ключ успешно сохранен.",
+            alertScanFailed: "Ошибка сканирования",
+            alertScanErrorMsg: "Произошла неизвестная ошибка при сканировании.",
+            
+            // Drop Zone / States
+            dragDropTitle: "Перетащите файл сюда",
+            dragDropDesc: "или кликните для выбора на компьютере",
+            selectFileBtn: "Выбрать файл",
+            readingSize: "Чтение размера файла...",
+            calculatingHash: "Вычисление хеша...",
+            willCompute: "Будет вычислено при сканировании",
+            startScanBtn: "Запустить проверку",
+            
+            // Scanning State
+            scanningHeader: "Сканирование цели",
+            preparingFile: "Подготовка файла...",
+            uploadingFile: "Загрузка файла",
+            
+            // Results State
+            detectionRatio: "Доля детектов",
+            verdictClean: "ЧИСТО И БЕЗОПАСНО",
+            verdictCleanDesc: "Все антивирусные движки сообщили, что файл безвреден.",
+            verdictSuspicious: "ПОДОЗРИТЕЛЬНО",
+            verdictSuspiciousDesc: "Отмечен как подозрительный {count} антивирусом(ами).",
+            verdictDangerous: "ОПАСНО",
+            verdictDangerousDesc: "Отмечен как вредоносный {count} антивирусом(ами)!",
+            labelName: "Имя:",
+            labelSize: "Размер:",
+            labelHash: "SHA-256:",
+            copied: "СКОПИРОВАНО!",
+            
+            // Detections Table
+            avDetections: "Детекты антивирусов",
+            flagsCount: "{count} детектов",
+            thEngine: "Антивирус",
+            thClass: "Классификация угрозы",
+            thSeverity: "Серьезность",
+            thMethod: "Метод",
+            allEnginesPassed: "Все проверки пройдены",
+            cleanDesc: "Файл чист. Анализ VirusTotal не выявил известных угроз безопасности.",
+            scanAnother: "Проверить другой файл",
+            viewReport: "Полный отчет на VirusTotal",
+            
+            // Go Events Statuses
+            "Calculating file SHA-256 hash...": "Вычисление SHA-256 хеша файла...",
+            "Checking if file was already analyzed...": "Проверка наличия анализа файла...",
+            "File already analyzed! Loading results...": "Файл уже анализировался! Загрузка результатов...",
+            "File not found in VirusTotal database. Uploading file...": "Файл не найден в базе VirusTotal. Загрузка файла...",
+            "File is larger than 32MB. Requesting custom upload URL...": "Файл больше 32 МБ. Запрос адреса для загрузки...",
+            "Upload finished! Waiting for analysis to complete...": "Загрузка завершена! Ожидание окончания анализа...",
+            "Analyzing on server": "Анализ на сервере"
+        }
+    };
+
+    let currentLang = localStorage.getItem("lang") || "en";
+
+    function t(key, variables = {}) {
+        let str = (translations[currentLang] && translations[currentLang][key]) || (translations['en'] && translations['en'][key]) || key;
+        for (const [k, v] of Object.entries(variables)) {
+            str = str.replace(`{${k}}`, v);
+        }
+        return str;
+    }
+
+    function applyTranslations() {
+        document.querySelectorAll("[data-i18n]").forEach(el => {
+            const key = el.getAttribute("data-i18n");
+            el.textContent = t(key);
+        });
+
+        const apiKeyInput = document.getElementById("api-key-input");
+        if (apiKeyInput) {
+            apiKeyInput.placeholder = t("apiKeyPlaceholder");
+        }
+    }
+
+    function updateLanguage(lang) {
+        currentLang = lang;
+        localStorage.setItem("lang", lang);
+        applyTranslations();
+    }
+
     // --- Elements ---
     const apiKeyInput = document.getElementById("api-key-input");
     const saveKeyBtn = document.getElementById("save-key-btn");
     const toggleKeyVisibilityBtn = document.getElementById("toggle-key-visibility");
     const eyeIcon = document.getElementById("eye-icon");
-    const contextMenuToggle = document.getElementById("context-menu-toggle");
     const useCliToggle = document.getElementById("use-cli-toggle");
     const cliStatusIndicator = document.getElementById("cli-status-indicator");
     const cliStatusText = cliStatusIndicator.querySelector(".status-text");
     const cliDownloadTip = document.getElementById("cli-download-tip");
     const githubLink = document.getElementById("github-link");
+    const langToggleBtn = document.getElementById("lang-toggle-btn");
 
     const globalAlert = document.getElementById("global-alert");
     const alertTitle = document.getElementById("alert-title");
@@ -37,8 +229,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const gaugeFill = document.getElementById("gauge-fill");
     const detectionScore = document.getElementById("detection-score");
     const verdictBanner = document.getElementById("verdict-banner");
-    const verdictIconPath = document.getElementById("verdict-icon-path");
-    const verdictIconPoly = document.getElementById("verdict-icon-poly");
     const verdictTitle = document.getElementById("verdict-title");
     const verdictDesc = document.getElementById("verdict-desc");
     
@@ -48,7 +238,6 @@ document.addEventListener("DOMContentLoaded", () => {
     
     const detectionsBadge = document.getElementById("detections-badge");
     const detectionsList = document.getElementById("detections-list");
-    const detectionsTableContainer = document.getElementById("detections-table-container");
     const cleanDetectionsMsg = document.getElementById("clean-detections-msg");
     const detectionsTable = document.querySelector(".detections-table");
 
@@ -64,6 +253,9 @@ document.addEventListener("DOMContentLoaded", () => {
     initApp();
 
     async function initApp() {
+        // Initialize Language
+        updateLanguage(currentLang);
+
         // 1. Get and populate API Key
         try {
             const key = await window.go.main.App.GetApiKey();
@@ -71,21 +263,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 apiKeyInput.value = key;
                 hideAlert();
             } else {
-                showAlert("Configure API Key", "You need a free or premium VirusTotal API Key to scan files.", "warning");
+                showAlert(t("alertInitTitle"), t("alertInitMsg"), "warning");
             }
         } catch (e) {
             console.error("Failed to fetch API key:", e);
         }
 
-        // 2. Check Context Menu Status
-        try {
-            const registered = await window.go.main.App.IsContextMenuRegistered();
-            contextMenuToggle.checked = registered;
-        } catch (e) {
-            console.error("Failed to check context menu status:", e);
-        }
-
-        // 3. Check Local CLI Preferences
+        // 2. Check Local CLI Preferences
         const useCLI = localStorage.getItem("useCLI") === "true";
         useCliToggle.checked = useCLI;
         if (useCLI) {
@@ -93,7 +277,7 @@ document.addEventListener("DOMContentLoaded", () => {
             checkCLIExecutable();
         }
 
-        // 4. Check if launched with a file argument (e.g. from Context Menu)
+        // 3. Check if launched with a file argument
         try {
             const initFile = await window.go.main.App.GetInitialFile();
             if (initFile) {
@@ -105,6 +289,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // --- Actions ---
+
+    // Toggle Language
+    langToggleBtn.addEventListener("click", () => {
+        const nextLang = currentLang === "en" ? "ru" : "en";
+        updateLanguage(nextLang);
+    });
 
     // Toggle API Key Visibility
     toggleKeyVisibilityBtn.addEventListener("click", () => {
@@ -121,46 +311,19 @@ document.addEventListener("DOMContentLoaded", () => {
     saveKeyBtn.addEventListener("click", async () => {
         const key = apiKeyInput.value.trim();
         if (!key) {
-            showAlert("Input Required", "API key cannot be empty.", "danger");
+            showAlert(t("alertRequiredTitle"), t("alertRequiredMsg"), "danger");
             return;
         }
         try {
             const err = await window.go.main.App.SaveApiKey(key);
             if (err) {
-                showAlert("Save Failed", "Failed to save key: " + err, "danger");
+                showAlert(t("alertSaveFailed"), t("alertSaveFailedMsg") + err, "danger");
             } else {
-                showAlert("Success", "API Key saved successfully.", "success");
+                showAlert(t("alertSuccess"), t("alertSavedSuccess"), "success");
                 setTimeout(hideAlert, 3000);
             }
         } catch (e) {
-            showAlert("Save Failed", "Error saving key: " + e, "danger");
-        }
-    });
-
-    // Toggle Context Menu Integration
-    contextMenuToggle.addEventListener("change", async () => {
-        try {
-            if (contextMenuToggle.checked) {
-                const err = await window.go.main.App.RegisterContextMenu();
-                if (err) {
-                    showAlert("Registration Failed", "Failed to register context menu: " + err, "danger");
-                    contextMenuToggle.checked = false;
-                } else {
-                    showAlert("Registered", "Successfully registered context menu integration.", "success");
-                    setTimeout(hideAlert, 3000);
-                }
-            } else {
-                const err = await window.go.main.App.UnregisterContextMenu();
-                if (err) {
-                    showAlert("Unregistration Failed", "Failed to remove context menu: " + err, "danger");
-                    contextMenuToggle.checked = true;
-                } else {
-                    showAlert("Removed", "Context menu integration removed.", "success");
-                    setTimeout(hideAlert, 3000);
-                }
-            }
-        } catch (e) {
-            showAlert("Error", "Failed to toggle context menu: " + e, "danger");
+            showAlert(t("alertSaveFailed"), t("alertSaveFailedMsg") + e, "danger");
         }
     });
 
@@ -185,22 +348,22 @@ document.addEventListener("DOMContentLoaded", () => {
     // Check vt.exe helper
     async function checkCLIExecutable() {
         cliStatusIndicator.className = "cli-status-container";
-        cliStatusText.textContent = "Checking vt.exe...";
+        cliStatusText.textContent = t("cliChecking");
         cliDownloadTip.classList.add("hidden");
 
         try {
             const path = await window.go.main.App.CheckVTExecutable();
             if (path) {
                 cliStatusIndicator.classList.add("found");
-                cliStatusText.textContent = "vt.exe found in system";
+                cliStatusText.textContent = t("cliFound");
             } else {
                 cliStatusIndicator.classList.add("missing");
-                cliStatusText.textContent = "vt.exe not found";
+                cliStatusText.textContent = t("cliNotFound");
                 cliDownloadTip.classList.remove("hidden");
             }
         } catch (e) {
             cliStatusIndicator.classList.add("missing");
-            cliStatusText.textContent = "Check failed";
+            cliStatusText.textContent = t("cliCheckFailed");
         }
     }
 
@@ -235,7 +398,6 @@ document.addEventListener("DOMContentLoaded", () => {
     dragDropZone.addEventListener("drop", (e) => {
         e.preventDefault();
         dragDropZone.classList.remove("dragover");
-        // Handled by Go OnFileDrop runtime event
     });
 
     // --- File Selection Handler ---
@@ -243,27 +405,18 @@ document.addEventListener("DOMContentLoaded", () => {
         selectedFilePath = path;
         const filename = path.replace(/^.*[\\\/]/, '');
         fileNameText.textContent = filename;
-        fileSizeText.textContent = "Reading file size...";
-        fileHashText.textContent = "Calculating fingerprint...";
+        fileSizeText.textContent = t("readingSize");
+        fileHashText.textContent = t("calculatingHash");
         
         selectedFilePanel.classList.remove("hidden");
         
-        // Try to get hash and details via Wails backend
         try {
-            // Expose a public helper in app.go to calculate hash before scanning
             const hash = await window.go.main.App.ComputeSHA256(path);
             fileHash = hash;
             fileHashText.textContent = hash;
         } catch (e) {
-            fileHashText.textContent = "Will be computed on scan";
+            fileHashText.textContent = t("willCompute");
         }
-
-        // Just run a simple command or check properties if possible.
-        // Actually, we can get the file size by calling a backend method or calculating it.
-        // We'll calculate size during scanning, or we can just fetch it. Let's make sure
-        // App.go has a method to get file info or let's estimate.
-        // Let's add a backend method or just leave size blank until scan is started.
-        // Actually, let's add a public FileInfo method! That would be extremely neat.
     }
 
     // --- Scan Actions ---
@@ -272,18 +425,30 @@ document.addEventListener("DOMContentLoaded", () => {
     async function startScan() {
         if (!selectedFilePath) return;
 
-        // Switch to scanning state
         switchState("scanning");
-        scanningHeader.textContent = "Scanning Target";
-        scanningStatus.textContent = "Preparing file...";
+        scanningHeader.textContent = t("scanningHeader");
+        scanningStatus.textContent = t("preparingFile");
         uploadProgressContainer.classList.add("hidden");
         progressBarFill.style.width = "0%";
         progressPercent.textContent = "0%";
         progressBytes.textContent = "0 MB";
 
-        // Bind progress and status events
         const removeStatusListener = window.runtime.EventsOn("scan_status", (status) => {
-            scanningStatus.textContent = status;
+            let translatedStatus = status;
+            if (status.startsWith("Analyzing on server")) {
+                const match = status.match(/Analyzing on server \((\d+)s elapsed\)\.\.\./);
+                if (match) {
+                    const sec = match[1];
+                    translatedStatus = currentLang === 'ru' 
+                        ? `Анализ на сервере (прошло ${sec} сек.)...`
+                        : `Analyzing on server (${sec}s elapsed)...`;
+                } else {
+                    translatedStatus = t("Analyzing on server");
+                }
+            } else {
+                translatedStatus = t(status);
+            }
+            scanningStatus.textContent = translatedStatus;
         });
 
         const removeProgressListener = window.runtime.EventsOn("upload_progress", (data) => {
@@ -301,7 +466,6 @@ document.addEventListener("DOMContentLoaded", () => {
             const useCLI = useCliToggle.checked;
             const result = await window.go.main.App.ScanFile(selectedFilePath, useCLI);
             
-            // Clean up listeners
             removeStatusListener();
             removeProgressListener();
 
@@ -314,7 +478,7 @@ document.addEventListener("DOMContentLoaded", () => {
             removeStatusListener();
             removeProgressListener();
             console.error("Scan failed:", e);
-            showAlert("Scan Failed", e.message || e || "Unknown scan error occurred.", "danger");
+            showAlert(t("alertScanFailed"), e.message || e || t("alertScanErrorMsg"), "danger");
             switchState("select");
         }
     }
@@ -324,7 +488,6 @@ document.addEventListener("DOMContentLoaded", () => {
         switchState("results");
         currentReportUrl = result.reportUrl;
 
-        // 1. Detections Score & Circle Gauge
         const stats = result.stats || {};
         const malicious = stats.malicious || 0;
         const suspicious = stats.suspicious || 0;
@@ -334,24 +497,19 @@ document.addEventListener("DOMContentLoaded", () => {
         
         detectionScore.textContent = `${malicious}/${total}`;
         
-        // Calculate circle dasharray
         const chart = document.querySelector(".circular-chart");
-        chart.className = "circular-chart"; // Reset
+        chart.className = "circular-chart"; 
         
         const pct = total > 0 ? (malicious / total) * 100 : 0;
         gaugeFill.setAttribute("stroke-dasharray", `${pct}, 100`);
 
-        // Verdict & Coloring
-        verdictBanner.className = "verdict-card"; // Reset
+        verdictBanner.className = "verdict-card"; 
         if (malicious > 0) {
             chart.classList.add("danger");
             verdictBanner.classList.add("verdict-malicious");
-            verdictTitle.textContent = "DANGEROUS";
-            verdictDesc = verdictDesc.textContent = `Flagged as malicious by ${malicious} engine${malicious > 1 ? 's' : ''}!`;
-            verdictIconPath.setAttribute("d", "M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z");
-            verdictIconPoly.setAttribute("points", "12 9 12 13 12.01 17"); // Reuse alert icon elements
+            verdictTitle.textContent = t("verdictDangerous");
+            verdictDesc.textContent = t("verdictDangerousDesc", { count: malicious, s: malicious > 1 ? 's' : '' });
             
-            // Simple triangle alert icon
             verdictBanner.querySelector(".verdict-icon").innerHTML = `
                 <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" fill="none" stroke="currentColor" stroke-width="2"/>
                 <line x1="12" y1="9" x2="12" y2="13" stroke="currentColor" stroke-width="2"/>
@@ -360,8 +518,8 @@ document.addEventListener("DOMContentLoaded", () => {
         } else if (suspicious > 0) {
             chart.classList.add("warning");
             verdictBanner.classList.add("verdict-suspicious");
-            verdictTitle.textContent = "SUSPICIOUS";
-            verdictDesc.textContent = `Flagged as suspicious by ${suspicious} engine${suspicious > 1 ? 's' : ''}.`;
+            verdictTitle.textContent = t("verdictSuspicious");
+            verdictDesc.textContent = t("verdictSuspiciousDesc", { count: suspicious, s: suspicious > 1 ? 's' : '' });
             
             verdictBanner.querySelector(".verdict-icon").innerHTML = `
                 <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/>
@@ -370,8 +528,8 @@ document.addEventListener("DOMContentLoaded", () => {
             `;
         } else {
             verdictBanner.classList.add("verdict-clean");
-            verdictTitle.textContent = "CLEAN & SAFE";
-            verdictDesc.textContent = "All antivirus engines reported this file as harmless.";
+            verdictTitle.textContent = t("verdictClean");
+            verdictDesc.textContent = t("verdictCleanDesc");
             
             verdictBanner.querySelector(".verdict-icon").innerHTML = `
                 <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" fill="none" stroke="currentColor" stroke-width="2"/>
@@ -379,15 +537,13 @@ document.addEventListener("DOMContentLoaded", () => {
             `;
         }
 
-        // File details
         resFilename.textContent = result.filename;
         resFilesize.textContent = formatBytes(result.size);
         resHash.textContent = result.hash;
         resHash.dataset.hash = result.hash;
 
-        // Detections Table
         const detections = result.detections || [];
-        detectionsBadge.textContent = `${detections.length} flags`;
+        detectionsBadge.textContent = t("flagsCount", { count: detections.length });
         
         if (detections.length > 0) {
             detectionsBadge.classList.add("danger");
@@ -418,7 +574,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!hash) return;
         navigator.clipboard.writeText(hash).then(() => {
             const originalText = resHash.textContent;
-            resHash.textContent = "COPIED!";
+            resHash.textContent = t("copied");
             resHash.style.color = "var(--color-success)";
             setTimeout(() => {
                 resHash.textContent = originalText;
@@ -458,7 +614,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (type === "danger") globalAlert.classList.add("alert-danger");
         else if (type === "success") {
             globalAlert.classList.add("alert-success");
-            // custom success colors
             globalAlert.style.backgroundColor = "var(--color-success-bg)";
             globalAlert.style.borderColor = "rgba(16, 185, 129, 0.3)";
             globalAlert.querySelector(".alert-icon").style.color = "var(--color-success)";

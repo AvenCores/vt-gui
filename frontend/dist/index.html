@@ -19,15 +19,22 @@
                 </svg>
                 <div class="brand-text">
                     <h1>VT Shield</h1>
-                    <span>VirusTotal Scanner</span>
+                    <span data-i18n="brandSub">VirusTotal Scanner</span>
                 </div>
+                <button id="lang-toggle-btn" class="lang-btn" title="Switch Language / Сменить язык">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="2" y1="12" x2="22" y2="12"></line>
+                        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                    </svg>
+                </button>
             </div>
 
             <!-- API Configuration -->
             <div class="sidebar-section">
-                <h3>API Configuration</h3>
+                <h3 data-i18n="apiConfig">API Configuration</h3>
                 <div class="form-group">
-                    <label for="api-key-input">VirusTotal API Key</label>
+                    <label for="api-key-input" data-i18n="apiKeyLabel">VirusTotal API Key</label>
                     <div class="input-with-button">
                         <input type="password" id="api-key-input" placeholder="Enter API Key..." autocomplete="off">
                         <button id="toggle-key-visibility" class="icon-btn" title="Toggle Visibility">
@@ -37,30 +44,19 @@
                             </svg>
                         </button>
                     </div>
-                    <button id="save-key-btn" class="primary-btn sm-btn">Save Key</button>
-                    <span class="hint-text">Saved locally in ~/.vt.toml</span>
+                    <button id="save-key-btn" class="primary-btn sm-btn" data-i18n="saveKey">Save Key</button>
+                    <span class="hint-text" data-i18n="savedLocally">Saved locally in config file</span>
                 </div>
             </div>
 
             <!-- Settings -->
             <div class="sidebar-section">
-                <h3>Settings</h3>
-                
-                <div class="toggle-group">
-                    <div class="toggle-label-desc">
-                        <span class="toggle-label">Explorer Context Menu</span>
-                        <span class="toggle-desc">Right-click context integration</span>
-                    </div>
-                    <label class="switch">
-                        <input type="checkbox" id="context-menu-toggle">
-                        <span class="slider"></span>
-                    </label>
-                </div>
+                <h3 data-i18n="settings">Settings</h3>
 
                 <div class="toggle-group">
                     <div class="toggle-label-desc">
-                        <span class="toggle-label">Use vt.exe CLI</span>
-                        <span class="toggle-desc">Fallbacks to Direct API if missing</span>
+                        <span class="toggle-label" data-i18n="useCli">Use vt.exe CLI</span>
+                        <span class="toggle-desc" data-i18n="useCliDesc">Fallbacks to Direct API if missing</span>
                     </div>
                     <label class="switch">
                         <input type="checkbox" id="use-cli-toggle">
@@ -72,17 +68,21 @@
                 <div id="cli-status-indicator" class="cli-status-container hidden">
                     <div class="cli-status">
                         <span class="dot"></span>
-                        <span class="status-text">Checking vt.exe...</span>
+                        <span class="status-text" data-i18n="cliChecking">Checking vt.exe...</span>
                     </div>
                     <div class="cli-download-tip hidden" id="cli-download-tip">
-                        <p>To use CLI mode, download <a href="#" id="github-link">vt.exe from GitHub</a> and place it in the application folder or PATH.</p>
+                        <p>
+                            <span data-i18n="cliDownloadTipPrefix">To use CLI mode, download </span>
+                            <a href="#" id="github-link">vt.exe from GitHub</a>
+                            <span data-i18n="cliDownloadTipSuffix"> and place it in the application folder or PATH.</span>
+                        </p>
                     </div>
                 </div>
             </div>
 
             <!-- Footer info -->
             <div class="sidebar-footer">
-                <span class="version-tag">Version 2.0.0 (Go-Wails)</span>
+                <span class="version-tag" data-i18n="version">Version 1.0.0</span>
             </div>
         </aside>
 
@@ -96,8 +96,8 @@
                     <line x1="12" y1="17" x2="12.01" y2="17"/>
                 </svg>
                 <div class="alert-content">
-                    <h4 id="alert-title">Warning</h4>
-                    <p id="alert-message">Please configure your VirusTotal API key to start scanning.</p>
+                    <h4 id="alert-title" data-i18n="alertWarning">Warning</h4>
+                    <p id="alert-message" data-i18n="alertApiKeyInit">Please configure your VirusTotal API key to start scanning.</p>
                 </div>
             </div>
 
@@ -114,9 +114,9 @@
                                 <polyline points="17 8 12 3 7 8"/>
                                 <line x1="12" y1="3" x2="12" y2="15"/>
                             </svg>
-                            <h2>Drag & Drop File Here</h2>
-                            <p>or click to browse your computer</p>
-                            <button id="browse-btn" class="secondary-btn">Select File</button>
+                            <h2 data-i18n="dragDropTitle">Drag & Drop File Here</h2>
+                            <p data-i18n="dragDropDesc">or click to browse your computer</p>
+                            <button id="browse-btn" class="secondary-btn" data-i18n="selectFileBtn">Select File</button>
                         </div>
                     </div>
 
@@ -130,13 +130,13 @@
                             <div class="file-info">
                                 <h3 id="file-name">filename.exe</h3>
                                 <div class="file-meta">
-                                    <span id="file-size">0 KB</span>
+                                    <span id="file-size" data-i18n="readingSize">Reading file size...</span>
                                     <span class="divider">•</span>
-                                    <span id="file-hash">SHA-256 hash placeholder</span>
+                                    <span id="file-hash" data-i18n="calculatingHash">Calculating fingerprint...</span>
                                 </div>
                             </div>
                         </div>
-                        <button id="start-scan-btn" class="primary-btn glow-btn">Start Security Scan</button>
+                        <button id="start-scan-btn" class="primary-btn glow-btn" data-i18n="startScanBtn">Start Security Scan</button>
                     </div>
                 </div>
 
@@ -153,13 +153,13 @@
                                 <line x1="12" y1="22" x2="12" y2="18"/>
                             </svg>
                         </div>
-                        <h2 id="scanning-header">Scanning File...</h2>
-                        <p id="scanning-status" class="status-msg">Hashing file...</p>
+                        <h2 id="scanning-header" data-i18n="scanningHeader">Scanning Target</h2>
+                        <p id="scanning-status" class="status-msg" data-i18n="preparingFile">Preparing file...</p>
 
                         <!-- Progress Section -->
                         <div id="upload-progress-container" class="progress-container hidden">
                             <div class="progress-labels">
-                                <span>Uploading File</span>
+                                <span data-i18n="uploadingFile">Uploading File</span>
                                 <span id="progress-percent">0%</span>
                             </div>
                             <div class="progress-bar-bg">
@@ -198,7 +198,7 @@
                                         <text x="18" y="20.35" class="percentage" id="detection-score">0/72</text>
                                     </svg>
                                 </div>
-                                <span class="gauge-label">Detection Ratio</span>
+                                <span class="gauge-label" data-i18n="detectionRatio">Detection Ratio</span>
                             </div>
 
                             <!-- Verdict Banner -->
@@ -209,23 +209,23 @@
                                     <polyline id="verdict-icon-poly" points="22 4 12 14.01 9 11.01"/>
                                 </svg>
                                 <div class="verdict-info">
-                                    <h3 id="verdict-title">SAFE</h3>
-                                    <p id="verdict-desc">No antivirus engine flagged this file.</p>
+                                    <h3 id="verdict-title" data-i18n="verdictClean">SAFE</h3>
+                                    <p id="verdict-desc" data-i18n="verdictCleanDesc">No antivirus engine flagged this file.</p>
                                 </div>
                             </div>
 
                             <!-- File summary details -->
                             <div class="mini-file-details">
                                 <div class="detail-row">
-                                    <span class="lbl">Name:</span>
+                                    <span class="lbl" data-i18n="labelName">Name:</span>
                                     <span class="val" id="res-filename">file.exe</span>
                                 </div>
                                 <div class="detail-row">
-                                    <span class="lbl">Size:</span>
+                                    <span class="lbl" data-i18n="labelSize">Size:</span>
                                     <span class="val" id="res-filesize">0 KB</span>
                                 </div>
                                 <div class="detail-row">
-                                    <span class="lbl">SHA-256:</span>
+                                    <span class="lbl" data-i18n="labelHash">SHA-256:</span>
                                     <span class="val hash-val" id="res-hash" title="Click to copy">hash</span>
                                 </div>
                             </div>
@@ -235,7 +235,7 @@
                         <div class="results-right">
                             <div class="detections-card">
                                 <div class="card-header-actions">
-                                    <h3>Antivirus Detections</h3>
+                                    <h3 data-i18n="avDetections">Antivirus Detections</h3>
                                     <span class="badge" id="detections-badge">0 detections</span>
                                 </div>
                                 
@@ -243,10 +243,10 @@
                                     <table class="detections-table">
                                         <thead>
                                             <tr>
-                                                <th>Antivirus Engine</th>
-                                                <th>Threat Classification</th>
-                                                <th>Severity</th>
-                                                <th>Method</th>
+                                                <th data-i18n="thEngine">Antivirus Engine</th>
+                                                <th data-i18n="thClass">Threat Classification</th>
+                                                <th data-i18n="thSeverity">Severity</th>
+                                                <th data-i18n="thMethod">Method</th>
                                             </tr>
                                         </thead>
                                         <tbody id="detections-list">
@@ -261,8 +261,8 @@
                                                 <polyline points="20 6 9 17 4 12"/>
                                             </svg>
                                         </div>
-                                        <h4>All Engines Passed</h4>
-                                        <p>The file is clean. VirusTotal analysis did not detect any known security threats.</p>
+                                        <h4 data-i18n="allEnginesPassed">All Engines Passed</h4>
+                                        <p data-i18n="cleanDesc">The file is clean. VirusTotal analysis did not detect any known security threats.</p>
                                     </div>
                                 </div>
                             </div>
@@ -271,14 +271,14 @@
 
                     <!-- Bottom Actions -->
                     <div class="results-actions">
-                        <button id="scan-new-btn" class="secondary-btn">Scan Another File</button>
+                        <button id="scan-new-btn" class="secondary-btn" data-i18n="scanAnother">Scan Another File</button>
                         <button id="view-report-btn" class="primary-btn glow-btn">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;margin-right:8px;">
                                 <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
                                 <polyline points="15 3 21 3 21 9"/>
                                 <line x1="10" y1="14" x2="21" y2="3"/>
                             </svg>
-                            View Full Report on VirusTotal
+                            <span data-i18n="viewReport">View Full Report on VirusTotal</span>
                         </button>
                     </div>
                 </div>
