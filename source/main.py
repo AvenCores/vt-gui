@@ -6,7 +6,7 @@ import time
 import webbrowser
 import flet as ft
 
-from src.config import (
+from app.config import (
     load_env_vars,
     write_env_var,
     get_api_key,
@@ -15,25 +15,25 @@ from src.config import (
     IS_WINDOWS,
     STRINGS
 )
-from src.cli_manager import (
+from app.cli_manager import (
     check_installed_binary,
     get_temp_bin_path,
     process_selected_binary,
     compute_sha256,
     download_and_install_cli
 )
-from src.vt_api import (
+from app.vt_api import (
     check_file_exists_direct,
     check_file_exists_vt
 )
-from src.ui.install_view import build_install_view
-from src.ui.scanner_view import build_scanner_view
-from src.ui.scanning_view import build_scanning_view
-from src.ui.results_view import build_results_view
-from src.ui.settings_dialog import open_settings
-from src.ui.intelligence_view import IntelligenceView
-from src.ui.footer import build_footer
-from src.services.scan_service import ScanService
+from app.ui.install_view import build_install_view
+from app.ui.scanner_view import build_scanner_view
+from app.ui.scanning_view import build_scanning_view
+from app.ui.results_view import build_results_view
+from app.ui.settings_dialog import open_settings
+from app.ui.intelligence_view import IntelligenceView
+from app.ui.footer import build_footer
+from app.services.scan_service import ScanService
 
 # Parse CLI arguments for context-menu invocation
 init_file_path = None
@@ -578,7 +578,7 @@ def main(page: ft.Page):
             selected_installer_data = exe_data
             selected_installer_hash = exe_hash
             
-            from src.config import KNOWN_HASHES
+            from app.config import KNOWN_HASHES
             
             if exe_hash in KNOWN_HASHES:
                 temp_bin = get_temp_bin_path()
