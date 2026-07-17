@@ -1,6 +1,5 @@
 import flet as ft
 from ..config import write_env_var, STRINGS, get_api_key
-from ..context_menu import register_context_menu, unregister_context_menu
 
 def open_settings(page, lang, on_settings_saved):
     """Opens a beautiful modal settings dialog with configuration options."""
@@ -18,51 +17,6 @@ def open_settings(page, lang, on_settings_saved):
         text_style=ft.TextStyle(color="#E2E8F0")
     )
     
-    # Helper to show alerts inside settings
-    def show_settings_alert(text):
-        inner_dlg = ft.AlertDialog(
-            title=ft.Text(STRINGS[lang]["settings_title"], color="#FFFFFF", weight=ft.FontWeight.BOLD),
-            content=ft.Text(text, color="#E2E8F0"),
-            actions=[ft.TextButton(STRINGS[lang]["btn_close"], on_click=lambda _: page.pop_dialog())],
-            actions_alignment=ft.MainAxisAlignment.END,
-            bgcolor="#1E293B"
-        )
-        page.show_dialog(inner_dlg)
-
-    def register_menu(e):
-        ok, err = register_context_menu()
-        if ok:
-            show_settings_alert(STRINGS[lang]["context_menu_success"])
-        else:
-            show_settings_alert(STRINGS[lang]["context_menu_fail"].format(e=err))
-            
-    def unregister_menu(e):
-        ok, err = unregister_context_menu()
-        if ok:
-            show_settings_alert(STRINGS[lang]["context_menu_removed"])
-        else:
-            show_settings_alert(STRINGS[lang]["context_menu_fail"].format(e=err))
-            
-    register_btn = ft.ElevatedButton(
-        content=STRINGS[lang]["context_menu_register"],
-        icon=ft.Icons.ADD_LINK_ROUNDED,
-        color="#FFFFFF",
-        bgcolor="#10B981",
-        style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8)),
-        on_click=register_menu
-    )
-    
-    unregister_btn = ft.OutlinedButton(
-        content=STRINGS[lang]["context_menu_unregister"],
-        icon=ft.Icons.LINK_OFF_ROUNDED,
-        style=ft.ButtonStyle(
-            shape=ft.RoundedRectangleBorder(radius=8),
-            side=ft.BorderSide(1, "#EF4444"),
-            color="#EF4444"
-        ),
-        on_click=unregister_menu
-    )
-    
     def save_settings(e):
         write_env_var("VT_APIKEY", api_key_field.value.strip())
         
@@ -74,13 +28,10 @@ def open_settings(page, lang, on_settings_saved):
         
     settings_content = ft.Column(
         [
-            api_key_field,
-            ft.Divider(color="#2E3C56"),
-            ft.Text(STRINGS[lang]["context_menu_label"], weight=ft.FontWeight.BOLD, size=13, color="#FFFFFF"),
-            ft.Row([register_btn, unregister_btn], spacing=10)
+            api_key_field
         ],
         spacing=15,
-        height=180,
+        height=80,
         width=400
     )
     
