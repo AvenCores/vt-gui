@@ -16,10 +16,25 @@ class ScanService:
         self.page = page
 
     def run_single_scan_pipeline(self, idx, file_path):
-        def set_scan_status(text, progress_value):
+        def set_scan_status(text, progress_value, rebuild=False):
             self.active_scans[idx]["status_text"] = text
-            self.active_scans[idx]["progress"] = progress_value
-            self.thread_safe_build_fn()
+            if progress_value is not None:
+                self.active_scans[idx]["progress"] = progress_value
+            # Update widgets directly if references exist, avoiding full UI rebuild
+            status_text_w = self.active_scans[idx].get("_status_text_widget")
+            progress_bar_w = self.active_scans[idx].get("_progress_bar_widget")
+            if status_text_w is not None:
+                status_text_w.value = text
+            if progress_bar_w is not None and progress_value is not None:
+                progress_bar_w.value = progress_value
+            if rebuild or status_text_w is None:
+                self.thread_safe_build_fn()
+            else:
+                # Lightweight update: just push changed values to the client
+                try:
+                    self.page.update()
+                except Exception:
+                    pass
 
         try:
             # 1. Compute Hash
@@ -44,7 +59,7 @@ class ScanService:
                 
             if existing_info:
                 # File already scanned! Fetch complete report.
-                set_scan_status(STRINGS[self.current_lang]["scan_success"], 1.0)
+                set_scan_status(STRINGS[self.current_lang]["scan_success"], 1.0, rebuild=True)
                 try:
                     web_info = check_file_exists_direct(sha256, api_key)
                     if web_info:
@@ -53,6 +68,8 @@ class ScanService:
                     pass
                 self.active_scans[idx]["results"] = existing_info
                 self.active_scans[idx]["status"] = "completed"
+                self.active_scans[idx].pop("_status_text_widget", None)
+                self.active_scans[idx].pop("_progress_bar_widget", None)
                 self.thread_safe_build_fn()
                 return
                 
@@ -123,7 +140,7 @@ class ScanService:
                 time.sleep(5)
                 
             # 6. Success! Fetch final file details.
-            set_scan_status(STRINGS[self.current_lang]["scan_success"], 1.0)
+            set_scan_status(STRINGS[self.current_lang]["scan_success"], 1.0, rebuild=True)
             
             final_report = check_file_exists_direct(sha256, api_key)
             if not final_report:
@@ -134,16 +151,22 @@ class ScanService:
                 
             self.active_scans[idx]["results"] = final_report
             self.active_scans[idx]["status"] = "completed"
+            self.active_scans[idx].pop("_status_text_widget", None)
+            self.active_scans[idx].pop("_progress_bar_widget", None)
             self.thread_safe_build_fn()
-            
+
         except ValueError as ve:
             err_text = str(ve)
             if err_text == "api_key_invalid_err":
                 err_text = STRINGS[self.current_lang]["api_key_invalid_err"]
             self.active_scans[idx]["status"] = "failed"
             self.active_scans[idx]["error"] = err_text
+            self.active_scans[idx].pop("_status_text_widget", None)
+            self.active_scans[idx].pop("_progress_bar_widget", None)
             self.thread_safe_build_fn()
         except Exception as ex:
             self.active_scans[idx]["status"] = "failed"
             self.active_scans[idx]["error"] = str(ex)
+            self.active_scans[idx].pop("_status_text_widget", None)
+            self.active_scans[idx].pop("_progress_bar_widget", None)
             self.thread_safe_build_fn()

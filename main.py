@@ -253,10 +253,14 @@ def main(page: ft.Page):
             tab_contents = []
             for idx, scan in enumerate(active_scans):
                 if scan["status"] == "scanning":
+                    scan_status_text = ft.Text(scan["status_text"], size=15, weight=ft.FontWeight.W_600, color="#00F0FF")
+                    scan_progress_bar = ft.ProgressBar(value=scan["progress"], color="#00F0FF", bgcolor="#334155", height=6)
+                    scan["_status_text_widget"] = scan_status_text
+                    scan["_progress_bar_widget"] = scan_progress_bar
                     tab_content = build_scanning_view(
                         ft.ProgressRing(color="#00F0FF", width=48, height=48),
-                        ft.Text(scan["status_text"], size=15, weight=ft.FontWeight.W_600, color="#00F0FF"),
-                        ft.ProgressBar(value=scan["progress"], color="#00F0FF", bgcolor="#334155", height=6),
+                        scan_status_text,
+                        scan_progress_bar,
                         current_lang
                     )
                 elif scan["status"] == "completed":
