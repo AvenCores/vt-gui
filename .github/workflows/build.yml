@@ -167,17 +167,17 @@ jobs:
           if-no-files-found: error
 
   # ─────────────────────────────────────────────────────────────────────────────
-  # macOS — universal2 binary (Intel + Apple Silicon in one file)
+  # macOS — native arm64 binary
   # ─────────────────────────────────────────────────────────────────────────────
   build-macos:
-    name: Build macOS (universal2)
+    name: Build macOS (arm64)
     runs-on: macos-15
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
 
-      - name: Set up Python (universal2 / arm64 host)
+      - name: Set up Python
         uses: actions/setup-python@v6
         with:
           python-version: '3.x'
@@ -186,13 +186,12 @@ jobs:
         run: pip install -r requirements.txt
         working-directory: source
 
-      - name: Build with PyInstaller (universal2)
+      - name: Build with PyInstaller
         run: >
           pyinstaller --onefile
           --name="VirusTotal_File_Scanner_macOS"
           --add-data="assets:assets"
           --add-data="app/strings.json:app"
-          --target-arch universal2
           --clean
           main.py
         working-directory: source
@@ -200,6 +199,6 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v7
         with:
-          name: python-macos-universal2
+          name: python-macos-arm64
           path: source/dist/VirusTotal_File_Scanner_macOS
           if-no-files-found: error
