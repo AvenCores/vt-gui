@@ -64,11 +64,8 @@ def main(page: ft.Page):
     page.window_min_height = 600
     page.padding = 0
     
-    # Load fonts
-    page.fonts = {
-        "Outfit": "https://github.com/google/fonts/raw/main/ofl/outfit/Outfit%5Bwght%5D.ttf"
-    }
-    page.theme = ft.Theme(font_family="Outfit")
+    # Use system font to prevent network loading and font layout shifts (jumping)
+    page.theme = ft.Theme(font_family="Segoe UI")
     
     # State variables
     app_state = "scanner"  # scanner, scanning, results, install_cli
