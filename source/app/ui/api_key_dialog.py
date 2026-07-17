@@ -125,8 +125,15 @@ def open_api_key_dialog(page, lang, on_saved):
         page.update()
 
         def run_reinstall():
+            def progress_cb(status_text, progress_val):
+                reinstall_status_text.value = status_text
+                try:
+                    page.update()
+                except Exception:
+                    pass
+
             try:
-                download_and_install_cli(lang=lang)
+                download_and_install_cli(progress_callback=progress_cb, lang=lang)
                 reinstall_status_text.value = STRINGS[lang]["reinstall_success"]
                 reinstall_status_text.color = "#10B981"
                 reinstall_status_icon.color = "#10B981"
