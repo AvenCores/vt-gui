@@ -1,1 +1,2 @@
-flet[all]
+flet>=0.25.0
+pyinstaller>=6.0

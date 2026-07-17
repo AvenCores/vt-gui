@@ -1,0 +1,192 @@
+name: Build Python
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Windows: x64
+  # ─────────────────────────────────────────────────────────────────────────────
+  build-windows:
+    name: Build Windows (${{ matrix.arch }})
+    runs-on: windows-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x64
+            python-arch: x64
+            output: VirusTotal_File_Scanner_Windows_x64.exe
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python (${{ matrix.arch }})
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.x'
+          architecture: ${{ matrix.python-arch }}
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Build with PyInstaller
+        run: >
+          pyinstaller --onefile
+          --icon=assets/icon.ico
+          --add-data="assets;assets"
+          --add-data="src/strings.json;src"
+          --name="VirusTotal_File_Scanner_Windows_x64"
+          --noupx
+          --clean
+          --version-file=version.txt
+          main.py
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: python-windows-${{ matrix.arch }}
+          path: dist/${{ matrix.output }}
+          if-no-files-found: error
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Windows ARM64 — native windows-11-arm runner
+  # ─────────────────────────────────────────────────────────────────────────────
+  build-windows-arm64:
+    name: Build Windows (arm64)
+    runs-on: windows-11-arm
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Build with PyInstaller
+        run: >
+          pyinstaller --onefile
+          --icon=assets/icon.ico
+          --add-data="assets;assets"
+          --add-data="src/strings.json;src"
+          --name="VirusTotal_File_Scanner_Windows_arm64"
+          --noupx
+          --clean
+          --version-file=version.txt
+          main.py
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: python-windows-arm64
+          path: dist/VirusTotal_File_Scanner_Windows_arm64.exe
+          if-no-files-found: error
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Linux x64
+  # ─────────────────────────────────────────────────────────────────────────────
+  build-linux-x64:
+    name: Build Linux (x64)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Build with PyInstaller
+        run: >
+          pyinstaller --onefile
+          --icon=assets/icon.ico
+          --add-data="assets:assets"
+          --add-data="src/strings.json:src"
+          --name="VirusTotal_File_Scanner_Linux_x64"
+          --clean
+          main.py
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: python-linux-x64
+          path: dist/VirusTotal_File_Scanner_Linux_x64
+          if-no-files-found: error
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Linux ARM64 — via QEMU emulation
+  # ─────────────────────────────────────────────────────────────────────────────
+  build-linux-arm64:
+    name: Build Linux (ARM64)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Build inside ARM64 container
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: .github/docker/Dockerfile.linux-arm64
+          platforms: linux/arm64
+          push: false
+          outputs: type=local,dest=dist-arm64
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: python-linux-arm64
+          path: dist-arm64/VirusTotal_File_Scanner_Linux_arm64
+          if-no-files-found: error
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # macOS — universal2 binary (Intel + Apple Silicon in one file)
+  # ─────────────────────────────────────────────────────────────────────────────
+  build-macos:
+    name: Build macOS (universal2)
+    runs-on: macos-15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python (universal2 / arm64 host)
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Build with PyInstaller (universal2)
+        run: >
+          pyinstaller --onefile
+          --name="VirusTotal_File_Scanner_macOS"
+          --add-data="assets:assets"
+          --add-data="src/strings.json:src"
+          --target-arch universal2
+          --clean
+          main.py
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: python-macos-universal2
+          path: dist/VirusTotal_File_Scanner_macOS
+          if-no-files-found: error

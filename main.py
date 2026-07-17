@@ -672,4 +672,7 @@ def main(page: ft.Page):
             on_scan_file_selected([PseudoFile(init_file_path)])
 
 if __name__ == '__main__':
+    # When frozen by PyInstaller, set CWD to the bundle dir so assets/ is found
+    if getattr(sys, 'frozen', False):
+        os.chdir(sys._MEIPASS)
     ft.run(main, assets_dir="assets")
