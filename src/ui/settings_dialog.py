@@ -59,7 +59,7 @@ def open_settings(page, lang, on_settings_saved):
             show_settings_alert(STRINGS[lang]["context_menu_fail"].format(e=err))
             
     register_btn = ft.ElevatedButton(
-        text=STRINGS[lang]["context_menu_register"],
+        content=STRINGS[lang]["context_menu_register"],
         icon=ft.Icons.ADD_LINK_ROUNDED,
         color="#FFFFFF",
         bgcolor="#10B981",
@@ -68,10 +68,13 @@ def open_settings(page, lang, on_settings_saved):
     )
     
     unregister_btn = ft.OutlinedButton(
-        text=STRINGS[lang]["context_menu_unregister"],
+        content=STRINGS[lang]["context_menu_unregister"],
         icon=ft.Icons.LINK_OFF_ROUNDED,
-        color="#EF4444",
-        style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8)),
+        style=ft.ButtonStyle(
+            shape=ft.RoundedRectangleBorder(radius=8),
+            side=ft.BorderSide(1, "#EF4444"),
+            color="#EF4444"
+        ),
         on_click=unregister_menu
     )
     

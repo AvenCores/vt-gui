@@ -17,7 +17,7 @@ def make_stat_card(label, count, color_hex, icon):
         border=ft.Border.all(1, "#2E3C56"),
         border_radius=12,
         padding=12,
-        alignment=ft.alignment.center,
+        alignment=ft.Alignment.CENTER,
         expand=True,
         shadow=ft.BoxShadow(blur_radius=8, color="#000000", offset=ft.Offset(0, 3))
     )

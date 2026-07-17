@@ -200,8 +200,8 @@ def main(page: ft.Page):
             
         outer_container = ft.Container(
             gradient=ft.LinearGradient(
-                begin=ft.alignment.top_left,
-                end=ft.alignment.bottom_right,
+                begin=ft.Alignment.TOP_LEFT,
+                end=ft.Alignment.BOTTOM_RIGHT,
                 colors=["#0B0F19", "#111827"]
             ),
             expand=True,
@@ -209,7 +209,7 @@ def main(page: ft.Page):
             content=ft.Column(
                 [
                     header,
-                    ft.VerticalDivider(height=10, color=ft.colors.TRANSPARENT),
+                    ft.Container(height=10),
                     main_content
                 ],
                 expand=True

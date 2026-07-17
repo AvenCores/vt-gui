@@ -94,7 +94,7 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
     actions_row = ft.Row(
         [
             ft.ElevatedButton(
-                text=STRINGS[lang]["btn_back"],
+                content=STRINGS[lang]["btn_back"],
                 icon=ft.Icons.ARROW_BACK_ROUNDED,
                 icon_color="#FFFFFF",
                 color="#FFFFFF",
@@ -103,7 +103,7 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
                 style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8))
             ),
             ft.ElevatedButton(
-                text=STRINGS[lang]["btn_open_web"],
+                content=STRINGS[lang]["btn_open_web"],
                 icon=ft.Icons.OPEN_IN_BROWSER_ROUNDED,
                 icon_color="#FFFFFF",
                 color="#FFFFFF",
@@ -153,34 +153,34 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
     def toggle_full_list(e):
         full_list_column.visible = not full_list_column.visible
         if full_list_column.visible:
-            toggle_button.current.text = STRINGS[lang]["hide_all_engines"]
+            toggle_button.current.content = STRINGS[lang]["hide_all_engines"]
             toggle_button.current.icon = ft.Icons.KEYBOARD_ARROW_UP_ROUNDED
         else:
-            toggle_button.current.text = STRINGS[lang]["show_all_engines"].format(count=len(clean_list) + len(mal_susp_list))
+            toggle_button.current.content = STRINGS[lang]["show_all_engines"].format(count=len(clean_list) + len(mal_susp_list))
             toggle_button.current.icon = ft.Icons.KEYBOARD_ARROW_DOWN_ROUNDED
         page.update()
         
     total_engines_count = len(clean_list) + len(mal_susp_list)
     show_all_btn = ft.TextButton(
         ref=toggle_button,
-        text=STRINGS[lang]["show_all_engines"].format(count=total_engines_count),
+        content=STRINGS[lang]["show_all_engines"].format(count=total_engines_count),
         icon=ft.Icons.KEYBOARD_ARROW_DOWN_ROUNDED,
         icon_color="#00F0FF",
-        color="#00F0FF",
+        style=ft.ButtonStyle(color="#00F0FF"),
         on_click=toggle_full_list
     )
     
     return ft.ListView(
         [
             verdict_banner,
-            ft.VerticalDivider(height=10, color=ft.colors.TRANSPARENT),
+            ft.Container(height=10),
             details_card,
             stats_row,
             ft.Divider(color="#1E293B"),
             actions_row,
             ft.Divider(color="#1E293B"),
             detections_list,
-            ft.VerticalDivider(height=10, color=ft.colors.TRANSPARENT),
+            ft.Container(height=10),
             show_all_btn,
             full_list_column
         ],

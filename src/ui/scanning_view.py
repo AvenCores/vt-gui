@@ -15,5 +15,5 @@ def build_scanning_view(scan_progress_ring, scan_status_text, scan_progress_bar)
             spacing=15
         ),
         expand=True,
-        alignment=ft.alignment.center
+        alignment=ft.Alignment.CENTER
     )

@@ -12,11 +12,11 @@ def build_install_view(cli_status, cli_hash, lang, file_picker_cli, on_direct_mo
                     ft.Text(STRINGS[lang]["download_instructions_title"], size=18, weight=ft.FontWeight.BOLD, color="#FFFFFF")
                 ], spacing=10),
                 ft.Text(STRINGS[lang]["download_instructions_text"], size=14, color="#E2E8F0"),
-                ft.VerticalDivider(height=10, color=ft.colors.TRANSPARENT),
+                ft.Container(height=10),
                 ft.Row(
                     [
                         ft.ElevatedButton(
-                            text=STRINGS[lang]["open_releases"],
+                            content=STRINGS[lang]["open_releases"],
                             icon=ft.Icons.OPEN_IN_NEW_ROUNDED,
                             icon_color="#FFFFFF",
                             color="#FFFFFF",
@@ -25,15 +25,18 @@ def build_install_view(cli_status, cli_hash, lang, file_picker_cli, on_direct_mo
                             style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8))
                         ),
                         ft.OutlinedButton(
-                            text=STRINGS[lang]["select_file_zip"],
+                            content=STRINGS[lang]["select_file_zip"],
                             icon=ft.Icons.FOLDER_OPEN_ROUNDED,
-                            color="#00F0FF",
                             on_click=lambda _: file_picker_cli.pick_files(
                                 allow_multiple=False,
                                 file_type=ft.FilePickerFileType.CUSTOM,
                                 allowed_extensions=["zip", "exe"]
                             ),
-                            style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8))
+                            style=ft.ButtonStyle(
+                                shape=ft.RoundedRectangleBorder(radius=8),
+                                side=ft.BorderSide(1, "#00F0FF"),
+                                color="#00F0FF"
+                            )
                         )
                     ],
                     spacing=15

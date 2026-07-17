@@ -52,7 +52,7 @@ def build_scanner_view(cli_status, cli_hash, is_direct, lang, file_picker_scan):
         border_radius=16,
         bgcolor="#151E33",
         height=250,
-        alignment=ft.alignment.center,
+        alignment=ft.Alignment.CENTER,
         on_click=lambda _: file_picker_scan.pick_files(allow_multiple=False),
         animate=ft.animation.Animation(200, ft.AnimationCurve.EASE_OUT)
     )
@@ -70,7 +70,7 @@ def build_scanner_view(cli_status, cli_hash, is_direct, lang, file_picker_scan):
                 ft.Text(STRINGS[lang]["vt_exe_status"] + ":", size=14, color="#94A3B8", weight=ft.FontWeight.BOLD),
                 status_badge
             ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
-            ft.VerticalDivider(height=10, color=ft.colors.TRANSPARENT),
+            ft.Container(height=10),
             dashed_area
         ],
         spacing=15,
