@@ -183,10 +183,33 @@ def main(page: ft.Page):
         )
         
         # Settings Icon
+        def on_reinstall_cli(status_text_widget, btn_widget):
+            def run_reinstall():
+                def progress_cb(status_text, progress_val):
+                    status_text_widget.value = status_text
+                    thread_safe_update()
+                
+                try:
+                    download_and_install_cli(progress_callback=progress_cb)
+                    cli_status, _ = check_installed_binary()
+                    if cli_status in ('verified', 'custom'):
+                        status_text_widget.value = STRINGS[current_lang]["reinstall_success"]
+                        btn_widget.disabled = False
+                        thread_safe_update()
+                        build_ui()
+                    else:
+                        raise ValueError("Reinstall succeeded but verification failed.")
+                except Exception as ex:
+                    status_text_widget.value = STRINGS[current_lang]["reinstall_fail"].format(e=str(ex))
+                    btn_widget.disabled = False
+                    thread_safe_update()
+            
+            threading.Thread(target=run_reinstall, daemon=True).start()
+        
         settings_button = ft.IconButton(
             icon=ft.Icons.SETTINGS,
             icon_color="#94A3B8",
-            on_click=lambda _: open_settings(page, current_lang, build_ui)
+            on_click=lambda _: open_settings(page, current_lang, build_ui, on_reinstall_cli)
         )
         
         # Header Layout

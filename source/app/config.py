@@ -25,12 +25,6 @@ KNOWN_HASHES = {
     # Version 1.3.1 — FreeBSD
     "87edffbd677e81083c4d0954383ad314f76ef3e3b58c01d471c3a152d2b80c56": "1.3.1 (FreeBSD 64-bit)",
     "516fbd51c01aaa086d71a34eb5bc0c5032eb2b1c7c55778b100952e5339573d0": "1.3.1 (FreeBSD 32-bit)",
-    # Version 1.3.0 — Windows
-    "8ee13a9b3ab9e4cb289b7946eba9743143988573233149d8a0072b061d7fde75": "1.3.0 (Windows 64-bit)",
-    "dd0385c676cf492393ca879427a80bafd1e5cafd9262b00d40a286ae6824c0e6": "1.3.0 (Windows 32-bit)",
-    # Version 1.2.0 — Windows
-    "376de9530f0d22f3db8a13bf77a38b1fde52a91cef71b197c743a20e9c1a246c": "1.2.0 (Windows 64-bit)",
-    "23b129ed48596c42e8471d82f74d618bdf51ed1db71d16c8a83aed10f9317e63": "1.2.0 (Windows 32-bit)"
 }
 
 def get_release_zip_name():
