@@ -108,6 +108,7 @@ STRINGS = {
         "copy_link_tooltip": "Copy Report Link",
         "btn_upgrade_premium": "Upgrade to premium",
         "premium_required_err": "Your API Key is not authorized for this operation (premium feature required).",
+        "scan_timeout_err": "Analysis timed out after {timeout}s. The file may still be processing on VirusTotal.",
         "btn_get_api_key": "Get API Key"
     },
     "ru": {
@@ -202,6 +203,7 @@ STRINGS = {
         "copy_link_tooltip": "Скопировать ссылку",
         "btn_upgrade_premium": "Перейти на Premium",
         "premium_required_err": "Ваш API-ключ не авторизован для этой операции (требуется премиум-подписка).",
+        "scan_timeout_err": "Анализ не завершился за {timeout}с. Файл всё ещё может обрабатываться на VirusTotal.",
         "btn_get_api_key": "Получить API ключ"
     }
 }

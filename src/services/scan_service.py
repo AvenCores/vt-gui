@@ -111,8 +111,13 @@ class ScanService:
             # 5. Poll Analysis status
             set_scan_status(STRINGS[self.current_lang]["waiting_analysis"], 0.7)
             start_time = time.time()
+            max_wait = 300  # 5 minutes timeout
             
             while True:
+                elapsed = time.time() - start_time
+                if elapsed >= max_wait:
+                    raise ValueError(STRINGS[self.current_lang]["scan_timeout_err"].format(timeout=max_wait))
+                    
                 status = None
                 vt_path = get_temp_bin_path()
                 status_cmd = [vt_path, 'analysis', analysis_id, '--format', 'json']
@@ -136,7 +141,9 @@ class ScanService:
                     break
                     
                 elapsed = int(time.time() - start_time)
-                set_scan_status(f"{STRINGS[self.current_lang]['waiting_analysis']} ({elapsed}s)...", None)
+                # Animate progress from 0.7 to 0.95 over the timeout window
+                progress = 0.7 + 0.25 * min(elapsed / max_wait, 1.0)
+                set_scan_status(f"{STRINGS[self.current_lang]['waiting_analysis']} ({elapsed}s)...", progress)
                 time.sleep(5)
                 
             # 6. Success! Fetch final file details.
