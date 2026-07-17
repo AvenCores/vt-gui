@@ -34,13 +34,24 @@ def build_footer(lang="en", page=None):
     card_number = "2202 2050 1464 4675"
 
     def on_about_click(e):
+        def open_repo(_):
+            webbrowser.open("https://github.com/AvenCores/vt-gui")
+
         dlg = ft.AlertDialog(
             title=ft.Text("VirusTotal File Scanner", color="#FFFFFF", weight=ft.FontWeight.BOLD),
             content=ft.Column([
                 ft.Text(f"{APP_VERSION}", color="#00F0FF", size=14, weight=ft.FontWeight.BOLD),
                 ft.Text("Powered by VirusTotal V3 API", color="#94A3B8", size=12),
-                ft.Text("github.com/AvenCores", color="#94A3B8", size=11),
-            ], spacing=6, height=80),
+                ft.ElevatedButton(
+                    content=ft.Text("github.com/AvenCores/vt-gui", color="#FFFFFF", size=12),
+                    icon=ft.Icons.OPEN_IN_NEW_ROUNDED,
+                    on_click=open_repo,
+                    bgcolor="#2E3C56",
+                    color="#FFFFFF",
+                    style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8))
+                ),
+                ft.Text("Автор: AvenCores", color="#94A3B8", size=11)
+            ], spacing=6, height=100, horizontal_alignment=ft.CrossAxisAlignment.CENTER),
             actions=[ft.TextButton("OK", on_click=lambda _: e.control.page.pop_dialog())],
             actions_alignment=ft.MainAxisAlignment.END,
             bgcolor="#151E33"
