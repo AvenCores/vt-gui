@@ -34,6 +34,7 @@ jobs:
 
       - name: Install dependencies
         run: pip install -r requirements.txt
+        working-directory: source
 
       - name: Build with PyInstaller
         run: >
@@ -46,12 +47,13 @@ jobs:
           --clean
           --version-file=version.txt
           main.py
+        working-directory: source
 
       - name: Upload artifact
         uses: actions/upload-artifact@v7
         with:
           name: python-windows-${{ matrix.arch }}
-          path: dist/${{ matrix.output }}
+          path: source/dist/${{ matrix.output }}
           if-no-files-found: error
 
   # ─────────────────────────────────────────────────────────────────────────────
@@ -72,6 +74,7 @@ jobs:
 
       - name: Install dependencies
         run: pip install -r requirements.txt
+        working-directory: source
 
       - name: Build with PyInstaller
         run: >
@@ -84,12 +87,13 @@ jobs:
           --clean
           --version-file=version.txt
           main.py
+        working-directory: source
 
       - name: Upload artifact
         uses: actions/upload-artifact@v7
         with:
           name: python-windows-arm64
-          path: dist/VirusTotal_File_Scanner_Windows_arm64.exe
+          path: source/dist/VirusTotal_File_Scanner_Windows_arm64.exe
           if-no-files-found: error
 
   # ─────────────────────────────────────────────────────────────────────────────
@@ -110,6 +114,7 @@ jobs:
 
       - name: Install dependencies
         run: pip install -r requirements.txt
+        working-directory: source
 
       - name: Build with PyInstaller
         run: >
@@ -120,12 +125,13 @@ jobs:
           --name="VirusTotal_File_Scanner_Linux_x64"
           --clean
           main.py
+        working-directory: source
 
       - name: Upload artifact
         uses: actions/upload-artifact@v7
         with:
           name: python-linux-x64
-          path: dist/VirusTotal_File_Scanner_Linux_x64
+          path: source/dist/VirusTotal_File_Scanner_Linux_x64
           if-no-files-found: error
 
   # ─────────────────────────────────────────────────────────────────────────────
@@ -142,17 +148,17 @@ jobs:
       - name: Build inside ARM64 container
         uses: docker/build-push-action@v7
         with:
-          context: .
+          context: source
           file: .github/docker/Dockerfile.linux-arm64
           platforms: linux/arm64
           push: false
-          outputs: type=local,dest=dist-arm64
+          outputs: type=local,dest=source/dist-arm64
 
       - name: Upload artifact
         uses: actions/upload-artifact@v7
         with:
           name: python-linux-arm64
-          path: dist-arm64/VirusTotal_File_Scanner_Linux_arm64
+          path: source/dist-arm64/VirusTotal_File_Scanner_Linux_arm64
           if-no-files-found: error
 
   # ─────────────────────────────────────────────────────────────────────────────
@@ -173,6 +179,7 @@ jobs:
 
       - name: Install dependencies
         run: pip install -r requirements.txt
+        working-directory: source
 
       - name: Build with PyInstaller (universal2)
         run: >
@@ -183,10 +190,11 @@ jobs:
           --target-arch universal2
           --clean
           main.py
+        working-directory: source
 
       - name: Upload artifact
         uses: actions/upload-artifact@v7
         with:
           name: python-macos-universal2
-          path: dist/VirusTotal_File_Scanner_macOS
+          path: source/dist/VirusTotal_File_Scanner_macOS
           if-no-files-found: error

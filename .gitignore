@@ -1,2 +1,5 @@
 __pycache__/
 .mimocode/
+source/dist/
+source/build/
+source/*.spec
