@@ -3,3 +3,4 @@ __pycache__/
 source/dist/
 source/build/
 source/*.spec
+!source/VirusTotal_File_Scanner_macOS.spec

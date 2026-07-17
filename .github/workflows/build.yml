@@ -189,14 +189,7 @@ jobs:
         working-directory: source
 
       - name: Build with PyInstaller
-        run: >
-          pyinstaller --onefile
-          --name="VirusTotal_File_Scanner_macOS"
-          --add-data="assets:assets"
-          --add-data="app/strings.json:app"
-          --codesign-identity=""
-          --clean
-          main.py
+        run: pyinstaller --clean VirusTotal_File_Scanner_macOS.spec
         working-directory: source
 
       - name: Upload artifact
