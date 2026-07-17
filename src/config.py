@@ -176,6 +176,67 @@ def load_env_vars():
             pass
     return vars_dict
 
+def get_vt_toml_path():
+    """Returns the path to the user's .vt.toml file."""
+    return os.path.join(os.path.expanduser("~"), ".vt.toml")
+
+def read_key_from_vt_toml():
+    """Reads the API key from the ~/.vt.toml file."""
+    toml_path = get_vt_toml_path()
+    if os.path.exists(toml_path) and os.path.isfile(toml_path):
+        try:
+            with open(toml_path, "r", encoding="utf-8") as f:
+                for line in f:
+                    line_stripped = line.strip()
+                    if not line_stripped or line_stripped.startswith("#"):
+                        continue
+                    if line_stripped.startswith("apikey"):
+                        parts = line_stripped.split("=", 1)
+                        if len(parts) == 2:
+                            val = parts[1].strip().strip('"').strip("'")
+                            return val
+        except Exception:
+            pass
+    return None
+
+def write_key_to_vt_toml(key):
+    """Writes or updates the API key in the ~/.vt.toml file."""
+    toml_path = get_vt_toml_path()
+    lines = []
+    found = False
+    
+    if os.path.exists(toml_path) and os.path.isfile(toml_path):
+        try:
+            with open(toml_path, "r", encoding="utf-8") as f:
+                lines = f.readlines()
+        except Exception:
+            pass
+
+    new_lines = []
+    for line in lines:
+        line_stripped = line.strip()
+        if line_stripped.startswith("apikey") and "=" in line_stripped and not line_stripped.startswith("#"):
+            leading_whitespace = line[:len(line) - len(line.lstrip())]
+            new_lines.append(f'{leading_whitespace}apikey = "{key}"\n')
+            found = True
+        else:
+            new_lines.append(line)
+            
+    if not found:
+        if new_lines and not new_lines[-1].endswith('\n'):
+            new_lines[-1] += '\n'
+        new_lines.append(f'apikey = "{key}"\n')
+        
+    try:
+        dir_name = os.path.dirname(toml_path)
+        if dir_name:
+            os.makedirs(dir_name, exist_ok=True)
+        with open(toml_path, "w", encoding="utf-8") as f:
+            f.writelines(new_lines)
+        return True
+    except Exception:
+        return False
+
 def write_env_var(key, value):
     """Write settings to the environment file."""
     env_path = get_env_file_path()
@@ -189,17 +250,37 @@ def write_env_var(key, value):
             for k, v in vars_dict.items():
                 f.write(f"{k}={v}\n")
         os.environ[key] = str(value)
+        if key == "VT_APIKEY":
+            write_key_to_vt_toml(value)
+            os.environ["VTCLI_APIKEY"] = str(value)
         return True
     except Exception:
         return False
 
 def get_api_key():
     """Retrieves configured VirusTotal API Key."""
+    # Always check ~/.vt.toml first as the main source of truth for vt-cli
+    toml_val = read_key_from_vt_toml()
+    
     env_vars = load_env_vars()
+    env_val = env_vars.get("VT_APIKEY") or os.environ.get("VT_APIKEY")
+    
+    if toml_val:
+        if toml_val != env_val:
+            # Sync to env
+            write_env_var("VT_APIKEY", toml_val)
+        os.environ["VTCLI_APIKEY"] = toml_val
+        return toml_val
+        
+    # Fallback to env file/environment variables if .vt.toml doesn't exist or is empty
     for var in ['VT_APIKEY', 'VTCLI_APIKEY', 'VIRUSTOTAL_API_KEY']:
         val = env_vars.get(var) or os.environ.get(var)
         if val:
+            # Sync to .vt.toml
+            write_key_to_vt_toml(val)
+            os.environ["VTCLI_APIKEY"] = val
             return val
+            
     return None
 
 def get_app_lang():

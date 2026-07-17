@@ -1,11 +1,10 @@
 import flet as ft
-from ..config import load_env_vars, write_env_var, STRINGS
+from ..config import write_env_var, STRINGS, get_api_key
 from ..context_menu import register_context_menu, unregister_context_menu
 
 def open_settings(page, lang, on_settings_saved):
     """Opens a beautiful modal settings dialog with configuration options."""
-    env_vars = load_env_vars()
-    api_key = env_vars.get("VT_APIKEY", "")
+    api_key = get_api_key() or ""
     
     api_key_field = ft.TextField(
         label=STRINGS[lang]["api_key_label"],

@@ -49,6 +49,9 @@ class ProgressThrottler:
         return False
 
 def main(page: ft.Page):
+    # Load and sync API key from ~/.vt.toml on startup
+    get_api_key()
+    
     current_lang = get_app_lang()
     
     # Page setup
