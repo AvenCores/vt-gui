@@ -270,7 +270,7 @@ class IntelligenceView:
             width=48
         )
         
-        results_area = ft.Container(expand=True)
+        results_area = ft.Container(expand=True, alignment=ft.Alignment.CENTER)
         
         if state["status"] == "loading":
             results_area.content = ft.Column(
