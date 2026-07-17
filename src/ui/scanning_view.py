@@ -6,7 +6,7 @@ def build_scanning_view(scan_progress_ring, scan_status_text, scan_progress_bar)
         content=ft.Column(
             [
                 scan_progress_ring,
-                ft.Text("SCAN IN PROGRESS", size=12, weight=ft.FontWeight.BOLD, color="#94A3B8", letter_spacing=2),
+                ft.Text("SCAN IN PROGRESS", size=12, weight=ft.FontWeight.BOLD, color="#94A3B8"),
                 scan_status_text,
                 ft.Container(content=scan_progress_bar, width=450, padding=ft.Padding(top=10))
             ],
