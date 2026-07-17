@@ -58,6 +58,7 @@ def main(page: ft.Page):
     # Page setup
     page.title = STRINGS[current_lang]["app_title"]
     page.theme_mode = ft.ThemeMode.DARK
+    page.window.icon = "icon.ico"
     page.window_width = 800
     page.window_height = 700
     page.window_min_width = 650
@@ -634,4 +635,4 @@ def main(page: ft.Page):
             on_scan_file_selected([PseudoFile(init_file_path)])
 
 if __name__ == '__main__':
-    ft.run(main)
+    ft.run(main, assets_dir="assets")
