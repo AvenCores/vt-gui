@@ -4,7 +4,7 @@ import os
 from ..config import STRINGS
 from .theme import make_stat_card, make_file_details_card, make_engine_row
 
-def build_results_view(current_scan_results, selected_target_file, last_completed_sha256, lang, back_to_scanner, page):
+def build_results_view(current_scan_results, selected_target_file, last_completed_sha256, lang, page):
     """Builds the results dashboard, showing antivirus detections, stats, and a full engine list."""
     
     # Helper to parse the V3 and CLI results format
@@ -88,32 +88,7 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
         spacing=10,
         alignment=ft.MainAxisAlignment.SPACE_EVENLY
     )
-    
-    # 4. Action Buttons
-    report_url = f"https://www.virustotal.com/gui/file/{last_completed_sha256}"
-    actions_row = ft.Row(
-        [
-            ft.ElevatedButton(
-                content=STRINGS[lang]["btn_back"],
-                icon=ft.Icons.ARROW_BACK_ROUNDED,
-                icon_color="#FFFFFF",
-                color="#FFFFFF",
-                bgcolor="#1E293B",
-                on_click=back_to_scanner,
-                style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8))
-            ),
-            ft.ElevatedButton(
-                content=STRINGS[lang]["btn_open_web"],
-                icon=ft.Icons.OPEN_IN_BROWSER_ROUNDED,
-                icon_color="#FFFFFF",
-                color="#FFFFFF",
-                bgcolor="#008DDA",
-                on_click=lambda _: webbrowser.open(report_url),
-                style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8))
-            )
-        ],
-        alignment=ft.MainAxisAlignment.SPACE_BETWEEN
-    )
+
     
     # 5. Detections details list
     detections_list = ft.Column(spacing=5, expand=True)
@@ -176,8 +151,6 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
             ft.Container(height=10),
             details_card,
             stats_row,
-            ft.Divider(color="#1E293B"),
-            actions_row,
             ft.Divider(color="#1E293B"),
             detections_list,
             ft.Container(height=10),

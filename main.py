@@ -55,6 +55,9 @@ def main(page: ft.Page):
     
     current_lang = get_app_lang()
     
+    # Initialize and register clipboard service
+    clipboard_service = ft.Clipboard()
+    
     # Page setup
     page.title = STRINGS[current_lang]["app_title"]
     page.theme_mode = ft.ThemeMode.DARK
@@ -205,23 +208,15 @@ def main(page: ft.Page):
                     tab_content = build_scanning_view(
                         ft.ProgressRing(color="#00F0FF", width=48, height=48),
                         ft.Text(scan["status_text"], size=15, weight=ft.FontWeight.W_600, color="#00F0FF"),
-                        ft.ProgressBar(value=scan["progress"], color="#00F0FF", bgcolor="#334155", height=6)
+                        ft.ProgressBar(value=scan["progress"], color="#00F0FF", bgcolor="#334155", height=6),
+                        current_lang
                     )
                 elif scan["status"] == "completed":
-                    def make_back_callback(scan_idx):
-                        def back_cb(e):
-                            nonlocal app_state, active_scans
-                            app_state = "scanner"
-                            active_scans = []
-                            build_ui()
-                        return back_cb
-                        
                     tab_content = build_results_view(
                         scan["results"],
                         scan["file_path"],
                         scan["sha256"],
                         current_lang,
-                        make_back_callback(idx),
                         page
                     )
                 else:  # failed
@@ -285,6 +280,7 @@ def main(page: ft.Page):
             def on_tab_change(e):
                 nonlocal current_tab_index
                 current_tab_index = int(e.control.selected_index)
+                build_ui()
                 
             tabs = ft.Tabs(
                 selected_index=current_tab_index,
@@ -305,6 +301,15 @@ def main(page: ft.Page):
                 )
             )
             
+            # Check if current tab is completed and has a hash
+            show_web_report_btn = False
+            report_url = None
+            if active_scans and current_tab_index < len(active_scans):
+                current_scan = active_scans[current_tab_index]
+                if current_scan["status"] == "completed" and current_scan["sha256"]:
+                    show_web_report_btn = True
+                    report_url = f"https://www.virustotal.com/gui/file/{current_scan['sha256']}"
+            
             def go_back_to_scanner(e):
                 nonlocal app_state, active_scans
                 app_state = "scanner"
@@ -320,9 +325,52 @@ def main(page: ft.Page):
                 style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8))
             )
             
+            # Left side row with back button
+            left_actions = ft.Row([back_btn], alignment=ft.MainAxisAlignment.START)
+            
+            # Right side actions (copy link & open web report)
+            right_actions = ft.Row([], alignment=ft.MainAxisAlignment.END, spacing=10)
+            
+            if show_web_report_btn:
+                def open_web_report(e, url=report_url):
+                    import webbrowser
+                    webbrowser.open(url)
+                    
+                def copy_web_report_link(e, url=report_url):
+                    page.run_task(clipboard_service.set, url)
+                    page.show_dialog(
+                        ft.SnackBar(
+                            content=ft.Text(STRINGS[current_lang]["link_copied"], color="#FFFFFF"),
+                            bgcolor="#10B981"
+                        )
+                    )
+                    
+                copy_btn = ft.IconButton(
+                    icon=ft.Icons.COPY_ROUNDED,
+                    icon_color="#00F0FF",
+                    tooltip="Copy Report Link / Скопировать ссылку",
+                    on_click=copy_web_report_link
+                )
+                
+                web_btn = ft.ElevatedButton(
+                    content=ft.Text(STRINGS[current_lang]["btn_open_web"]),
+                    icon=ft.Icons.OPEN_IN_BROWSER_ROUNDED,
+                    on_click=open_web_report,
+                    bgcolor="#008DDA",
+                    color="#FFFFFF",
+                    style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8))
+                )
+                right_actions.controls.extend([copy_btn, web_btn])
+            
+            top_buttons_row = ft.Row(
+                [left_actions, right_actions],
+                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                spacing=10
+            )
+            
             main_content.content = ft.Column(
                 [
-                    ft.Row([back_btn], alignment=ft.MainAxisAlignment.START),
+                    top_buttons_row,
                     tabs
                 ],
                 expand=True
@@ -615,7 +663,7 @@ def main(page: ft.Page):
     # Initialize file pickers
     file_picker_scan = ft.FilePicker()
     file_picker_cli = ft.FilePicker()
-    page.services.extend([file_picker_scan, file_picker_cli])
+    page.services.extend([file_picker_scan, file_picker_cli, clipboard_service])
     
     build_ui()
     
