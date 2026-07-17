@@ -473,7 +473,7 @@ def main(page: ft.Page):
             main_content.content = landing_tabs
             
         # Build footer with social links
-        footer = build_footer(current_lang)
+        footer = build_footer(current_lang, page)
 
         outer_container = ft.Container(
             gradient=ft.LinearGradient(
