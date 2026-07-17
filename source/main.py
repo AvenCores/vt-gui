@@ -69,9 +69,11 @@ def main(page: ft.Page):
     page.title = STRINGS[current_lang]["app_title"]
     page.theme_mode = ft.ThemeMode.DARK
     # Set window icon — use .ico on Windows, .png on other platforms if available
-    icon_path = "icon.ico" if IS_WINDOWS else "icon.png"
-    if os.path.exists(os.path.join("assets", icon_path)):
-        page.window.icon = icon_path
+    _script_dir = os.path.dirname(os.path.abspath(__file__))
+    icon_file = "icon.ico" if IS_WINDOWS else "icon.png"
+    icon_full_path = os.path.join(_script_dir, "assets", icon_file)
+    if os.path.exists(icon_full_path):
+        page.window.icon = icon_full_path
     page.window_width = 800
     page.window_height = 700
     page.window_min_width = 650
