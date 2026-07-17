@@ -81,11 +81,26 @@ def get_available_langs():
     """Returns list of (code, display_name) for languages present in strings.json."""
     return [(code, LANG_NAMES.get(code, code)) for code in STRINGS if code in LANG_NAMES]
 
+def _get_config_dir():
+    """Returns a writable, persistent config directory for the application."""
+    if getattr(sys, 'frozen', False):
+        # Running as PyInstaller bundle — use user config dir
+        if IS_WINDOWS:
+            base = os.environ.get('APPDATA') or os.path.expanduser('~')
+            return os.path.join(base, 'VT-GUI')
+        else:
+            return os.path.join(os.path.expanduser('~'), '.config', 'vt-gui')
+    # Running from source — use working directory
+    return os.getcwd()
+
+
 def get_env_file_path():
     """Returns .env file path, handling naming collisions on Windows."""
-    if os.path.exists('.env') and os.path.isdir('.env'):
-        return os.path.join('.env', '.env')
-    return '.env'
+    config_dir = _get_config_dir()
+    env_path = os.path.join(config_dir, '.env')
+    if os.path.exists(env_path) and os.path.isdir(env_path):
+        return os.path.join(env_path, '.env')
+    return env_path
 
 def load_env_vars():
     """Load settings from the environment file."""
@@ -230,14 +245,50 @@ def _detect_system_lang():
         "ar": "ar",
     }
     try:
+        # 1. Check environment variables (works everywhere)
         for env_var in ('LANG', 'LC_ALL', 'LC_CTYPE', 'LANGUAGE'):
             val = os.environ.get(env_var)
             if val:
                 prefix = val.split('.')[0].split('_')[0].split('-')[0].lower()
                 if prefix in locale_map:
                     return locale_map[prefix]
+
+        # 2. Try Windows-specific API for frozen builds
+        if IS_WINDOWS:
+            try:
+                import ctypes
+                lang_id = ctypes.windll.kernel32.GetUserDefaultUILanguage() & 0x3FF
+                # Windows LCID sublanguage bits
+                win_lang_map = {
+                    0x01: "ru", 0x19: "uk",  # Russian, Ukrainian
+                    0x09: "en",
+                    0x0A: "es",
+                    0x07: "de",
+                    0x0C: "fr",
+                    0x16: "pt",
+                    0x1F: "tr",
+                    0x04: "zh",
+                    0x11: "ja",
+                    0x12: "ko",
+                    0x05: "ar",
+                }
+                code = win_lang_map.get(lang_id)
+                if code:
+                    return code
+            except Exception:
+                pass
+
+        # 3. Try locale module (may not work in all PyInstaller builds)
         try:
             lang, _ = locale.getlocale()
+            if lang:
+                prefix = lang.split('_')[0].split('-')[0].lower()
+                if prefix in locale_map:
+                    return locale_map[prefix]
+        except Exception:
+            pass
+        try:
+            lang, _ = locale.getdefaultlocale()
             if lang:
                 prefix = lang.split('_')[0].split('-')[0].lower()
                 if prefix in locale_map:
