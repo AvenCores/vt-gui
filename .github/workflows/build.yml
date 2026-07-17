@@ -39,6 +39,7 @@ jobs:
       - name: Build with PyInstaller
         run: >
           pyinstaller --onefile
+          --noconsole
           --icon=assets/icon.ico
           --add-data="assets;assets"
           --add-data="app/strings.json;app"
@@ -79,6 +80,7 @@ jobs:
       - name: Build with PyInstaller
         run: >
           pyinstaller --onefile
+          --noconsole
           --icon=assets/icon.ico
           --add-data="assets;assets"
           --add-data="app/strings.json;app"
