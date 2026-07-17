@@ -99,7 +99,9 @@
         "footer_copy_card": "Copy card number",
         "footer_card_copied": "Card number copied!",
         "footer_powered_by": "Powered by VirusTotal V3 API",
-        "footer_author": "Author:"
+        "footer_author": "Author:",
+        "api_key_setup_title": "API Key Required",
+        "api_key_required_text": "VirusTotal API key is required to scan files and perform lookups."
     },
     "ru": {
         "app_title": "Сканер файлов VirusTotal",
@@ -201,7 +203,9 @@
         "footer_copy_card": "Скопировать номер карты",
         "footer_card_copied": "Номер карты скопирован!",
         "footer_powered_by": "Powered by VirusTotal V3 API",
-        "footer_author": "Автор:"
+        "footer_author": "Автор:",
+        "api_key_setup_title": "Требуется API-ключ",
+        "api_key_required_text": "API-ключ VirusTotal необходим для сканирования файлов и выполнения запросов."
     },
     "es": {
         "app_title": "Escáner de Archivos VirusTotal",
@@ -303,7 +307,9 @@
         "footer_copy_card": "Copiar número de tarjeta",
         "footer_card_copied": "¡Número de tarjeta copiado!",
         "footer_powered_by": "Desarrollado con VirusTotal V3 API",
-        "footer_author": "Autor:"
+        "footer_author": "Autor:",
+        "api_key_setup_title": "Clave API requerida",
+        "api_key_required_text": "Se requiere una clave API de VirusTotal para escanear archivos y realizar consultas."
     },
     "de": {
         "app_title": "VirusTotal Dateiscanner",
@@ -405,7 +411,9 @@
         "footer_copy_card": "Kartennummer kopieren",
         "footer_card_copied": "Kartennummer kopiert!",
         "footer_powered_by": "Unterstützt von VirusTotal V3 API",
-        "footer_author": "Autor:"
+        "footer_author": "Autor:",
+        "api_key_setup_title": "API-Schlüssel erforderlich",
+        "api_key_required_text": "Ein VirusTotal API-Schlüssel ist erforderlich, um Dateien zu scannen und Abfragen durchzuführen."
     },
     "fr": {
         "app_title": "Scanner de Fichiers VirusTotal",
@@ -507,7 +515,9 @@
         "footer_copy_card": "Copier le numéro de carte",
         "footer_card_copied": "Numéro de carte copié !",
         "footer_powered_by": "Propulsé par VirusTotal V3 API",
-        "footer_author": "Auteur :"
+        "footer_author": "Auteur :",
+        "api_key_setup_title": "Clé API requise",
+        "api_key_required_text": "Une clé API VirusTotal est nécessaire pour analyser les fichiers et effectuer des recherches."
     },
     "pt": {
         "app_title": "Scanner de Arquivos VirusTotal",
@@ -609,7 +619,9 @@
         "footer_copy_card": "Copiar número do cartão",
         "footer_card_copied": "Número do cartão copiado!",
         "footer_powered_by": "Desenvolvido com VirusTotal V3 API",
-        "footer_author": "Autor:"
+        "footer_author": "Autor:",
+        "api_key_setup_title": "Chave API necessária",
+        "api_key_required_text": "Uma chave API do VirusTotal é necessária para escanear arquivos e realizar consultas."
     },
     "tr": {
         "app_title": "VirusTotal Dosya Tarayıcı",
@@ -711,7 +723,9 @@
         "footer_copy_card": "Kart numarasını kopyala",
         "footer_card_copied": "Kart numarası kopyalandı!",
         "footer_powered_by": "VirusTotal V3 API tarafından desteklenmektedir",
-        "footer_author": "Yazar:"
+        "footer_author": "Yazar:",
+        "api_key_setup_title": "API anahtarı gerekli",
+        "api_key_required_text": "Dosya tarama ve sorgulama yapmak için VirusTotal API anahtarı gereklidir."
     },
     "uk": {
         "app_title": "Сканер файлів VirusTotal",
@@ -813,7 +827,9 @@
         "footer_copy_card": "Скопіювати номер картки",
         "footer_card_copied": "Номер картки скопійовано!",
         "footer_powered_by": "Працює на VirusTotal V3 API",
-        "footer_author": "Автор:"
+        "footer_author": "Автор:",
+        "api_key_setup_title": "Потрібен API-ключ",
+        "api_key_required_text": "API-ключ VirusTotal необхідний для сканування файлів та виконання запитів."
     },
     "zh": {
         "app_title": "VirusTotal 文件扫描器",
@@ -915,7 +931,9 @@
         "footer_copy_card": "复制卡号",
         "footer_card_copied": "卡号已复制！",
         "footer_powered_by": "由 VirusTotal V3 API 提供支持",
-        "footer_author": "作者："
+        "footer_author": "作者：",
+        "api_key_setup_title": "需要 API 密钥",
+        "api_key_required_text": "需要 VirusTotal API 密钥才能扫描文件和执行查询。"
     },
     "ja": {
         "app_title": "VirusTotal ファイルスキャナー",
@@ -1017,7 +1035,9 @@
         "footer_copy_card": "カード番号をコピー",
         "footer_card_copied": "カード番号がコピーされました！",
         "footer_powered_by": "VirusTotal V3 API で動作",
-        "footer_author": "著者："
+        "footer_author": "著者：",
+        "api_key_setup_title": "APIキーが必要です",
+        "api_key_required_text": "ファイルのスキャンと検索を行うにはVirusTotal APIキーが必要です。"
     },
     "ko": {
         "app_title": "VirusTotal 파일 스캐너",
@@ -1119,7 +1139,9 @@
         "footer_copy_card": "카드 번호 복사",
         "footer_card_copied": "카드 번호가 복사되었습니다!",
         "footer_powered_by": "VirusTotal V3 API 제공",
-        "footer_author": "작성자:"
+        "footer_author": "작성자:",
+        "api_key_setup_title": "API 키 필요",
+        "api_key_required_text": "파일 스캔 및 조회를 위해 VirusTotal API 키가 필요합니다."
     },
     "ar": {
         "app_title": "ماسح ملفات VirusTotal",
@@ -1221,6 +1243,8 @@
         "footer_copy_card": "نسخ رقم البطاقة",
         "footer_card_copied": "تم نسخ رقم البطاقة!",
         "footer_powered_by": "مدعوم بواسطة VirusTotal V3 API",
-        "footer_author": "المؤلف:"
+        "footer_author": "المؤلف:",
+        "api_key_setup_title": "مفتاح API مطلوب",
+        "api_key_required_text": "مطلوب مفتاح API لـ VirusTotal لفحص الملفات وإجراء الاستعلامات."
     }
 }

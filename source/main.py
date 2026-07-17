@@ -31,6 +31,7 @@ from app.ui.scanner_view import build_scanner_view
 from app.ui.scanning_view import build_scanning_view
 from app.ui.results_view import build_results_view
 from app.ui.settings_dialog import open_settings
+from app.ui.api_key_dialog import open_api_key_dialog
 from app.ui.intelligence_view import IntelligenceView
 from app.ui.footer import build_footer
 from app.services.scan_service import ScanService, resolve_scan_status
@@ -662,9 +663,13 @@ def main(page: ft.Page):
     page.on_keyboard_event = on_paste_keyboard
     
     build_ui()
-    
-    # Command line argument autostart scan
-    if init_file_path and os.path.exists(init_file_path):
+
+    # Show API key setup dialog on first launch if no key is configured
+    if not get_api_key():
+        def on_api_key_saved():
+            build_ui()
+        open_api_key_dialog(page, current_lang, on_api_key_saved)
+    elif init_file_path and os.path.exists(init_file_path):
         api_key = get_api_key()
         cli_status, _ = check_installed_binary()
         
