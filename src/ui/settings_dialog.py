@@ -15,7 +15,8 @@ def open_settings(page, lang, on_settings_saved):
         border_color="#2E3C56",
         focused_border_color="#00F0FF",
         label_style=ft.TextStyle(color="#94A3B8"),
-        text_style=ft.TextStyle(color="#E2E8F0")
+        text_style=ft.TextStyle(color="#E2E8F0"),
+        expand=True
     )
     
     get_api_key_btn = ft.TextButton(
