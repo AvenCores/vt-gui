@@ -125,7 +125,12 @@
         "history_cleared": "History cleared!",
         "history_scanned_at": "Scanned: {date}",
         "history_detections": "Detections: {count}",
-        "history_back": "Back to Scanner"
+        "history_back": "Back to Scanner",
+        "footer_check_update": "Check for updates",
+        "footer_update_available": "Update available",
+        "footer_up_to_date": "Up to date",
+        "footer_update_error": "Could not check",
+        "footer_checking": "Checking..."
     },
     "ru": {
         "app_title": "Сканер файлов VirusTotal",
@@ -253,7 +258,12 @@
         "history_cleared": "История очищена!",
         "history_scanned_at": "Просканировано: {date}",
         "history_detections": "Обнаружений: {count}",
-        "history_back": "Назад к сканеру"
+        "history_back": "Назад к сканеру",
+        "footer_check_update": "Проверить обновления",
+        "footer_update_available": "Доступно обновление",
+        "footer_up_to_date": "Уже актуально",
+        "footer_update_error": "Не удалось проверить",
+        "footer_checking": "Проверка..."
     },
     "es": {
         "app_title": "Escáner de Archivos VirusTotal",
@@ -381,7 +391,12 @@
         "history_cleared": "¡Historial borrado!",
         "history_scanned_at": "Escaneado: {date}",
         "history_detections": "Detecciones: {count}",
-        "history_back": "Volver al escáner"
+        "history_back": "Volver al escáner",
+        "footer_check_update": "Buscar actualizaciones",
+        "footer_update_available": "Actualización disponible",
+        "footer_up_to_date": "Actualizado",
+        "footer_update_error": "No se pudo verificar",
+        "footer_checking": "Verificando..."
     },
     "de": {
         "app_title": "VirusTotal Dateiscanner",
@@ -509,7 +524,12 @@
         "history_cleared": "Verlauf gelöscht!",
         "history_scanned_at": "Gescannt: {date}",
         "history_detections": "Erkennungen: {count}",
-        "history_back": "Zurück zum Scanner"
+        "history_back": "Zurück zum Scanner",
+        "footer_check_update": "Nach Updates suchen",
+        "footer_update_available": "Update verfügbar",
+        "footer_up_to_date": "Aktuell",
+        "footer_update_error": "Überprüfung fehlgeschlagen",
+        "footer_checking": "Überprüfe..."
     },
     "fr": {
         "app_title": "Scanner de Fichiers VirusTotal",
@@ -637,7 +657,12 @@
         "history_cleared": "Historique effacé !",
         "history_scanned_at": "Scanné : {date}",
         "history_detections": "Détections : {count}",
-        "history_back": "Retour au scanner"
+        "history_back": "Retour au scanner",
+        "footer_check_update": "Vérifier les mises à jour",
+        "footer_update_available": "Mise à jour disponible",
+        "footer_up_to_date": "À jour",
+        "footer_update_error": "Vérification impossible",
+        "footer_checking": "Vérification..."
     },
     "pt": {
         "app_title": "Scanner de Arquivos VirusTotal",
@@ -765,7 +790,12 @@
         "history_cleared": "Histórico limpo!",
         "history_scanned_at": "Escaneado: {date}",
         "history_detections": "Detecções: {count}",
-        "history_back": "Voltar ao escâner"
+        "history_back": "Voltar ao escâner",
+        "footer_check_update": "Verificar atualizações",
+        "footer_update_available": "Atualização disponível",
+        "footer_up_to_date": "Atualizado",
+        "footer_update_error": "Falha na verificação",
+        "footer_checking": "Verificando..."
     },
     "tr": {
         "app_title": "VirusTotal Dosya Tarayıcı",
@@ -893,7 +923,12 @@
         "history_cleared": "Geçmiş temizlendi!",
         "history_scanned_at": "Taranma tarihi: {date}",
         "history_detections": "Tespitler: {count}",
-        "history_back": "Tarayıcıya dön"
+        "history_back": "Tarayıcıya dön",
+        "footer_check_update": "Güncellemeleri kontrol et",
+        "footer_update_available": "Güncelleme mevcut",
+        "footer_up_to_date": "Güncel",
+        "footer_update_error": "Kontrol edilemedi",
+        "footer_checking": "Kontrol ediliyor..."
     },
     "uk": {
         "app_title": "Сканер файлів VirusTotal",
@@ -1021,7 +1056,12 @@
         "history_cleared": "Історію очищено!",
         "history_scanned_at": "Проскановано: {date}",
         "history_detections": "Виявлень: {count}",
-        "history_back": "Назад до сканера"
+        "history_back": "Назад до сканера",
+        "footer_check_update": "Перевірити оновлення",
+        "footer_update_available": "Доступне оновлення",
+        "footer_up_to_date": "Оновлено",
+        "footer_update_error": "Не вдалося перевірити",
+        "footer_checking": "Перевірка..."
     },
     "zh": {
         "app_title": "VirusTotal 文件扫描器",
@@ -1149,7 +1189,12 @@
         "history_cleared": "历史已清除！",
         "history_scanned_at": "扫描时间: {date}",
         "history_detections": "检测: {count}",
-        "history_back": "返回扫描器"
+        "history_back": "返回扫描器",
+        "footer_check_update": "检查更新",
+        "footer_update_available": "有新版本",
+        "footer_up_to_date": "已是最新",
+        "footer_update_error": "检查失败",
+        "footer_checking": "检查中..."
     },
     "ja": {
         "app_title": "VirusTotal ファイルスキャナー",
@@ -1277,7 +1322,12 @@
         "history_cleared": "履歴をクリアしました！",
         "history_scanned_at": "スキャン日時: {date}",
         "history_detections": "検出: {count}",
-        "history_back": "スキャナーに戻る"
+        "history_back": "スキャナーに戻る",
+        "footer_check_update": "アップデートを確認",
+        "footer_update_available": "アップデートあり",
+        "footer_up_to_date": "最新です",
+        "footer_update_error": "確認失敗",
+        "footer_checking": "確認中..."
     },
     "ko": {
         "app_title": "VirusTotal 파일 스캐너",
@@ -1405,7 +1455,12 @@
         "history_cleared": "기록이 삭제되었습니다!",
         "history_scanned_at": "스캔 시간: {date}",
         "history_detections": "탐지: {count}",
-        "history_back": "스캐너로 돌아가기"
+        "history_back": "스캐너로 돌아가기",
+        "footer_check_update": "업데이트 확인",
+        "footer_update_available": "업데이트 가능",
+        "footer_up_to_date": "최신 버전",
+        "footer_update_error": "확인 실패",
+        "footer_checking": "확인 중..."
     },
     "ar": {
         "app_title": "ماسح ملفات VirusTotal",
@@ -1533,6 +1588,11 @@
         "history_cleared": "تم مسح السجل!",
         "history_scanned_at": "تم الفحص: {date}",
         "history_detections": "الكاشفات: {count}",
-        "history_back": "العودة إلى الماسح"
+        "history_back": "العودة إلى الماسح",
+        "footer_check_update": "التحقق من التحديثات",
+        "footer_update_available": "تحديث متاح",
+        "footer_up_to_date": "محدّث",
+        "footer_update_error": "فشل التحقق",
+        "footer_checking": "جاري التحقق..."
     }
 }

@@ -1,8 +1,37 @@
 import flet as ft
 import webbrowser
+import urllib.request
+import json
+import asyncio
 from ..config import STRINGS
 
 APP_VERSION = "V1.0.0"
+GITHUB_REPO = "AvenCores/vt-gui"
+RELEASES_URL = f"https://github.com/{GITHUB_REPO}/releases"
+API_URL = f"https://api.github.com/repos/{GITHUB_REPO}/releases/latest"
+
+def _parse_version(version_str):
+    """Parse version string like 'V1.0.0' or '1.0.0' into tuple of ints."""
+    v = version_str.lstrip("Vv")
+    try:
+        return tuple(int(x) for x in v.split("."))
+    except (ValueError, AttributeError):
+        return (0, 0, 0)
+
+def _check_for_update():
+    """Check GitHub for the latest release. Returns (latest_tag, html_url) or None."""
+    try:
+        req = urllib.request.Request(
+            API_URL,
+            headers={"User-Agent": "VT-GUI", "Accept": "application/vnd.github.v3+json"}
+        )
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            data = json.loads(resp.read().decode())
+            tag = data.get("tag_name", "")
+            html_url = data.get("html_url", RELEASES_URL)
+            return tag, html_url
+    except Exception:
+        return None
 
 def build_footer(lang="en", page=None):
     """Builds a sticky, premium footer containing social links with hover animations."""
@@ -106,11 +135,90 @@ def build_footer(lang="en", page=None):
         )
         e.control.page.show_dialog(dlg)
 
+    update_text = S.get("footer_check_update", "Check for updates")
+    update_available_text = S.get("footer_update_available", "Update available")
+    update_latest_text = S.get("footer_up_to_date", "Up to date")
+    update_error_text = S.get("footer_update_error", "Could not check")
+    checking_text = S.get("footer_checking", "Checking...")
+
     version_label = ft.Container(
         content=ft.Text(APP_VERSION, color="#E2E8F0", size=12, weight=ft.FontWeight.W_600),
         padding=ft.Padding(left=5, right=0, top=0, bottom=0),
         tooltip=APP_VERSION
     )
+
+    update_btn_icon = ft.Icon(ft.Icons.UPDATE_ROUNDED, size=14, color="#94A3B8")
+    update_btn_label = ft.Text(update_text, color="#94A3B8", size=11)
+    update_btn = ft.Container(
+        content=ft.Row([update_btn_icon, update_btn_label], spacing=4),
+        padding=ft.Padding(left=4, right=4, top=2, bottom=2),
+        border_radius=4,
+        tooltip=update_text,
+        on_hover=lambda e: _on_update_hover(e),
+    )
+
+    def _on_update_hover(e):
+        if update_btn.data != "checking" and update_btn.data != "update":
+            update_btn.bgcolor = "#1E293B" if e.data == "true" else None
+            update_btn.update()
+
+    def on_update_click(e):
+        update_btn.data = "checking"
+        update_btn_label.value = checking_text
+        update_btn_label.color = "#FACC15"
+        update_btn_icon.color = "#FACC15"
+        update_btn.update()
+
+        async def _do_check():
+            result = await asyncio.to_thread(_check_for_update)
+            if result is None:
+                update_btn_label.value = update_error_text
+                update_btn_label.color = "#EF4444"
+                update_btn_icon.color = "#EF4444"
+                update_btn.data = "error"
+                update_btn.update()
+                await asyncio.sleep(3)
+                _reset_btn(None)
+                return
+
+            latest_tag, html_url = result
+            current = _parse_version(APP_VERSION)
+            latest = _parse_version(latest_tag)
+
+            if latest > current:
+                update_btn_label.value = f"{update_available_text} ({latest_tag})"
+                update_btn_label.color = "#10B981"
+                update_btn_icon.color = "#10B981"
+                update_btn_icon.name = ft.Icons.NEW_RELEASES_ROUNDED
+                update_btn.data = "update"
+                update_btn.on_click = lambda _: webbrowser.open(html_url)
+                update_btn.tooltip = f"{update_available_text}: {latest_tag}"
+                update_btn.update()
+            else:
+                update_btn_label.value = update_latest_text
+                update_btn_label.color = "#10B981"
+                update_btn_icon.color = "#10B981"
+                update_btn_icon.name = ft.Icons.CHECK_CIRCLE_ROUNDED
+                update_btn.data = "latest"
+                update_btn.update()
+                await asyncio.sleep(3)
+                _reset_btn(None)
+
+        def _reset_btn(_=None):
+            update_btn_label.value = update_text
+            update_btn_label.color = "#94A3B8"
+            update_btn_icon.color = "#94A3B8"
+            update_btn_icon.name = ft.Icons.UPDATE_ROUNDED
+            update_btn.data = None
+            update_btn.on_click = on_update_click
+            update_btn.bgcolor = None
+            update_btn.tooltip = update_text
+            update_btn.update()
+
+        page.run_task(_do_check)
+
+    update_btn.on_click = on_update_click
+    update_btn.data = None
     donate_btn = make_social_link("donate.svg", "#", donate_text)
     donate_btn.on_click = on_donate_click
 
@@ -121,7 +229,7 @@ def build_footer(lang="en", page=None):
         content=ft.Column([
             ft.Row(
                 [
-                    version_label,
+                    ft.Row([version_label, update_btn], spacing=8),
                     ft.Row(
                         [
                             make_social_link("youtube.svg", "https://www.youtube.com/@avencores/", "YouTube"),
