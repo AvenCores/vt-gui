@@ -1,7 +1,7 @@
 import flet as ft
 from ..config import STRINGS, KNOWN_HASHES
 
-def build_scanner_view(cli_status, cli_hash, is_direct, lang, file_picker_scan):
+def build_scanner_view(cli_status, cli_hash, is_direct, lang, file_picker_scan, on_scan_file_selected):
     """Builds the main File Scanner view with drag-and-drop simulated click zone and badges."""
     # Build Status Badge for CLI
     if is_direct:
@@ -53,8 +53,8 @@ def build_scanner_view(cli_status, cli_hash, is_direct, lang, file_picker_scan):
         bgcolor="#151E33",
         height=250,
         alignment=ft.Alignment.CENTER,
-        on_click=lambda _: file_picker_scan.pick_files(allow_multiple=False),
-        animate=ft.animation.Animation(200, ft.AnimationCurve.EASE_OUT)
+        on_click=lambda _: on_scan_file_selected(file_picker_scan.pick_files(allow_multiple=False)),
+        animate=ft.Animation(200, ft.AnimationCurve.EASE_OUT)
     )
     
     def on_hover_dashed(e):

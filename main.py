@@ -175,7 +175,8 @@ def main(page: ft.Page):
                 current_lang,
                 file_picker_cli,
                 on_direct_mode_changed,
-                is_direct
+                is_direct,
+                on_cli_file_selected
             )
         elif app_state == "scanning":
             main_content.content = build_scanning_view(scan_progress_ring, scan_status_text, scan_progress_bar)
@@ -196,7 +197,7 @@ def main(page: ft.Page):
                 page
             )
         else:
-            main_content.content = build_scanner_view(cli_status, cli_hash, is_direct, current_lang, file_picker_scan)
+            main_content.content = build_scanner_view(cli_status, cli_hash, is_direct, current_lang, file_picker_scan, on_scan_file_selected)
             
         outer_container = ft.Container(
             gradient=ft.LinearGradient(
@@ -403,10 +404,10 @@ def main(page: ft.Page):
     # ==============================================================================
     # FILE PICKER HANDLERS
     # ==============================================================================
-    def on_scan_file_selected(e: ft.FilePickerResultEvent):
-        if not e.files:
+    def on_scan_file_selected(files):
+        if not files:
             return
-        file_path = e.files[0].path
+        file_path = files[0].path
         if not os.path.exists(file_path):
             return
         if os.path.isdir(file_path):
@@ -414,11 +415,11 @@ def main(page: ft.Page):
             return
         threading.Thread(target=run_scan_pipeline, args=(file_path,), daemon=True).start()
 
-    def on_cli_file_selected(e: ft.FilePickerResultEvent):
+    def on_cli_file_selected(files):
         nonlocal selected_installer_data, selected_installer_hash
-        if not e.files:
+        if not files:
             return
-        file_path = e.files[0].path
+        file_path = files[0].path
         try:
             exe_hash, exe_data = process_selected_binary(file_path)
             selected_installer_data = exe_data
@@ -467,12 +468,10 @@ def main(page: ft.Page):
         except Exception as ex:
             show_alert(STRINGS[current_lang]["verify_fail"].format(e=""), str(ex))
 
-    # Initialize overlays
+    # Initialize file pickers
     file_picker_scan = ft.FilePicker()
-    file_picker_scan.on_result = on_scan_file_selected
     file_picker_cli = ft.FilePicker()
-    file_picker_cli.on_result = on_cli_file_selected
-    page.overlay.extend([file_picker_scan, file_picker_cli])
+    page.services.extend([file_picker_scan, file_picker_cli])
     
     build_ui()
     
