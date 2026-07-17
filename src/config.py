@@ -105,7 +105,9 @@ STRINGS = {
         "tab_domains": "Domains",
         "tab_ips": "IPs",
         "tab_search": "Search",
-        "copy_link_tooltip": "Copy Report Link"
+        "copy_link_tooltip": "Copy Report Link",
+        "btn_upgrade_premium": "Upgrade to premium",
+        "premium_required_err": "Your API Key is not authorized for this operation (premium feature required)."
     },
     "ru": {
         "app_title": "Сканер файлов VirusTotal",
@@ -196,7 +198,9 @@ STRINGS = {
         "tab_domains": "Домены",
         "tab_ips": "IP-адреса",
         "tab_search": "Поиск",
-        "copy_link_tooltip": "Скопировать ссылку"
+        "copy_link_tooltip": "Скопировать ссылку",
+        "btn_upgrade_premium": "Перейти на Premium",
+        "premium_required_err": "Ваш API-ключ не авторизован для этой операции (требуется премиум-подписка)."
     }
 }
 

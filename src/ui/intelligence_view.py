@@ -287,7 +287,7 @@ class IntelligenceView:
                 ft.Icon(ft.Icons.ERROR_OUTLINE_ROUNDED, color="#EF4444", size=32),
                 ft.Text(state["error"], color="#EF4444", size=13, text_align=ft.TextAlign.CENTER),
                 ft.ElevatedButton(
-                    content=ft.Text("Upgrade to premium", color="#FFFFFF", size=13),
+                    content=ft.Text(STRINGS[self.current_lang]["btn_upgrade_premium"], color="#FFFFFF", size=13),
                     icon=ft.Icons.OPEN_IN_BROWSER_ROUNDED,
                     on_click=lambda _: webbrowser.open("https://www.virustotal.com/gui/contact-us/premium-services"),
                     bgcolor="#008DDA",
@@ -358,7 +358,7 @@ class IntelligenceView:
                 if proc.returncode != 0:
                     err_msg = proc.stderr or proc.stdout
                     if "You are not authorized" in err_msg:
-                        raise ValueError("Your API Key is not authorized for this operation (premium feature required).")
+                        raise ValueError(STRINGS[self.current_lang]["premium_required_err"])
                     raise ValueError(err_msg.strip())
                     
                 stdout = proc.stdout.strip()
