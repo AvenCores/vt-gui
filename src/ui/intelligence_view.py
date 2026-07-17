@@ -283,11 +283,20 @@ class IntelligenceView:
                 spacing=10
             )
         elif state["status"] == "error":
+            error_items = [
+                ft.Icon(ft.Icons.ERROR_OUTLINE_ROUNDED, color="#EF4444", size=32),
+                ft.Text(state["error"], color="#EF4444", size=13, text_align=ft.TextAlign.CENTER),
+                ft.ElevatedButton(
+                    content=ft.Text("Upgrade to premium", color="#FFFFFF", size=13),
+                    icon=ft.Icons.OPEN_IN_BROWSER_ROUNDED,
+                    on_click=lambda _: webbrowser.open("https://www.virustotal.com/gui/contact-us/premium-services"),
+                    bgcolor="#008DDA",
+                    color="#FFFFFF",
+                    style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8))
+                )
+            ]
             results_area.content = ft.Column(
-                [
-                    ft.Icon(ft.Icons.ERROR_OUTLINE_ROUNDED, color="#EF4444", size=32),
-                    ft.Text(state["error"], color="#EF4444", size=13, text_align=ft.TextAlign.CENTER)
-                ],
+                error_items,
                 alignment=ft.MainAxisAlignment.CENTER,
                 horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                 spacing=10
