@@ -634,6 +634,25 @@ def main(page: ft.Page):
     file_picker_scan = ft.FilePicker()
     file_picker_cli = ft.FilePicker()
     page.services.extend([file_picker_scan, file_picker_cli, clipboard_service])
+
+    # Ctrl+V handler: paste file path from clipboard
+    async def on_paste_keyboard(e):
+        if e.key == "v" and (e.ctrl or e.meta):
+            try:
+                clip_text = clipboard_service.get()
+                if not clip_text or not clip_text.strip():
+                    return
+                paths = [p.strip().strip('"').strip("'") for p in clip_text.splitlines() if p.strip()]
+                valid = [p for p in paths if os.path.exists(p) and not os.path.isdir(p)]
+                if valid:
+                    class PseudoFile:
+                        def __init__(self, path):
+                            self.path = path
+                    on_scan_file_selected([PseudoFile(p) for p in valid])
+            except Exception:
+                pass
+
+    page.on_keyboard_event = on_paste_keyboard
     
     build_ui()
     
