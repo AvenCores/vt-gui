@@ -1,5 +1,6 @@
 import flet as ft
 import webbrowser
+import threading
 from ..config import write_env_var, STRINGS, get_api_key
 
 def open_settings(page, lang, on_settings_saved, on_reinstall_cli=None):
@@ -25,11 +26,68 @@ def open_settings(page, lang, on_settings_saved, on_reinstall_cli=None):
         on_click=lambda _: webbrowser.open("https://docs.virustotal.com/docs/please-give-me-an-api-key")
     )
 
+    api_check_icon = ft.Icon(ft.Icons.VERIFIED_ROUNDED, color="transparent", size=16)
+    api_check_text = ft.Text(" ", size=12, color="#94A3B8")
+
+    def on_check_api_click(e):
+        key = api_key_field.value.strip()
+        if not key:
+            api_check_text.value = STRINGS[lang]["api_key_hint"]
+            api_check_text.color = "#F59E0B"
+            api_check_icon.color = "#F59E0B"
+            api_check_icon.name = ft.Icons.WARNING_ROUNDED
+            page.update()
+            return
+
+        api_check_btn.disabled = True
+        api_check_text.value = STRINGS[lang]["api_checking"]
+        api_check_text.color = "#94A3B8"
+        api_check_icon.color = "transparent"
+        page.update()
+
+        def run_check():
+            from ..vt_api import verify_api_key
+            try:
+                success, error = verify_api_key(key)
+                if success:
+                    api_check_text.value = STRINGS[lang]["api_check_success"]
+                    api_check_text.color = "#10B981"
+                    api_check_icon.color = "#10B981"
+                    api_check_icon.name = ft.Icons.CHECK_CIRCLE_ROUNDED
+                else:
+                    api_check_text.value = STRINGS[lang]["api_check_fail"].format(e=error)
+                    api_check_text.color = "#EF4444"
+                    api_check_icon.color = "#EF4444"
+                    api_check_icon.name = ft.Icons.ERROR_ROUNDED
+            except Exception as ex:
+                api_check_text.value = STRINGS[lang]["api_check_fail"].format(e=str(ex))
+                api_check_text.color = "#EF4444"
+                api_check_icon.color = "#EF4444"
+                api_check_icon.name = ft.Icons.ERROR_ROUNDED
+            api_check_btn.disabled = False
+            page.update()
+
+        threading.Thread(target=run_check, daemon=True).start()
+
+    api_check_btn = ft.TextButton(
+        content=ft.Text(STRINGS[lang]["btn_check_api"], color="#00F0FF", size=13),
+        icon=ft.Icons.HELP_OUTLINE_ROUNDED,
+        icon_color="#00F0FF",
+        on_click=on_check_api_click,
+    )
+
+    api_check_row = ft.Row(
+        [api_check_icon, api_check_text],
+        spacing=6,
+        height=20,
+    )
+
     def save_settings(e):
         write_env_var("VT_APIKEY", api_key_field.value.strip())
         page.pop_dialog()
         on_settings_saved()
 
+    # Reinstall CLI section
     status_icon = ft.Icon(ft.Icons.SYNC_ROUNDED, color="transparent", size=14)
     status_text = ft.Text(" ", size=12, color="#94A3B8")
     status_row = ft.Row(
@@ -95,13 +153,14 @@ def open_settings(page, lang, on_settings_saved, on_reinstall_cli=None):
         [
             api_key_field,
             get_api_key_btn,
+            ft.Row([api_check_btn, api_check_row], alignment=ft.MainAxisAlignment.START, spacing=5),
             ft.Divider(height=1, color="#2E3C56"),
             reinstall_container,
             status_row,
         ],
         spacing=10,
         width=400,
-        height=220,
+        height=260,
         alignment=ft.MainAxisAlignment.START,
     )
 

@@ -26,6 +26,25 @@ def check_file_exists_direct(sha256, api_key):
     except Exception:
         return None
 
+def verify_api_key(api_key):
+    """Verify that the API key is valid by making a test request to VirusTotal.
+    Returns (True, None) on success or (False, error_message) on failure."""
+    url = "https://www.virustotal.com/api/v3/users/me"
+    req = urllib.request.Request(
+        url,
+        headers={"x-apikey": api_key, "User-Agent": "Mozilla/5.0"}
+    )
+    try:
+        with urllib.request.urlopen(req) as response:
+            data = json.loads(response.read().decode('utf-8'))
+            return True, None
+    except urllib.error.HTTPError as e:
+        if e.code in (401, 403):
+            return False, "Authentication failed"
+        return False, f"HTTP {e.code}"
+    except Exception as e:
+        return False, str(e)
+
 def check_file_exists_vt(vt_path, sha256):
     """Check if the file hash already exists on VirusTotal using vt CLI."""
     try:
