@@ -115,7 +115,17 @@
         "cli_extracting": "Extracting CLI binary...",
         "cli_verifying": "Verifying binary hash...",
         "cli_installing": "Installing...",
-        "cli_done": "Done!"
+        "cli_done": "Done!",
+        "tab_history": "History",
+        "history_empty": "No scan history yet",
+        "history_clear": "Clear History",
+        "history_delete": "Delete",
+        "history_rescan": "Rescan",
+        "history_clear_confirm": "Are you sure you want to clear all history?",
+        "history_cleared": "History cleared!",
+        "history_scanned_at": "Scanned: {date}",
+        "history_detections": "Detections: {count}",
+        "history_back": "Back to Scanner"
     },
     "ru": {
         "app_title": "Сканер файлов VirusTotal",
@@ -233,7 +243,17 @@
         "cli_extracting": "Извлечение бинарного файла CLI...",
         "cli_verifying": "Проверка хэша бинарного файла...",
         "cli_installing": "Установка...",
-        "cli_done": "Готово!"
+        "cli_done": "Готово!",
+        "tab_history": "История",
+        "history_empty": "История сканирований пуста",
+        "history_clear": "Очистить историю",
+        "history_delete": "Удалить",
+        "history_rescan": "Сканировать снова",
+        "history_clear_confirm": "Вы уверены, что хотите очистить всю историю?",
+        "history_cleared": "История очищена!",
+        "history_scanned_at": "Просканировано: {date}",
+        "history_detections": "Обнаружений: {count}",
+        "history_back": "Назад к сканеру"
     },
     "es": {
         "app_title": "Escáner de Archivos VirusTotal",
@@ -351,7 +371,17 @@
         "cli_extracting": "Extrayendo binario CLI...",
         "cli_verifying": "Verificando hash del binario...",
         "cli_installing": "Instalando...",
-        "cli_done": "Listo!"
+        "cli_done": "Listo!",
+        "tab_history": "Historial",
+        "history_empty": "Sin historial de escaneos",
+        "history_clear": "Borrar historial",
+        "history_delete": "Eliminar",
+        "history_rescan": "Escanear de nuevo",
+        "history_clear_confirm": "¿Está seguro de que desea borrar todo el historial?",
+        "history_cleared": "¡Historial borrado!",
+        "history_scanned_at": "Escaneado: {date}",
+        "history_detections": "Detecciones: {count}",
+        "history_back": "Volver al escáner"
     },
     "de": {
         "app_title": "VirusTotal Dateiscanner",
@@ -469,7 +499,17 @@
         "cli_extracting": "CLI-Binary wird extrahiert...",
         "cli_verifying": "Binary-Hash wird überprüft...",
         "cli_installing": "Installation...",
-        "cli_done": "Fertig!"
+        "cli_done": "Fertig!",
+        "tab_history": "Verlauf",
+        "history_empty": "Noch kein Scan-Verlauf",
+        "history_clear": "Verlauf löschen",
+        "history_delete": "Löschen",
+        "history_rescan": "Erneut scannen",
+        "history_clear_confirm": "Möchten Sie wirklich den gesamten Verlauf löschen?",
+        "history_cleared": "Verlauf gelöscht!",
+        "history_scanned_at": "Gescannt: {date}",
+        "history_detections": "Erkennungen: {count}",
+        "history_back": "Zurück zum Scanner"
     },
     "fr": {
         "app_title": "Scanner de Fichiers VirusTotal",
@@ -587,7 +627,17 @@
         "cli_extracting": "Extraction du binaire CLI...",
         "cli_verifying": "Vérification du hash du binaire...",
         "cli_installing": "Installation...",
-        "cli_done": "Terminé !"
+        "cli_done": "Terminé !",
+        "tab_history": "Historique",
+        "history_empty": "Aucun historique de scan",
+        "history_clear": "Effacer l'historique",
+        "history_delete": "Supprimer",
+        "history_rescan": "Scanner à nouveau",
+        "history_clear_confirm": "Êtes-vous sûr de vouloir effacer tout l'historique ?",
+        "history_cleared": "Historique effacé !",
+        "history_scanned_at": "Scanné : {date}",
+        "history_detections": "Détections : {count}",
+        "history_back": "Retour au scanner"
     },
     "pt": {
         "app_title": "Scanner de Arquivos VirusTotal",
@@ -705,7 +755,17 @@
         "cli_extracting": "Extraindo binário CLI...",
         "cli_verifying": "Verificando hash do binário...",
         "cli_installing": "Instalando...",
-        "cli_done": "Concluído!"
+        "cli_done": "Concluído!",
+        "tab_history": "Histórico",
+        "history_empty": "Nenhum histórico de escaneamento",
+        "history_clear": "Limpar histórico",
+        "history_delete": "Excluir",
+        "history_rescan": "Escanear novamente",
+        "history_clear_confirm": "Tem certeza de que deseja limpar todo o histórico?",
+        "history_cleared": "Histórico limpo!",
+        "history_scanned_at": "Escaneado: {date}",
+        "history_detections": "Detecções: {count}",
+        "history_back": "Voltar ao escâner"
     },
     "tr": {
         "app_title": "VirusTotal Dosya Tarayıcı",
@@ -823,7 +883,17 @@
         "cli_extracting": "CLI ikili dosyası çıkarılıyor...",
         "cli_verifying": "İkili dosya hashi doğrulanıyor...",
         "cli_installing": "Yükleniyor...",
-        "cli_done": "Tamamlandı!"
+        "cli_done": "Tamamlandı!",
+        "tab_history": "Geçmiş",
+        "history_empty": "Tarama geçmişi yok",
+        "history_clear": "Geçmişi temizle",
+        "history_delete": "Sil",
+        "history_rescan": "Yeniden tara",
+        "history_clear_confirm": "Tüm geçmişi silmek istediğinizden emin misiniz?",
+        "history_cleared": "Geçmiş temizlendi!",
+        "history_scanned_at": "Taranma tarihi: {date}",
+        "history_detections": "Tespitler: {count}",
+        "history_back": "Tarayıcıya dön"
     },
     "uk": {
         "app_title": "Сканер файлів VirusTotal",
@@ -941,7 +1011,17 @@
         "cli_extracting": "Вилучення бінарного файлу CLI...",
         "cli_verifying": "Перевірка хешу бінарного файлу...",
         "cli_installing": "Встановлення...",
-        "cli_done": "Готово!"
+        "cli_done": "Готово!",
+        "tab_history": "Історія",
+        "history_empty": "Історія сканувань порожня",
+        "history_clear": "Очистити історію",
+        "history_delete": "Видалити",
+        "history_rescan": "Сканувати знову",
+        "history_clear_confirm": "Ви впевнені, що хочете очистити всю історію?",
+        "history_cleared": "Історію очищено!",
+        "history_scanned_at": "Проскановано: {date}",
+        "history_detections": "Виявлень: {count}",
+        "history_back": "Назад до сканера"
     },
     "zh": {
         "app_title": "VirusTotal 文件扫描器",
@@ -1059,7 +1139,17 @@
         "cli_extracting": "正在提取 CLI 二进制文件...",
         "cli_verifying": "正在验证二进制文件哈希...",
         "cli_installing": "正在安装...",
-        "cli_done": "完成!"
+        "cli_done": "完成!",
+        "tab_history": "历史记录",
+        "history_empty": "暂无扫描历史",
+        "history_clear": "清除历史",
+        "history_delete": "删除",
+        "history_rescan": "重新扫描",
+        "history_clear_confirm": "确定要清除所有历史记录吗？",
+        "history_cleared": "历史已清除！",
+        "history_scanned_at": "扫描时间: {date}",
+        "history_detections": "检测: {count}",
+        "history_back": "返回扫描器"
     },
     "ja": {
         "app_title": "VirusTotal ファイルスキャナー",
@@ -1177,7 +1267,17 @@
         "cli_extracting": "CLIバイナリを展開中...",
         "cli_verifying": "バイナリハッシュを検証中...",
         "cli_installing": "インストール中...",
-        "cli_done": "完了!"
+        "cli_done": "完了!",
+        "tab_history": "履歴",
+        "history_empty": "スキャン履歴がありません",
+        "history_clear": "履歴をクリア",
+        "history_delete": "削除",
+        "history_rescan": "再スキャン",
+        "history_clear_confirm": "すべての履歴をクリアしてもよろしいですか？",
+        "history_cleared": "履歴をクリアしました！",
+        "history_scanned_at": "スキャン日時: {date}",
+        "history_detections": "検出: {count}",
+        "history_back": "スキャナーに戻る"
     },
     "ko": {
         "app_title": "VirusTotal 파일 스캐너",
@@ -1295,7 +1395,17 @@
         "cli_extracting": "CLI 바이너리 추출 중...",
         "cli_verifying": "바이너리 해시 검증 중...",
         "cli_installing": "설치 중...",
-        "cli_done": "완료!"
+        "cli_done": "완료!",
+        "tab_history": "기록",
+        "history_empty": "스캔 기록이 없습니다",
+        "history_clear": "기록 삭제",
+        "history_delete": "삭제",
+        "history_rescan": "다시 스캔",
+        "history_clear_confirm": "모든 기록을 삭제하시겠습니까?",
+        "history_cleared": "기록이 삭제되었습니다!",
+        "history_scanned_at": "스캔 시간: {date}",
+        "history_detections": "탐지: {count}",
+        "history_back": "스캐너로 돌아가기"
     },
     "ar": {
         "app_title": "ماسح ملفات VirusTotal",
@@ -1413,6 +1523,16 @@
         "cli_extracting": "استخراج الملف الثنائي للـ CLI...",
         "cli_verifying": "التحقق من تجزئة الملف الثنائي...",
         "cli_installing": "جارٍ التثبيت...",
-        "cli_done": "تم!"
+        "cli_done": "تم!",
+        "tab_history": "السجل",
+        "history_empty": "لا يوجد سجل فحص",
+        "history_clear": "مسح السجل",
+        "history_delete": "حذف",
+        "history_rescan": "إعادة الفحص",
+        "history_clear_confirm": "هل أنت متأكد أنك تريد مسح جميع السجلات؟",
+        "history_cleared": "تم مسح السجل!",
+        "history_scanned_at": "تم الفحص: {date}",
+        "history_detections": "الكاشفات: {count}",
+        "history_back": "العودة إلى الماسح"
     }
 }

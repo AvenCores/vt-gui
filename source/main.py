@@ -35,6 +35,7 @@ from app.ui.api_key_dialog import open_api_key_dialog
 from app.ui.intelligence_view import IntelligenceView
 from app.ui.footer import build_footer
 from app.services.scan_service import ScanService, resolve_scan_status
+from app.ui.history_view import build_history_view
 
 # Parse CLI arguments for context-menu invocation
 init_file_path = None
@@ -89,7 +90,7 @@ def main(page: ft.Page):
         page.theme = ft.Theme(font_family="sans-serif")
     
     # State variables
-    app_state = "scanner"  # scanner, scans, install_cli
+    app_state = "scanner"  # scanner, scans, install_cli, history
     active_scans = []
     scan_service = None
     current_tab_index = 0
@@ -471,16 +472,51 @@ def main(page: ft.Page):
             domain_view = intel_view.build_lookup_tab("domain", STRINGS[current_lang]["domain_placeholder"], STRINGS[current_lang]["domain_helper"])
             ip_view = intel_view.build_lookup_tab("ip", STRINGS[current_lang]["ip_placeholder"], STRINGS[current_lang]["ip_helper"])
             search_view = intel_view.build_lookup_tab("search", STRINGS[current_lang]["search_placeholder"], STRINGS[current_lang]["search_helper"])
-            
-            def on_active_tab_change(e):
-                nonlocal active_scanner_tab_index
-                active_scanner_tab_index = int(e.control.selected_index)
+
+            def on_history_back():
+                nonlocal app_state, active_scanner_tab_index
+                active_scanner_tab_index = 0
+                app_state = "scanner"
                 build_ui()
-                
+
+            def on_history_rescan(path):
+                nonlocal active_scans, app_state, current_tab_index, scan_service
+                active_scans = []
+                current_tab_index = 0
+                app_state = "scans"
+                class PseudoFile:
+                    def __init__(self, p):
+                        self.path = p
+                active_scans.append({
+                    "file_path": path,
+                    "filename": os.path.basename(path),
+                    "status": "scanning",
+                    "status_text": STRINGS[current_lang]["computing_hash"],
+                    "progress": 0.0,
+                    "sha256": None,
+                    "results": None,
+                    "error": None
+                })
+                build_ui()
+                scan_service = ScanService(active_scans, current_lang, thread_safe_build, show_alert, page)
+                threading.Thread(target=scan_service.run_single_scan_pipeline, args=(0, path), daemon=True).start()
+
+            history_view = build_history_view(current_lang, page, on_history_back, on_history_rescan)
+
+            def on_active_tab_change(e):
+                nonlocal active_scanner_tab_index, app_state
+                idx = int(e.control.selected_index)
+                active_scanner_tab_index = idx
+                if idx == 5:
+                    app_state = "history"
+                else:
+                    app_state = "scanner"
+                build_ui()
+
             landing_tabs = ft.Tabs(
                 selected_index=active_scanner_tab_index,
                 on_change=on_active_tab_change,
-                length=5,
+                length=6,
                 expand=True,
                 content=ft.Column(
                     expand=True,
@@ -492,6 +528,7 @@ def main(page: ft.Page):
                                 ft.Tab(label=STRINGS[current_lang]["tab_domains"], icon=ft.Icons.LANGUAGE_ROUNDED),
                                 ft.Tab(label=STRINGS[current_lang]["tab_ips"], icon=ft.Icons.CELL_TOWER_ROUNDED),
                                 ft.Tab(label=STRINGS[current_lang]["tab_search"], icon=ft.Icons.SEARCH_ROUNDED),
+                                ft.Tab(label=STRINGS[current_lang]["tab_history"], icon=ft.Icons.HISTORY_ROUNDED),
                             ]
                         ),
                         ft.TabBarView(
@@ -502,6 +539,7 @@ def main(page: ft.Page):
                                 ft.Container(content=domain_view, padding=10),
                                 ft.Container(content=ip_view, padding=10),
                                 ft.Container(content=search_view, padding=10),
+                                ft.Container(content=history_view, padding=10),
                             ]
                         )
                     ]

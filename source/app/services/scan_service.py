@@ -7,6 +7,7 @@ import threading
 from ..config import STRINGS, get_api_key, CLI_BINARY_NAME
 from ..cli_manager import get_temp_bin_path, compute_sha256
 from ..vt_api import check_file_exists_direct, check_file_exists_vt
+from ..history_manager import add_scan_record
 
 _NO_WINDOW = subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0
 
@@ -98,6 +99,13 @@ class ScanService:
                 self.active_scans[idx]["status"] = "completed"
                 self.active_scans[idx].pop("_status_text_widget", None)
                 self.active_scans[idx].pop("_progress_bar_widget", None)
+                add_scan_record(
+                    filename=os.path.basename(file_path),
+                    file_path=file_path,
+                    sha256=sha256,
+                    status="completed",
+                    results=existing_info
+                )
                 self.thread_safe_build_fn()
                 return
                 
@@ -195,6 +203,13 @@ class ScanService:
             self.active_scans[idx]["status"] = "completed"
             self.active_scans[idx].pop("_status_text_widget", None)
             self.active_scans[idx].pop("_progress_bar_widget", None)
+            add_scan_record(
+                filename=os.path.basename(file_path),
+                file_path=file_path,
+                sha256=sha256,
+                status="completed",
+                results=final_report
+            )
             self.thread_safe_build_fn()
 
         except ValueError as ve:
@@ -205,10 +220,24 @@ class ScanService:
             self.active_scans[idx]["error"] = err_text
             self.active_scans[idx].pop("_status_text_widget", None)
             self.active_scans[idx].pop("_progress_bar_widget", None)
+            add_scan_record(
+                filename=os.path.basename(file_path),
+                file_path=file_path,
+                sha256=sha256 or "",
+                status="failed",
+                error=err_text
+            )
             self.thread_safe_build_fn()
         except Exception as ex:
             self.active_scans[idx]["status"] = "failed"
             self.active_scans[idx]["error"] = str(ex)
             self.active_scans[idx].pop("_status_text_widget", None)
             self.active_scans[idx].pop("_progress_bar_widget", None)
+            add_scan_record(
+                filename=os.path.basename(file_path),
+                file_path=file_path,
+                sha256=sha256 or "",
+                status="failed",
+                error=str(ex)
+            )
             self.thread_safe_build_fn()

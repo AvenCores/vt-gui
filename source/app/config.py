@@ -84,8 +84,11 @@ def _get_config_dir():
             return os.path.join(base, 'VT-GUI')
         else:
             return os.path.join(os.path.expanduser('~'), '.config', 'vt-gui')
-    # Running from source — use working directory
-    return os.getcwd()
+    # Running from source — use user config directory
+    if IS_WINDOWS:
+        base = os.environ.get('APPDATA') or os.path.expanduser('~')
+        return os.path.join(base, 'VT-GUI')
+    return os.path.join(os.path.expanduser('~'), '.config', 'vt-gui')
 
 
 def get_env_file_path():
