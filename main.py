@@ -135,13 +135,46 @@ def main(page: ft.Page):
             page.title = STRINGS[current_lang]["app_title"]
             build_ui()
             
+        active_lang_name = "РУ" if current_lang == "ru" else "EN"
+        
         language_menu = ft.PopupMenuButton(
-            icon=ft.Icons.LANGUAGE,
-            icon_color="#00F0FF",
-            tooltip="Язык / Language",
+            content=ft.Container(
+                content=ft.Row(
+                    [
+                        ft.Icon(ft.Icons.LANGUAGE, color="#00F0FF", size=18),
+                        ft.Text(active_lang_name, color="#FFFFFF", size=13, weight=ft.FontWeight.W_600),
+                        ft.Icon(ft.Icons.ARROW_DROP_DOWN_ROUNDED, color="#94A3B8", size=16),
+                    ],
+                    spacing=5,
+                    alignment=ft.MainAxisAlignment.CENTER
+                ),
+                padding=ft.Padding(left=10, right=8, top=6, bottom=6),
+                border=ft.Border.all(1, "#2E3C56"),
+                border_radius=8,
+                bgcolor="#151E33"
+            ),
+            tooltip="Select Language / Выбрать язык",
             items=[
-                ft.PopupMenuItem(content=ft.Text("Русский"), on_click=lambda _: change_language("ru")),
-                ft.PopupMenuItem(content=ft.Text("English"), on_click=lambda _: change_language("en")),
+                ft.PopupMenuItem(
+                    content=ft.Row(
+                        [
+                            ft.Icon(ft.Icons.CHECK_ROUNDED, color="#00F0FF" if current_lang == "ru" else "transparent", size=16),
+                            ft.Text("Русский", color="#E2E8F0", size=13),
+                        ],
+                        spacing=10
+                    ),
+                    on_click=lambda _: change_language("ru")
+                ),
+                ft.PopupMenuItem(
+                    content=ft.Row(
+                        [
+                            ft.Icon(ft.Icons.CHECK_ROUNDED, color="#00F0FF" if current_lang == "en" else "transparent", size=16),
+                            ft.Text("English", color="#E2E8F0", size=13),
+                        ],
+                        spacing=10
+                    ),
+                    on_click=lambda _: change_language("en")
+                ),
             ]
         )
         
