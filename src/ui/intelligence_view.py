@@ -4,7 +4,7 @@ import subprocess
 import json
 import webbrowser
 import flet as ft
-from ..config import STRINGS
+from ..config import STRINGS, CLI_BINARY_NAME
 from .theme import make_stat_card, make_engine_row
 
 class IntelligenceView:
@@ -337,7 +337,7 @@ class IntelligenceView:
             try:
                 vt_path = self.get_temp_bin_path_fn()
                 if not os.path.exists(vt_path):
-                    raise ValueError("vt.exe CLI is not installed.")
+                    raise ValueError(f"{CLI_BINARY_NAME} CLI is not installed.")
                     
                 if tab_key == "url":
                     cmd = [vt_path, 'url', query_val, '--format', 'json']

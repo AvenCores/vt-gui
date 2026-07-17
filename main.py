@@ -11,6 +11,7 @@ from src.config import (
     write_env_var,
     get_api_key,
     get_app_lang,
+    IS_WINDOWS,
     STRINGS
 )
 from src.cli_manager import (
@@ -65,15 +66,23 @@ def main(page: ft.Page):
     # Page setup
     page.title = STRINGS[current_lang]["app_title"]
     page.theme_mode = ft.ThemeMode.DARK
-    page.window.icon = "icon.ico"
+    # Set window icon — use .ico on Windows, .png on other platforms if available
+    icon_path = "icon.ico" if IS_WINDOWS else "icon.png"
+    if os.path.exists(os.path.join("assets", icon_path)):
+        page.window.icon = icon_path
     page.window_width = 800
     page.window_height = 700
     page.window_min_width = 650
     page.window_min_height = 600
     page.padding = 0
-    
+
     # Use system font to prevent network loading and font layout shifts (jumping)
-    page.theme = ft.Theme(font_family="Segoe UI")
+    if IS_WINDOWS:
+        page.theme = ft.Theme(font_family="Segoe UI")
+    elif sys.platform == "darwin":
+        page.theme = ft.Theme(font_family="SF Pro Text")
+    else:
+        page.theme = ft.Theme(font_family="sans-serif")
     
     # State variables
     app_state = "scanner"  # scanner, scans, install_cli
@@ -113,7 +122,7 @@ def main(page: ft.Page):
         nonlocal app_state
         cli_status, cli_hash = check_installed_binary()
         
-        # Enforce install view if missing vt.exe
+        # Enforce install view if missing vt CLI
         if cli_status == 'missing' and app_state == "scanner":
             app_state = "install_cli"
             
@@ -618,10 +627,11 @@ def main(page: ft.Page):
 
     async def on_cli_click(e):
         try:
+            allowed_exts = ["zip", "exe"] if IS_WINDOWS else ["zip"]
             files = await file_picker_cli.pick_files(
                 allow_multiple=False,
                 file_type=ft.FilePickerFileType.CUSTOM,
-                allowed_extensions=["zip", "exe"]
+                allowed_extensions=allowed_exts
             )
             on_cli_file_selected(files)
         except Exception as ex:

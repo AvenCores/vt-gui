@@ -24,7 +24,7 @@ def check_file_exists_direct(sha256, api_key):
         return None
 
 def check_file_exists_vt(vt_path, sha256):
-    """Check if the file hash already exists on VirusTotal using vt.exe CLI."""
+    """Check if the file hash already exists on VirusTotal using vt CLI."""
     try:
         cmd = [vt_path, 'file', sha256, '--format', 'json']
         proc = subprocess.run(

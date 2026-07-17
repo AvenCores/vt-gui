@@ -1,19 +1,53 @@
 import os
 import locale
 import sys
+import platform
 
-# Official SHA-256 hashes of vt.exe itself
+# Platform-aware binary name
+IS_WINDOWS = sys.platform == "win32"
+CLI_BINARY_NAME = "vt.exe" if IS_WINDOWS else "vt"
+
+def get_cli_display_name():
+    """Returns a human-readable name for the CLI binary."""
+    return "vt.exe" if IS_WINDOWS else "vt"
+
+# Official SHA-256 hashes of the vt CLI binary itself
 KNOWN_HASHES = {
-    # Version 1.3.1
+    # Version 1.3.1 — Windows
     "1f46c735b74a0a094b10faa3c58fee84577e767e2c7df3c2b0799ec8ff85c404": "1.3.1 (Windows 64-bit)",
     "b8a1acb1a5e857046852f9ca806099a9c48faedfc690ec3c8233659a6c8cc1e7": "1.3.1 (Windows 32-bit)",
-    # Version 1.3.0
+    # Version 1.3.1 — Linux
+    "600b19a99dced17d9e8d075f76a719ff30d7b6e3b18884d1eac670b128c34f8c": "1.3.1 (Linux 64-bit)",
+    "1310faa6e352a22e3a95c8c82e3ff69ced1f507a7be2d2de3dc7a2c4e1465dee": "1.3.1 (Linux 32-bit)",
+    # Version 1.3.1 — macOS
+    "d32449caf0cb059c9331e3f2dfce7703823ff0faf8a40270a20f68ebb618a970": "1.3.1 (macOS)",
+    # Version 1.3.1 — FreeBSD
+    "87edffbd677e81083c4d0954383ad314f76ef3e3b58c01d471c3a152d2b80c56": "1.3.1 (FreeBSD 64-bit)",
+    "516fbd51c01aaa086d71a34eb5bc0c5032eb2b1c7c55778b100952e5339573d0": "1.3.1 (FreeBSD 32-bit)",
+    # Version 1.3.0 — Windows
     "8ee13a9b3ab9e4cb289b7946eba9743143988573233149d8a0072b061d7fde75": "1.3.0 (Windows 64-bit)",
     "dd0385c676cf492393ca879427a80bafd1e5cafd9262b00d40a286ae6824c0e6": "1.3.0 (Windows 32-bit)",
-    # Version 1.2.0
+    # Version 1.2.0 — Windows
     "376de9530f0d22f3db8a13bf77a38b1fde52a91cef71b197c743a20e9c1a246c": "1.2.0 (Windows 64-bit)",
     "23b129ed48596c42e8471d82f74d618bdf51ed1db71d16c8a83aed10f9317e63": "1.2.0 (Windows 32-bit)"
 }
+
+def get_release_zip_name():
+    """Returns the appropriate release ZIP filename for the current platform."""
+    if IS_WINDOWS:
+        is_64bit = platform.machine().endswith("64") or "AMD64" in platform.machine()
+        return "Windows64.zip" if is_64bit else "Windows32.zip"
+    elif sys.platform == "darwin":
+        return "MacOSX.zip"
+    elif sys.platform.startswith("linux"):
+        is_64bit = platform.machine().endswith("64") or "x86_64" in platform.machine() or "aarch64" in platform.machine()
+        return "Linux64.zip" if is_64bit else "Linux32.zip"
+    elif sys.platform.startswith("freebsd"):
+        is_64bit = platform.machine().endswith("64")
+        return "FreeBSD64.zip" if is_64bit else "FreeBSD32.zip"
+    else:
+        # Fallback: try 64-bit
+        return "Linux64.zip"
 
 STRINGS = {
     "en": {
@@ -27,15 +61,15 @@ STRINGS = {
         "vt_exe_unapproved": "Unapproved (Hash: {hash})",
         "vt_exe_missing": "Not Installed",
         "vt_exe_custom": "Verified (Custom approved binary)",
-        "download_instructions_title": "VirusTotal CLI (vt.exe) Required",
-        "download_instructions_text": "To scan files using the official CLI, you need to download it manually:\n\n1. Click the button below to open GitHub releases.\n2. Download the Windows ZIP archive (Windows64.zip or Windows32.zip).\n3. Click 'Select Downloaded File' below to verify and install it.",
+        "download_instructions_title": "VirusTotal CLI Required",
+        "download_instructions_text": "To scan files using the official CLI, you need to download it manually:\n\n1. Click the button below to open GitHub releases.\n2. Download the archive for your platform.\n3. Click 'Select Downloaded File' below to verify and install it.",
         "open_releases": "Open GitHub Releases Page",
-        "select_file_zip": "Select Downloaded ZIP or vt.exe",
-        "install_desc": "The official VirusTotal command-line tool (vt.exe) is required to perform fast and complete file scans. Install it automatically below.",
+        "select_file_zip": "Select Downloaded ZIP or CLI binary",
+        "install_desc": "The official VirusTotal command-line tool is required to perform fast and complete file scans. Install it automatically below.",
         "btn_auto_install": "Download and Install CLI",
-        "btn_manual_install": "Select ZIP or vt.exe manually",
+        "btn_manual_install": "Select ZIP or CLI binary manually",
         "installing_cli": "Installing vt-cli...",
-        "verify_success": "vt.exe successfully verified and installed!",
+        "verify_success": "CLI binary successfully verified and installed!",
         "verify_fail": "Verification failed: {e}",
         "hash_warning_title": "Unknown Binary Hash",
         "hash_warning_text": "The SHA-256 hash of this file ({hash}) does not match any known official release of vt-cli.\n\nDo you want to use this binary anyway?",
@@ -122,15 +156,15 @@ STRINGS = {
         "vt_exe_unapproved": "Не одобрен (Хэш: {hash})",
         "vt_exe_missing": "Не установлен",
         "vt_exe_custom": "Проверен (Пользовательский одобренный)",
-        "download_instructions_title": "Требуется VirusTotal CLI (vt.exe)",
-        "download_instructions_text": "Для сканирования через CLI необходимо скачать его вручную:\n\n1. Нажмите кнопку ниже для перехода к релизам на GitHub.\n2. Скачайте ZIP-архив для Windows (Windows64.zip или Windows32.zip).\n3. Нажмите кнопку 'Выбрать скачанный файл' ниже для проверки и установки.",
+        "download_instructions_title": "Требуется VirusTotal CLI",
+        "download_instructions_text": "Для сканирования через CLI необходимо скачать его вручную:\n\n1. Нажмите кнопку ниже для перехода к релизам на GitHub.\n2. Скачайте архив для вашей платформы.\n3. Нажмите кнопку 'Выбрать скачанный файл' ниже для проверки и установки.",
         "open_releases": "Открыть страницу релизов на GitHub",
-        "select_file_zip": "Выбрать скачанный ZIP или vt.exe",
-        "install_desc": "Для быстрого и полного сканирования файлов требуется официальная утилита VirusTotal (vt.exe). Установите ее автоматически ниже.",
+        "select_file_zip": "Выбрать скачанный ZIP или бинарный файл CLI",
+        "install_desc": "Для быстрого и полного сканирования файлов требуется официальная утилита VirusTotal CLI. Установите ее автоматически ниже.",
         "btn_auto_install": "Скачать и установить CLI",
-        "btn_manual_install": "Выбрать ZIP или vt.exe вручную",
+        "btn_manual_install": "Выбрать ZIP или бинарный файл CLI вручную",
         "installing_cli": "Установка vt-cli...",
-        "verify_success": "vt.exe успешно проверен и установлен!",
+        "verify_success": "Бинарный файл CLI успешно проверен и установлен!",
         "verify_fail": "Ошибка проверки: {e}",
         "hash_warning_title": "Неизвестный хэш файла",
         "hash_warning_text": "SHA-256 хэш этого файла ({hash}) не совпадает с официальными релизами vt-cli.\n\nВы хотите использовать этот файл на свой страх и риск?",

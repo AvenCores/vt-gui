@@ -3,7 +3,7 @@ import time
 import json
 import subprocess
 import threading
-from ..config import STRINGS, get_api_key
+from ..config import STRINGS, get_api_key, CLI_BINARY_NAME
 from ..cli_manager import get_temp_bin_path, compute_sha256
 from ..vt_api import check_file_exists_direct, check_file_exists_vt
 
@@ -54,7 +54,7 @@ class ScanService:
             
             vt_path = get_temp_bin_path()
             if not os.path.exists(vt_path):
-                raise ValueError("vt.exe was missing when scan was initiated.")
+                raise ValueError(f"{CLI_BINARY_NAME} was missing when scan was initiated.")
             existing_info = check_file_exists_vt(vt_path, sha256)
                 
             if existing_info:
@@ -87,7 +87,7 @@ class ScanService:
                 errors='replace'
             )
             if proc.returncode != 0:
-                raise ValueError(f"vt.exe upload failed: {proc.stderr or proc.stdout}")
+                raise ValueError(f"vt CLI upload failed: {proc.stderr or proc.stdout}")
             
             stdout_lines = proc.stdout.strip().split('\n')
             for line in stdout_lines:
