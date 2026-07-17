@@ -352,7 +352,11 @@ class IntelligenceView:
                         raise ValueError("Your API Key is not authorized for this operation (premium feature required).")
                     raise ValueError(err_msg.strip())
                     
-                data = json.loads(proc.stdout)
+                stdout = proc.stdout.strip()
+                if not stdout:
+                    raise ValueError("Empty response from VirusTotal. The URL may not have been analyzed yet.")
+                    
+                data = json.loads(stdout)
                 if isinstance(data, list) and len(data) > 0:
                     if tab_key != "search":
                         data = data[0]
