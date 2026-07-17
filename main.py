@@ -175,7 +175,7 @@ def main(page: ft.Page):
                 file_picker_cli,
                 on_direct_mode_changed,
                 is_direct,
-                on_cli_file_selected
+                on_cli_click
             )
         elif app_state == "scanning":
             main_content.content = build_scanning_view(scan_progress_ring, scan_status_text, scan_progress_bar)
@@ -196,7 +196,7 @@ def main(page: ft.Page):
                 page
             )
         else:
-            main_content.content = build_scanner_view(cli_status, cli_hash, is_direct, current_lang, file_picker_scan, on_scan_file_selected)
+            main_content.content = build_scanner_view(cli_status, cli_hash, is_direct, current_lang, file_picker_scan, on_scan_click)
             
         outer_container = ft.Container(
             gradient=ft.LinearGradient(
@@ -414,6 +414,10 @@ def main(page: ft.Page):
             return
         threading.Thread(target=run_scan_pipeline, args=(file_path,), daemon=True).start()
 
+    async def on_scan_click(e):
+        files = await file_picker_scan.pick_files(allow_multiple=False)
+        on_scan_file_selected(files)
+
     def on_cli_file_selected(files):
         nonlocal selected_installer_data, selected_installer_hash
         if not files:
@@ -465,6 +469,14 @@ def main(page: ft.Page):
                 
         except Exception as ex:
             show_alert(STRINGS[current_lang]["verify_fail"].format(e=""), str(ex))
+
+    async def on_cli_click(e):
+        files = await file_picker_cli.pick_files(
+            allow_multiple=False,
+            file_type=ft.FilePickerFileType.CUSTOM,
+            allowed_extensions=["zip", "exe"]
+        )
+        on_cli_file_selected(files)
 
     # Initialize file pickers
     file_picker_scan = ft.FilePicker()

@@ -2,7 +2,7 @@ import flet as ft
 import webbrowser
 from ..config import STRINGS
 
-def build_install_view(cli_status, cli_hash, lang, file_picker_cli, on_direct_mode_changed, direct_mode_init, on_cli_file_selected):
+def build_install_view(cli_status, cli_hash, lang, file_picker_cli, on_direct_mode_changed, direct_mode_init, on_cli_click):
     """Builds the Flet container for the vt.exe CLI manual installation screen."""
     return ft.Container(
         content=ft.Column(
@@ -27,11 +27,7 @@ def build_install_view(cli_status, cli_hash, lang, file_picker_cli, on_direct_mo
                         ft.OutlinedButton(
                             content=STRINGS[lang]["select_file_zip"],
                             icon=ft.Icons.FOLDER_OPEN_ROUNDED,
-                            on_click=lambda _: on_cli_file_selected(file_picker_cli.pick_files(
-                                allow_multiple=False,
-                                file_type=ft.FilePickerFileType.CUSTOM,
-                                allowed_extensions=["zip", "exe"]
-                            )),
+                            on_click=on_cli_click,
                             style=ft.ButtonStyle(
                                 shape=ft.RoundedRectangleBorder(radius=8),
                                 side=ft.BorderSide(1, "#00F0FF"),
