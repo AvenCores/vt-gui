@@ -1,10 +1,13 @@
 import flet as ft
 import webbrowser
+from ..config import STRINGS
 
 APP_VERSION = "V1.0.0"
 
 def build_footer(lang="en", page=None):
     """Builds a sticky, premium footer containing social links with hover animations."""
+    S = STRINGS.get(lang, STRINGS.get("en", {}))
+
     def make_social_link(icon_name, dest_url, tooltip):
         img = ft.Image(
             src=icon_name,
@@ -12,11 +15,11 @@ def build_footer(lang="en", page=None):
             height=24,
             color="#94A3B8"
         )
-        
+
         def on_hover(e):
             img.color = "#00F0FF" if e.data == "true" else "#94A3B8"
             img.update()
-            
+
         return ft.Container(
             content=img,
             tooltip=tooltip,
@@ -26,11 +29,13 @@ def build_footer(lang="en", page=None):
             border_radius=4
         )
 
-    about_text = "О программе" if lang == "ru" else "About"
-    donate_text = "Поддержать автора" if lang == "ru" else "Support the author"
-    copy_text = "Скопировать номер карты" if lang == "ru" else "Copy card number"
-    copied_text = "Номер карты скопирован!" if lang == "ru" else "Card number copied!"
-    close_text = "Закрыть" if lang == "ru" else "Close"
+    about_text = S.get("footer_about", "About")
+    donate_text = S.get("footer_support_author", "Support the author")
+    copy_text = S.get("footer_copy_card", "Copy card number")
+    copied_text = S.get("footer_card_copied", "Card number copied!")
+    close_text = S.get("btn_close", "Close")
+    powered_by_text = S.get("footer_powered_by", "Powered by VirusTotal V3 API")
+    author_text = S.get("footer_author", "Author:")
     card_number = "2202 2050 1464 4675"
 
     def on_about_click(e):
@@ -38,10 +43,10 @@ def build_footer(lang="en", page=None):
             webbrowser.open("https://github.com/AvenCores/vt-gui")
 
         dlg = ft.AlertDialog(
-            title=ft.Text("VirusTotal File Scanner", color="#FFFFFF", weight=ft.FontWeight.BOLD),
+            title=ft.Text(S.get("app_title", "VirusTotal File Scanner"), color="#FFFFFF", weight=ft.FontWeight.BOLD),
             content=ft.Column([
                 ft.Text(f"{APP_VERSION}", color="#00F0FF", size=14, weight=ft.FontWeight.BOLD),
-                ft.Text("Powered by VirusTotal V3 API", color="#94A3B8", size=12),
+                ft.Text(powered_by_text, color="#94A3B8", size=12),
                 ft.ElevatedButton(
                     content=ft.Text("github.com/AvenCores/vt-gui", color="#FFFFFF", size=12),
                     icon=ft.Icons.OPEN_IN_NEW_ROUNDED,
@@ -50,7 +55,7 @@ def build_footer(lang="en", page=None):
                     color="#FFFFFF",
                     style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8))
                 ),
-                ft.Text("Автор: AvenCores", color="#94A3B8", size=11)
+                ft.Text(f"{author_text} AvenCores", color="#94A3B8", size=11)
             ], spacing=6, height=100, horizontal_alignment=ft.CrossAxisAlignment.CENTER),
             actions=[ft.TextButton("OK", on_click=lambda _: e.control.page.pop_dialog())],
             actions_alignment=ft.MainAxisAlignment.END,

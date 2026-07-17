@@ -92,7 +92,13 @@
         "btn_upgrade_premium": "Upgrade to premium",
         "premium_required_err": "Your API Key is not authorized for this operation (premium feature required).",
         "scan_timeout_err": "Analysis timed out after {timeout}s. The file may still be processing on VirusTotal.",
-        "btn_get_api_key": "Get API Key"
+        "btn_get_api_key": "Get API Key",
+        "footer_about": "About",
+        "footer_support_author": "Support the author",
+        "footer_copy_card": "Copy card number",
+        "footer_card_copied": "Card number copied!",
+        "footer_powered_by": "Powered by VirusTotal V3 API",
+        "footer_author": "Author:"
     },
     "ru": {
         "app_title": "Сканер файлов VirusTotal",
@@ -187,7 +193,13 @@
         "btn_upgrade_premium": "Перейти на Premium",
         "premium_required_err": "Ваш API-ключ не авторизован для этой операции (требуется премиум-подписка).",
         "scan_timeout_err": "Анализ не завершился за {timeout}с. Файл всё ещё может обрабатываться на VirusTotal.",
-        "btn_get_api_key": "Получить API ключ"
+        "btn_get_api_key": "Получить API ключ",
+        "footer_about": "О программе",
+        "footer_support_author": "Поддержать автора",
+        "footer_copy_card": "Скопировать номер карты",
+        "footer_card_copied": "Номер карты скопирован!",
+        "footer_powered_by": "Powered by VirusTotal V3 API",
+        "footer_author": "Автор:"
     },
     "es": {
         "app_title": "Escáner de Archivos VirusTotal",
@@ -282,7 +294,13 @@
         "btn_upgrade_premium": "Actualizar a premium",
         "premium_required_err": "Su clave API no está autorizada para esta operación (se requiere función premium).",
         "scan_timeout_err": "El análisis tardó más de {timeout}s. El archivo puede estar procesándose en VirusTotal.",
-        "btn_get_api_key": "Obtener clave API"
+        "btn_get_api_key": "Obtener clave API",
+        "footer_about": "Acerca de",
+        "footer_support_author": "Apoyar al autor",
+        "footer_copy_card": "Copiar número de tarjeta",
+        "footer_card_copied": "¡Número de tarjeta copiado!",
+        "footer_powered_by": "Desarrollado con VirusTotal V3 API",
+        "footer_author": "Autor:"
     },
     "de": {
         "app_title": "VirusTotal Dateiscanner",
@@ -377,7 +395,13 @@
         "btn_upgrade_premium": "Auf Premium upgraden",
         "premium_required_err": "Ihr API-Schlüssel ist für diesen Vorgang nicht autorisiert (Premium-Funktion erforderlich).",
         "scan_timeout_err": "Analyse nach {timeout}s abgelaufen. Die Datei wird möglicherweise noch bei VirusTotal verarbeitet.",
-        "btn_get_api_key": "API-Schlüssel erhalten"
+        "btn_get_api_key": "API-Schlüssel erhalten",
+        "footer_about": "Über",
+        "footer_support_author": "Autor unterstützen",
+        "footer_copy_card": "Kartennummer kopieren",
+        "footer_card_copied": "Kartennummer kopiert!",
+        "footer_powered_by": "Unterstützt von VirusTotal V3 API",
+        "footer_author": "Autor:"
     },
     "fr": {
         "app_title": "Scanner de Fichiers VirusTotal",
@@ -472,7 +496,13 @@
         "btn_upgrade_premium": "Passer à premium",
         "premium_required_err": "Votre clé API n'est pas autorisée pour cette opération (fonctionnalité premium requise).",
         "scan_timeout_err": "L'analyse a expiré après {timeout}s. Le fichier est peut-être encore en cours de traitement sur VirusTotal.",
-        "btn_get_api_key": "Obtenir une clé API"
+        "btn_get_api_key": "Obtenir une clé API",
+        "footer_about": "À propos",
+        "footer_support_author": "Soutenir l'auteur",
+        "footer_copy_card": "Copier le numéro de carte",
+        "footer_card_copied": "Numéro de carte copié !",
+        "footer_powered_by": "Propulsé par VirusTotal V3 API",
+        "footer_author": "Auteur :"
     },
     "pt": {
         "app_title": "Scanner de Arquivos VirusTotal",
@@ -567,7 +597,13 @@
         "btn_upgrade_premium": "Atualizar para premium",
         "premium_required_err": "Sua chave API não está autorizada para esta operação (recurso premium necessário).",
         "scan_timeout_err": "Análise expirou após {timeout}s. O arquivo pode estar sendo processado no VirusTotal.",
-        "btn_get_api_key": "Obter chave API"
+        "btn_get_api_key": "Obter chave API",
+        "footer_about": "Sobre",
+        "footer_support_author": "Apoiar o autor",
+        "footer_copy_card": "Copiar número do cartão",
+        "footer_card_copied": "Número do cartão copiado!",
+        "footer_powered_by": "Desenvolvido com VirusTotal V3 API",
+        "footer_author": "Autor:"
     },
     "tr": {
         "app_title": "VirusTotal Dosya Tarayıcı",
@@ -662,7 +698,13 @@
         "btn_upgrade_premium": "Premium'a yükselt",
         "premium_required_err": "API anahtarınız bu işlem için yetkilendirilmemiş (premium özellik gerekli).",
         "scan_timeout_err": "Analiz {timeout}s sonra zaman aşımına uğradı. Dosya hâlâ VirusTotal'da işleniyor olabilir.",
-        "btn_get_api_key": "API anahtarı al"
+        "btn_get_api_key": "API anahtarı al",
+        "footer_about": "Hakkında",
+        "footer_support_author": "Yazarı destekle",
+        "footer_copy_card": "Kart numarasını kopyala",
+        "footer_card_copied": "Kart numarası kopyalandı!",
+        "footer_powered_by": "VirusTotal V3 API tarafından desteklenmektedir",
+        "footer_author": "Yazar:"
     },
     "uk": {
         "app_title": "Сканер файлів VirusTotal",
@@ -757,7 +799,13 @@
         "btn_upgrade_premium": "Перейти на Premium",
         "premium_required_err": "Ваш API-ключ не авторизовано для цієї операції (потрібна преміум-підписка).",
         "scan_timeout_err": "Аналіз не завершився за {timeout}с. Файл всё ещё може оброблятися на VirusTotal.",
-        "btn_get_api_key": "Отримати API ключ"
+        "btn_get_api_key": "Отримати API ключ",
+        "footer_about": "Про програму",
+        "footer_support_author": "Підтримати автора",
+        "footer_copy_card": "Скопіювати номер картки",
+        "footer_card_copied": "Номер картки скопійовано!",
+        "footer_powered_by": "Працює на VirusTotal V3 API",
+        "footer_author": "Автор:"
     },
     "zh": {
         "app_title": "VirusTotal 文件扫描器",
@@ -852,7 +900,13 @@
         "btn_upgrade_premium": "升级到高级版",
         "premium_required_err": "您的 API 密钥未授权此操作（需要高级功能）。",
         "scan_timeout_err": "分析在 {timeout}s 后超时。该文件可能仍在 VirusTotal 上处理中。",
-        "btn_get_api_key": "获取 API 密钥"
+        "btn_get_api_key": "获取 API 密钥",
+        "footer_about": "关于",
+        "footer_support_author": "支持作者",
+        "footer_copy_card": "复制卡号",
+        "footer_card_copied": "卡号已复制！",
+        "footer_powered_by": "由 VirusTotal V3 API 提供支持",
+        "footer_author": "作者："
     },
     "ja": {
         "app_title": "VirusTotal ファイルスキャナー",
@@ -947,7 +1001,13 @@
         "btn_upgrade_premium": "プレミアムにアップグレード",
         "premium_required_err": "この操作にはAPIキーが承認されていません（プレミアム機能が必要）。",
         "scan_timeout_err": "分析が {timeout}s 後にタイムアウトしました。ファイルはまだVirusTotalで処理中の可能性があります。",
-        "btn_get_api_key": "APIキーを取得"
+        "btn_get_api_key": "APIキーを取得",
+        "footer_about": "概要",
+        "footer_support_author": "著者を支援する",
+        "footer_copy_card": "カード番号をコピー",
+        "footer_card_copied": "カード番号がコピーされました！",
+        "footer_powered_by": "VirusTotal V3 API で動作",
+        "footer_author": "著者："
     },
     "ko": {
         "app_title": "VirusTotal 파일 스캐너",
@@ -1042,7 +1102,13 @@
         "btn_upgrade_premium": "프리미엄으로 업그레이드",
         "premium_required_err": "이 작업에 대한 API 키가 승인되지 않았습니다 (프리미엄 기능 필요).",
         "scan_timeout_err": "분석이 {timeout}초 후에 시간 초과되었습니다. 파일이 여전히 VirusTotal에서 처리 중일 수 있습니다.",
-        "btn_get_api_key": "API 키 받기"
+        "btn_get_api_key": "API 키 받기",
+        "footer_about": "정보",
+        "footer_support_author": "작성자 지원",
+        "footer_copy_card": "카드 번호 복사",
+        "footer_card_copied": "카드 번호가 복사되었습니다!",
+        "footer_powered_by": "VirusTotal V3 API 제공",
+        "footer_author": "작성자:"
     },
     "ar": {
         "app_title": "ماسح ملفات VirusTotal",
@@ -1137,6 +1203,12 @@
         "btn_upgrade_premium": "الترقية إلى المميزة",
         "premium_required_err": "مفتاح API غير مصرح له بهذه العملية (ميزة مميزة مطلوبة).",
         "scan_timeout_err": "انتهت مهلة التحليل بعد {timeout}ث. قد لا يزال الملف قيد المعالجة على VirusTotal.",
-        "btn_get_api_key": "الحصول على مفتاح API"
+        "btn_get_api_key": "الحصول على مفتاح API",
+        "footer_about": "حول",
+        "footer_support_author": "دعم المؤلف",
+        "footer_copy_card": "نسخ رقم البطاقة",
+        "footer_card_copied": "تم نسخ رقم البطاقة!",
+        "footer_powered_by": "مدعوم بواسطة VirusTotal V3 API",
+        "footer_author": "المؤلف:"
     }
 }
