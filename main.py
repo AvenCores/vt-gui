@@ -68,15 +68,9 @@ def main(page: ft.Page):
     page.theme = ft.Theme(font_family="Segoe UI")
     
     # State variables
-    app_state = "scanner"  # scanner, scanning, results, install_cli
-    selected_target_file = None
-    current_scan_results = None
-    last_completed_sha256 = None
-    
-    # GUI references
-    scan_status_text = ft.Text("", size=15, weight=ft.FontWeight.W_600, color="#00F0FF")
-    scan_progress_bar = ft.ProgressBar(value=0, color="#00F0FF", bgcolor="#334155", height=6)
-    scan_progress_ring = ft.ProgressRing(color="#00F0FF", width=48, height=48)
+    app_state = "scanner"  # scanner, scans, install_cli
+    active_scans = []
+    current_tab_index = 0
     
     install_status_text = ft.Text("", size=14, color="#94A3B8")
     install_progress_bar = ft.ProgressBar(value=0, color="#00F0FF", bgcolor="#334155", height=6, visible=False)
@@ -202,23 +196,135 @@ def main(page: ft.Page):
                 on_auto_install_click,
                 on_manual_install_click
             )
-        elif app_state == "scanning":
-            main_content.content = build_scanning_view(scan_progress_ring, scan_status_text, scan_progress_bar)
-        elif app_state == "results":
-            def back_to_scanner(e):
-                nonlocal app_state, selected_target_file, current_scan_results
+        elif app_state == "scans":
+            tab_headers = []
+            tab_contents = []
+            for idx, scan in enumerate(active_scans):
+                if scan["status"] == "scanning":
+                    tab_content = build_scanning_view(
+                        ft.ProgressRing(color="#00F0FF", width=48, height=48),
+                        ft.Text(scan["status_text"], size=15, weight=ft.FontWeight.W_600, color="#00F0FF"),
+                        ft.ProgressBar(value=scan["progress"], color="#00F0FF", bgcolor="#334155", height=6)
+                    )
+                elif scan["status"] == "completed":
+                    def make_back_callback(scan_idx):
+                        def back_cb(e):
+                            nonlocal app_state, active_scans
+                            app_state = "scanner"
+                            active_scans = []
+                            build_ui()
+                        return back_cb
+                        
+                    tab_content = build_results_view(
+                        scan["results"],
+                        scan["file_path"],
+                        scan["sha256"],
+                        current_lang,
+                        make_back_callback(idx),
+                        page
+                    )
+                else:  # failed
+                    def make_retry_callback(scan_idx, path):
+                        def retry_scan(e):
+                            active_scans[scan_idx]["status"] = "scanning"
+                            active_scans[scan_idx]["status_text"] = STRINGS[current_lang]["computing_hash"]
+                            active_scans[scan_idx]["progress"] = 0.0
+                            active_scans[scan_idx]["error"] = None
+                            build_ui()
+                            threading.Thread(target=run_single_scan_pipeline, args=(scan_idx, path), daemon=True).start()
+                        return retry_scan
+                        
+                    tab_content = ft.Container(
+                        content=ft.Column(
+                            [
+                                ft.Icon(ft.Icons.ERROR_OUTLINE_ROUNDED, color="#EF4444", size=48),
+                                ft.Text(STRINGS[current_lang]["scan_failed"].format(e=""), size=16, weight=ft.FontWeight.BOLD, color="#FFFFFF"),
+                                ft.Text(scan["error"], size=14, color="#EF4444", text_align=ft.TextAlign.CENTER),
+                                ft.Container(height=10),
+                                ft.Row(
+                                    [
+                                        ft.ElevatedButton(
+                                            content=ft.Text("Retry / Повторить"),
+                                            icon=ft.Icons.REFRESH_ROUNDED,
+                                            on_click=make_retry_callback(idx, scan["file_path"]),
+                                            bgcolor="#008DDA",
+                                            color="#FFFFFF"
+                                        )
+                                    ],
+                                    alignment=ft.MainAxisAlignment.CENTER
+                                )
+                            ],
+                            alignment=ft.MainAxisAlignment.CENTER,
+                            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                            spacing=15
+                        ),
+                        alignment=ft.Alignment.CENTER,
+                        expand=True
+                    )
+                
+                icon = "⏳"
+                if scan["status"] == "completed":
+                    stats = scan["results"].get("data", {}).get("attributes", {}).get("last_analysis_stats", {})
+                    if not stats and isinstance(scan["results"], list) and len(scan["results"]) > 0:
+                        stats = scan["results"][0].get("last_analysis_stats", {})
+                    malicious = stats.get("malicious", 0)
+                    icon = "❌" if malicious > 0 else "✅"
+                elif scan["status"] == "failed":
+                    icon = "⚠️"
+                    
+                tab_headers.append(
+                    ft.Tab(
+                        label=f"{icon} {scan['filename']}"
+                    )
+                )
+                tab_contents.append(
+                    ft.Container(content=tab_content, padding=15)
+                )
+                
+            def on_tab_change(e):
+                nonlocal current_tab_index
+                current_tab_index = int(e.control.selected_index)
+                
+            tabs = ft.Tabs(
+                selected_index=current_tab_index,
+                on_change=on_tab_change,
+                length=len(active_scans),
+                expand=True,
+                content=ft.Column(
+                    expand=True,
+                    controls=[
+                        ft.TabBar(
+                            tabs=tab_headers
+                        ),
+                        ft.TabBarView(
+                            expand=True,
+                            controls=tab_contents
+                        )
+                    ]
+                )
+            )
+            
+            def go_back_to_scanner(e):
+                nonlocal app_state, active_scans
                 app_state = "scanner"
-                selected_target_file = None
-                current_scan_results = None
+                active_scans = []
                 build_ui()
                 
-            main_content.content = build_results_view(
-                current_scan_results,
-                selected_target_file,
-                last_completed_sha256,
-                current_lang,
-                back_to_scanner,
-                page
+            back_btn = ft.ElevatedButton(
+                content=ft.Text(STRINGS[current_lang]["btn_back"]),
+                icon=ft.Icons.ARROW_BACK_ROUNDED,
+                on_click=go_back_to_scanner,
+                bgcolor="#1E293B",
+                color="#FFFFFF",
+                style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8))
+            )
+            
+            main_content.content = ft.Column(
+                [
+                    ft.Row([back_btn], alignment=ft.MainAxisAlignment.START),
+                    tabs
+                ],
+                expand=True
             )
         else:
             main_content.content = build_scanner_view(cli_status, cli_hash, current_lang, file_picker_scan, on_scan_click)
@@ -256,47 +362,13 @@ def main(page: ft.Page):
     # ==============================================================================
     # BACKGROUND PIPELINE
     # ==============================================================================
-    def set_scan_status(text, progress_value):
-        scan_status_text.value = text
-        if progress_value is None:
-            scan_progress_bar.value = None
-        else:
-            scan_progress_bar.value = progress_value
-        thread_safe_update()
-
-    def show_scan_error(err_msg):
-        nonlocal app_state
-        app_state = "scanner"
-        thread_safe_build()
-        show_alert(STRINGS[current_lang]["scan_failed"].format(e=""), err_msg)
-
-    def show_results(results_data, file_hash, file_path):
-        nonlocal app_state, current_scan_results, last_completed_sha256, selected_target_file
-        current_scan_results = results_data
-        last_completed_sha256 = file_hash
-        selected_target_file = file_path
-        app_state = "results"
-        thread_safe_build()
-
-    def run_scan_pipeline(file_path):
-        nonlocal app_state
-        app_state = "scanning"
-        thread_safe_build()
+    def run_single_scan_pipeline(idx, file_path):
+        throttler = ProgressThrottler(0.15)
         
-        throttler = ProgressThrottler(0.12)
-        
-        def on_upload_progress(current, total):
-            if throttler.should_update() or current == total:
-                percent = current / total if total > 0 else 0
-                scan_progress_bar.value = percent
-                current_mb = current / (1024 * 1024)
-                total_mb = total / (1024 * 1024)
-                scan_status_text.value = STRINGS[current_lang]["upload_progress"].format(
-                    percent=int(percent * 100),
-                    current=current_mb,
-                    total=total_mb
-                )
-                thread_safe_update()
+        def set_scan_status(text, progress_value):
+            active_scans[idx]["status_text"] = text
+            active_scans[idx]["progress"] = progress_value
+            thread_safe_build()
 
         try:
             # 1. Compute Hash
@@ -304,7 +376,8 @@ def main(page: ft.Page):
             sha256 = compute_sha256(file_path)
             if not sha256:
                 raise ValueError("Could not compute target file SHA-256 hash.")
-                
+            active_scans[idx]["sha256"] = sha256
+            
             # 2. Check API Key
             api_key = get_api_key()
             if not api_key:
@@ -327,7 +400,9 @@ def main(page: ft.Page):
                         existing_info = web_info
                 except Exception:
                     pass
-                show_results(existing_info, sha256, file_path)
+                active_scans[idx]["results"] = existing_info
+                active_scans[idx]["status"] = "completed"
+                thread_safe_build()
                 return
                 
             # 4. Upload file
@@ -408,15 +483,21 @@ def main(page: ft.Page):
             if not final_report:
                 raise ValueError("Analysis completed, but failed to fetch the file details.")
                 
-            show_results(final_report, sha256, file_path)
+            active_scans[idx]["results"] = final_report
+            active_scans[idx]["status"] = "completed"
+            thread_safe_build()
             
         except ValueError as ve:
             err_text = str(ve)
             if err_text == "api_key_invalid_err":
                 err_text = STRINGS[current_lang]["api_key_invalid_err"]
-            show_scan_error(err_text)
+            active_scans[idx]["status"] = "failed"
+            active_scans[idx]["error"] = err_text
+            thread_safe_build()
         except Exception as ex:
-            show_scan_error(str(ex))
+            active_scans[idx]["status"] = "failed"
+            active_scans[idx]["error"] = str(ex)
+            thread_safe_build()
 
     # ==============================================================================
     # FILE PICKER HANDLERS
@@ -424,17 +505,47 @@ def main(page: ft.Page):
     def on_scan_file_selected(files):
         if not files:
             return
-        file_path = files[0].path
-        if not os.path.exists(file_path):
+            
+        nonlocal active_scans, app_state, current_tab_index
+        active_scans = []
+        current_tab_index = 0
+        app_state = "scans"
+        
+        valid_files = []
+        for f in files:
+            if not f.path or not os.path.exists(f.path):
+                continue
+            if os.path.isdir(f.path):
+                show_alert("Error / Ошибка", f"Scanning directories is not supported ({os.path.basename(f.path)}). Please choose files.")
+                continue
+            valid_files.append(f)
+            
+        if not valid_files:
+            app_state = "scanner"
+            build_ui()
             return
-        if os.path.isdir(file_path):
-            show_alert("Error / Ошибка", "Scanning directories is not supported. Please choose a file.")
-            return
-        threading.Thread(target=run_scan_pipeline, args=(file_path,), daemon=True).start()
+            
+        for f in valid_files:
+            active_scans.append({
+                "file_path": f.path,
+                "filename": os.path.basename(f.path),
+                "status": "scanning",
+                "status_text": STRINGS[current_lang]["computing_hash"],
+                "progress": 0.0,
+                "sha256": None,
+                "results": None,
+                "error": None
+            })
+            
+        build_ui()
+        
+        # Start scanning for each file in a separate thread
+        for idx, scan in enumerate(active_scans):
+            threading.Thread(target=run_single_scan_pipeline, args=(idx, scan["file_path"]), daemon=True).start()
 
     async def on_scan_click(e):
         try:
-            files = await file_picker_scan.pick_files(allow_multiple=False)
+            files = await file_picker_scan.pick_files(allow_multiple=True)
             on_scan_file_selected(files)
         except Exception as ex:
             show_alert("Error", str(ex))
@@ -507,7 +618,7 @@ def main(page: ft.Page):
     
     build_ui()
     
-    # Context menu autostart scan
+    # Command line argument autostart scan
     if init_file_path and os.path.exists(init_file_path):
         api_key = get_api_key()
         cli_status, _ = check_installed_binary()
@@ -517,7 +628,10 @@ def main(page: ft.Page):
         elif cli_status == 'missing':
             show_alert("Error / Ошибка", STRINGS[current_lang]["download_instructions_title"])
         else:
-            threading.Thread(target=run_scan_pipeline, args=(init_file_path,), daemon=True).start()
+            class PseudoFile:
+                def __init__(self, path):
+                    self.path = path
+            on_scan_file_selected([PseudoFile(init_file_path)])
 
 if __name__ == '__main__':
     ft.run(main)
