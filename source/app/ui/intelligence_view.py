@@ -6,6 +6,7 @@ import json
 import webbrowser
 import flet as ft
 from ..config import STRINGS, CLI_BINARY_NAME
+from ..history_manager import add_lookup_record
 from .theme import make_stat_card, make_engine_row
 
 _NO_WINDOW = subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0
@@ -378,9 +379,21 @@ class IntelligenceView:
                     
                 state["results"] = data
                 state["status"] = "success"
+                add_lookup_record(
+                    lookup_type=tab_key,
+                    query=query_val,
+                    status="completed",
+                    results=data
+                )
             except Exception as ex:
                 state["status"] = "error"
                 state["error"] = str(ex)
+                add_lookup_record(
+                    lookup_type=tab_key,
+                    query=query_val,
+                    status="failed",
+                    error=str(ex)
+                )
                 
             self.thread_safe_build_fn()
             

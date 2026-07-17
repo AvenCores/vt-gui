@@ -43,9 +43,31 @@ def add_scan_record(filename, file_path, sha256, status, results=None, error=Non
     """Add a completed scan record to history. Returns the record."""
     record = {
         "id": int(time.time() * 1000),
+        "type": "file",
         "filename": filename,
         "file_path": file_path,
         "sha256": sha256,
+        "status": status,
+        "results": results,
+        "error": error,
+        "timestamp": time.time(),
+    }
+    records = load_history()
+    records.insert(0, record)
+    if len(records) > MAX_RECORDS:
+        records = records[:MAX_RECORDS]
+    save_history(records)
+    return record
+
+
+def add_lookup_record(lookup_type, query, status, results=None, error=None):
+    """Add a completed lookup record (url/domain/ip/search) to history."""
+    record = {
+        "id": int(time.time() * 1000),
+        "type": "lookup",
+        "lookup_type": lookup_type,
+        "query": query,
+        "filename": query,
         "status": status,
         "results": results,
         "error": error,
