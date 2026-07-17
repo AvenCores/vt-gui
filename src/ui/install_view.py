@@ -11,7 +11,7 @@ def build_install_view(cli_status, cli_hash, lang, file_picker_cli, on_direct_mo
                     ft.Icon(ft.Icons.DOWNLOAD_ROUNDED, color="#F59E0B", size=24),
                     ft.Text(STRINGS[lang]["download_instructions_title"], size=18, weight=ft.FontWeight.BOLD, color="#FFFFFF")
                 ], spacing=10),
-                ft.Text(STRINGS[lang]["download_instructions_text"], size=14, color="#E2E8F0", line_height=1.4),
+                ft.Text(STRINGS[lang]["download_instructions_text"], size=14, color="#E2E8F0"),
                 ft.VerticalDivider(height=10, color=ft.colors.TRANSPARENT),
                 ft.Row(
                     [
