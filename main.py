@@ -364,7 +364,7 @@ def main(page: ft.Page):
                 active_scans = []
                 build_ui()
                 
-            back_btn = ft.ElevatedButton(
+            back_btn = ft.Button(
                 content=ft.Text(STRINGS[current_lang]["btn_back"]),
                 icon=ft.Icons.ARROW_BACK_ROUNDED,
                 on_click=go_back_to_scanner,
@@ -400,7 +400,7 @@ def main(page: ft.Page):
                     on_click=copy_web_report_link
                 )
                 
-                web_btn = ft.ElevatedButton(
+                web_btn = ft.Button(
                     content=ft.Text(STRINGS[current_lang]["btn_open_web"]),
                     icon=ft.Icons.OPEN_IN_BROWSER_ROUNDED,
                     on_click=open_web_report,
