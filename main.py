@@ -11,6 +11,7 @@ from src.config import (
     write_env_var,
     get_api_key,
     get_app_lang,
+    get_available_langs,
     IS_WINDOWS,
     STRINGS
 )
@@ -135,9 +136,10 @@ def main(page: ft.Page):
             write_env_var("LANGUAGE", lang_code)
             page.title = STRINGS[current_lang]["app_title"]
             build_ui()
-            
-        active_lang_name = "РУ" if current_lang == "ru" else "EN"
-        
+
+        available_langs = get_available_langs()
+        active_lang_name = dict(available_langs).get(current_lang, current_lang.upper())
+
         language_menu = ft.PopupMenuButton(
             content=ft.Container(
                 content=ft.Row(
@@ -159,23 +161,14 @@ def main(page: ft.Page):
                 ft.PopupMenuItem(
                     content=ft.Row(
                         [
-                            ft.Icon(ft.Icons.CHECK_ROUNDED, color="#00F0FF" if current_lang == "ru" else "transparent", size=16),
-                            ft.Text("Русский", color="#E2E8F0", size=13),
+                            ft.Icon(ft.Icons.CHECK_ROUNDED, color="#00F0FF" if current_lang == code else "transparent", size=16),
+                            ft.Text(name, color="#E2E8F0", size=13),
                         ],
                         spacing=10
                     ),
-                    on_click=lambda _: change_language("ru")
-                ),
-                ft.PopupMenuItem(
-                    content=ft.Row(
-                        [
-                            ft.Icon(ft.Icons.CHECK_ROUNDED, color="#00F0FF" if current_lang == "en" else "transparent", size=16),
-                            ft.Text("English", color="#E2E8F0", size=13),
-                        ],
-                        spacing=10
-                    ),
-                    on_click=lambda _: change_language("en")
-                ),
+                    on_click=lambda _, c=code: change_language(c)
+                )
+                for code, name in available_langs
             ]
         )
         

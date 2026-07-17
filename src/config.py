@@ -61,6 +61,26 @@ def _load_strings():
 
 STRINGS = _load_strings()
 
+# Display names for each language code
+LANG_NAMES = {
+    "en": "English",
+    "ru": "Русский",
+    "es": "Español",
+    "de": "Deutsch",
+    "fr": "Français",
+    "pt": "Português",
+    "tr": "Türkçe",
+    "uk": "Українська",
+    "zh": "中文",
+    "ja": "日本語",
+    "ko": "한국어",
+    "ar": "العربية",
+}
+
+def get_available_langs():
+    """Returns list of (code, display_name) for languages present in strings.json."""
+    return [(code, LANG_NAMES.get(code, code)) for code in STRINGS if code in LANG_NAMES]
+
 def get_env_file_path():
     """Returns .env file path, handling naming collisions on Windows."""
     if os.path.exists('.env') and os.path.isdir('.env'):
@@ -194,24 +214,44 @@ def get_api_key():
             
     return None
 
-def get_app_lang():
-    """Determines application language (RU or EN)."""
-    env_vars = load_env_vars()
-    saved_lang = env_vars.get("LANGUAGE")
-    if saved_lang in ("ru", "en"):
-        return saved_lang
+def _detect_system_lang():
+    """Detect system locale and return best matching language code."""
+    # Map of locale prefixes to language codes
+    locale_map = {
+        "ru": "ru", "uk": "uk",
+        "es": "es",
+        "de": "de",
+        "fr": "fr",
+        "pt": "pt",
+        "tr": "tr",
+        "zh": "zh",
+        "ja": "ja",
+        "ko": "ko",
+        "ar": "ar",
+    }
     try:
-        lang = None
         for env_var in ('LANG', 'LC_ALL', 'LC_CTYPE', 'LANGUAGE'):
             val = os.environ.get(env_var)
             if val:
-                lang = val
-                break
-        if not lang:
-            try:
-                lang, _ = locale.getlocale()
-            except Exception:
-                pass
-        return "ru" if lang and lang.lower().startswith("ru") else "en"
+                prefix = val.split('.')[0].split('_')[0].split('-')[0].lower()
+                if prefix in locale_map:
+                    return locale_map[prefix]
+        try:
+            lang, _ = locale.getlocale()
+            if lang:
+                prefix = lang.split('_')[0].split('-')[0].lower()
+                if prefix in locale_map:
+                    return locale_map[prefix]
+        except Exception:
+            pass
     except Exception:
-        return "en"
+        pass
+    return "en"
+
+def get_app_lang():
+    """Determines application language from saved settings or system locale."""
+    env_vars = load_env_vars()
+    saved_lang = env_vars.get("LANGUAGE")
+    if saved_lang and saved_lang in STRINGS:
+        return saved_lang
+    return _detect_system_lang()
