@@ -3,6 +3,7 @@ import os
 import sys
 import threading
 import time
+import webbrowser
 import flet as ft
 
 from src.config import (
@@ -93,6 +94,28 @@ def main(page: ft.Page):
             bgcolor="#1E293B"
         )
         page.show_dialog(dlg)
+
+    # Helper to create social links in footer
+    def make_social_link(icon_url, dest_url, tooltip):
+        img = ft.Image(
+            src=icon_url,
+            width=20,
+            height=20,
+            color="#94A3B8"
+        )
+        
+        def on_hover(e):
+            img.color = "#00F0FF" if e.data == "true" else "#94A3B8"
+            img.update()
+            
+        return ft.Container(
+            content=img,
+            tooltip=tooltip,
+            on_click=lambda _: webbrowser.open(dest_url),
+            on_hover=on_hover,
+            padding=5,
+            border_radius=4
+        )
 
     def build_ui():
         nonlocal app_state
@@ -378,6 +401,33 @@ def main(page: ft.Page):
         else:
             main_content.content = build_scanner_view(cli_status, cli_hash, current_lang, file_picker_scan, on_scan_click)
             
+        # Build footer with social links
+        footer = ft.Container(
+            content=ft.Row(
+                [
+                    make_social_link(
+                        "https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/youtube.svg",
+                        "https://youtube.com/@avencores",
+                        "YouTube"
+                    ),
+                    make_social_link(
+                        "https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/telegram.svg",
+                        "https://t.me/avencoresyt",
+                        "Telegram"
+                    ),
+                    make_social_link(
+                        "https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/github.svg",
+                        "https://github.com/AvenCores",
+                        "GitHub"
+                    ),
+                ],
+                alignment=ft.MainAxisAlignment.CENTER,
+                spacing=20
+            ),
+            padding=ft.Padding(top=10, right=0, bottom=5, left=0),
+            alignment=ft.Alignment(0, 0)
+        )
+
         outer_container = ft.Container(
             gradient=ft.LinearGradient(
                 begin=ft.Alignment.TOP_LEFT,
@@ -390,7 +440,8 @@ def main(page: ft.Page):
                 [
                     header,
                     ft.Container(height=10),
-                    main_content
+                    main_content,
+                    footer
                 ],
                 expand=True
             )
