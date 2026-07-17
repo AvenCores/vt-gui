@@ -225,33 +225,39 @@ def build_footer(lang="en", page=None):
     about_btn = make_social_link("info.svg", "#", about_text)
     about_btn.on_click = on_about_click
 
+    social_icons = ft.Row(
+        [
+            make_social_link("youtube.svg", "https://www.youtube.com/@avencores/", "YouTube"),
+            make_social_link("telegram.svg", "https://t.me/avencoresyt", "Telegram"),
+            make_social_link("vk.svg", "https://vk.ru/avencoresreuploads", "VK"),
+            make_social_link("dzen.svg", "https://dzen.ru/avencores", "Dzen"),
+            make_social_link("github.svg", "https://github.com/AvenCores", "GitHub"),
+        ],
+        alignment=ft.MainAxisAlignment.CENTER,
+        spacing=20,
+    )
+
+    left_part = ft.Container(
+        content=ft.Row([version_label, update_btn], spacing=8),
+        clip_behavior=ft.ClipBehavior.HARD_EDGE,
+        expand=True,
+    )
+
+    right_part = ft.Container(
+        content=ft.Row([donate_btn, about_btn], spacing=8, alignment=ft.MainAxisAlignment.END),
+        expand=True,
+    )
+
+    center_part = ft.Container(
+        content=social_icons,
+        expand=True,
+        alignment=ft.Alignment.CENTER,
+    )
+
     return ft.Container(
-        content=ft.Column([
-            ft.Row(
-                [
-                    ft.Row([version_label, update_btn], spacing=8),
-                    ft.Row(
-                        [
-                            make_social_link("youtube.svg", "https://www.youtube.com/@avencores/", "YouTube"),
-                            make_social_link("telegram.svg", "https://t.me/avencoresyt", "Telegram"),
-                            make_social_link("vk.svg", "https://vk.ru/avencoresreuploads", "VK"),
-                            make_social_link("dzen.svg", "https://dzen.ru/avencores", "Dzen"),
-                            make_social_link("github.svg", "https://github.com/AvenCores", "GitHub"),
-                        ],
-                        alignment=ft.MainAxisAlignment.CENTER,
-                        spacing=20
-                    ),
-                    ft.Row(
-                        [
-                            donate_btn,
-                            about_btn
-                        ],
-                        spacing=8
-                    )
-                ],
-                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                vertical_alignment=ft.CrossAxisAlignment.CENTER
-            )
-        ]),
+        content=ft.Row(
+            [left_part, center_part, right_part],
+            vertical_alignment=ft.CrossAxisAlignment.CENTER,
+        ),
         padding=ft.Padding(top=10, right=10, bottom=5, left=10)
     )
