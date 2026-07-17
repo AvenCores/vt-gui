@@ -6,7 +6,6 @@ def open_settings(page, lang, on_settings_saved):
     """Opens a beautiful modal settings dialog with configuration options."""
     env_vars = load_env_vars()
     api_key = env_vars.get("VT_APIKEY", "")
-    is_direct = env_vars.get("DIRECT_MODE") == "True"
     
     api_key_field = ft.TextField(
         label=STRINGS[lang]["api_key_label"],
@@ -20,28 +19,16 @@ def open_settings(page, lang, on_settings_saved):
         text_style=ft.TextStyle(color="#E2E8F0")
     )
     
-    direct_switch = ft.Switch(
-        value=is_direct,
-        label=STRINGS[lang]["direct_mode_label"],
-        active_color="#00F0FF",
-        label_text_style=ft.TextStyle(color="#E2E8F0", size=13)
-    )
-    
     # Helper to show alerts inside settings
     def show_settings_alert(text):
-        def close_inner_dlg(e):
-            page.dialog.open = False
-            page.update()
-            
-        page.dialog = ft.AlertDialog(
+        inner_dlg = ft.AlertDialog(
             title=ft.Text(STRINGS[lang]["settings_title"], color="#FFFFFF", weight=ft.FontWeight.BOLD),
             content=ft.Text(text, color="#E2E8F0"),
-            actions=[ft.TextButton(STRINGS[lang]["btn_close"], on_click=close_inner_dlg)],
+            actions=[ft.TextButton(STRINGS[lang]["btn_close"], on_click=lambda _: page.pop_dialog())],
             actions_alignment=ft.MainAxisAlignment.END,
             bgcolor="#1E293B"
         )
-        page.dialog.open = True
-        page.update()
+        page.show_dialog(inner_dlg)
 
     def register_menu(e):
         ok, err = register_context_menu()
@@ -79,11 +66,9 @@ def open_settings(page, lang, on_settings_saved):
     
     def save_settings(e):
         write_env_var("VT_APIKEY", api_key_field.value.strip())
-        write_env_var("DIRECT_MODE", str(direct_switch.value))
         
-        # Close dialog
-        page.dialog.open = False
-        page.update()
+        # Close settings dialog
+        page.pop_dialog()
         
         # Call completion callback to reload parent UI
         on_settings_saved()
@@ -92,30 +77,22 @@ def open_settings(page, lang, on_settings_saved):
         [
             api_key_field,
             ft.Divider(color="#2E3C56"),
-            direct_switch,
-            ft.Text(STRINGS[lang]["direct_mode_hint"], size=10, color="#94A3B8"),
-            ft.Divider(color="#2E3C56"),
             ft.Text(STRINGS[lang]["context_menu_label"], weight=ft.FontWeight.BOLD, size=13, color="#FFFFFF"),
             ft.Row([register_btn, unregister_btn], spacing=10)
         ],
         spacing=15,
-        height=320,
+        height=180,
         width=400
     )
     
-    page.dialog = ft.AlertDialog(
+    dlg = ft.AlertDialog(
         title=ft.Text(STRINGS[lang]["settings_title"], color="#FFFFFF", weight=ft.FontWeight.BOLD),
         content=settings_content,
         actions=[
-            ft.TextButton(STRINGS[lang]["btn_no"], on_click=lambda _: close_dlg()),
+            ft.TextButton(STRINGS[lang]["btn_no"], on_click=lambda _: page.pop_dialog()),
             ft.ElevatedButton(STRINGS[lang]["btn_save"], on_click=save_settings, bgcolor="#008DDA", color="#FFFFFF")
         ],
         bgcolor="#151E33"
     )
     
-    def close_dlg():
-        page.dialog.open = False
-        page.update()
-        
-    page.dialog.open = True
-    page.update()
+    page.show_dialog(dlg)

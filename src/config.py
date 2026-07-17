@@ -22,8 +22,6 @@ STRINGS = {
         "settings_title": "Settings",
         "api_key_label": "VirusTotal API Key",
         "api_key_hint": "Enter your VirusTotal API key",
-        "direct_mode_label": "Direct HTTP API Mode (No vt.exe required)",
-        "direct_mode_hint": "Use pure Python requests instead of vt.exe CLI. Fast and requires no installation.",
         "context_menu_label": "Windows Explorer Context Menu",
         "context_menu_register": "Register 'Scan with VirusTotal'",
         "context_menu_unregister": "Remove from Context Menu",
@@ -90,8 +88,6 @@ STRINGS = {
         "settings_title": "Настройки",
         "api_key_label": "API Ключ VirusTotal",
         "api_key_hint": "Введите ваш API-ключ",
-        "direct_mode_label": "Режим Direct HTTP API (без vt.exe)",
-        "direct_mode_hint": "Использовать прямые HTTP-запросы вместо vt.exe. Не требует установки утилиты.",
         "context_menu_label": "Контекстное меню проводника Windows",
         "context_menu_register": "Добавить 'Сканировать в VirusTotal'",
         "context_menu_unregister": "Удалить из контекстного меню",
@@ -205,10 +201,6 @@ def get_api_key():
         if val:
             return val
     return None
-
-def is_direct_mode():
-    """Returns True if Direct HTTP mode is active."""
-    return load_env_vars().get("DIRECT_MODE") == "True"
 
 def get_app_lang():
     """Determines application language (RU or EN)."""

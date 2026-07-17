@@ -2,7 +2,7 @@ import flet as ft
 import webbrowser
 from ..config import STRINGS
 
-def build_install_view(cli_status, cli_hash, lang, file_picker_cli, on_direct_mode_changed, direct_mode_init, on_cli_click):
+def build_install_view(cli_status, cli_hash, lang, file_picker_cli, on_cli_click):
     """Builds the Flet container for the vt.exe CLI manual installation screen."""
     return ft.Container(
         content=ft.Column(
@@ -36,20 +36,7 @@ def build_install_view(cli_status, cli_hash, lang, file_picker_cli, on_direct_mo
                         )
                     ],
                     spacing=15
-                ),
-                ft.Divider(color="#1E293B"),
-                ft.Row(
-                    [
-                        ft.Text(STRINGS[lang]["direct_mode_label"], size=13, color="#E2E8F0", weight=ft.FontWeight.BOLD),
-                        ft.Switch(
-                            value=direct_mode_init,
-                            active_color="#00F0FF",
-                            on_change=on_direct_mode_changed
-                        )
-                    ],
-                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN
-                ),
-                ft.Text(STRINGS[lang]["direct_mode_hint"], size=11, color="#94A3B8")
+                )
             ],
             spacing=15
         ),

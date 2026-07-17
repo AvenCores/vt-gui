@@ -1,14 +1,10 @@
 import flet as ft
 from ..config import STRINGS, KNOWN_HASHES
 
-def build_scanner_view(cli_status, cli_hash, is_direct, lang, file_picker_scan, on_scan_click):
+def build_scanner_view(cli_status, cli_hash, lang, file_picker_scan, on_scan_click):
     """Builds the main File Scanner view with drag-and-drop simulated click zone and badges."""
     # Build Status Badge for CLI
-    if is_direct:
-        badge_text = STRINGS[lang]["direct_mode_label"]
-        badge_color = "#008DDA"
-        badge_icon = ft.Icons.HTTP_ROUNDED
-    elif cli_status == 'verified':
+    if cli_status == 'verified':
         version_str = KNOWN_HASHES.get(cli_hash, "CLI")
         badge_text = STRINGS[lang]["vt_exe_verified"].format(version=version_str)
         badge_color = "#10B981"

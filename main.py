@@ -9,7 +9,6 @@ from src.config import (
     load_env_vars,
     write_env_var,
     get_api_key,
-    is_direct_mode,
     get_app_lang,
     STRINGS
 )
@@ -21,9 +20,6 @@ from src.cli_manager import (
 )
 from src.vt_api import (
     check_file_exists_direct,
-    check_file_exists_vt,
-    upload_file_direct,
-    check_analysis_status_direct,
     check_file_exists_vt
 )
 from src.ui.install_view import build_install_view
@@ -87,26 +83,21 @@ def main(page: ft.Page):
     
     # Helper to show alerts
     def show_alert(title, text):
-        def close_dlg(e):
-            page.dialog.open = False
-            page.update()
-        page.dialog = ft.AlertDialog(
+        dlg = ft.AlertDialog(
             title=ft.Text(title, color="#FFFFFF", weight=ft.FontWeight.BOLD),
             content=ft.Text(text, color="#E2E8F0"),
-            actions=[ft.TextButton(STRINGS[current_lang]["btn_close"], on_click=close_dlg)],
+            actions=[ft.TextButton(STRINGS[current_lang]["btn_close"], on_click=lambda _: page.pop_dialog())],
             actions_alignment=ft.MainAxisAlignment.END,
             bgcolor="#1E293B"
         )
-        page.dialog.open = True
-        page.update()
+        page.show_dialog(dlg)
 
     def build_ui():
         nonlocal app_state
         cli_status, cli_hash = check_installed_binary()
-        is_direct = is_direct_mode()
         
-        # Enforce install view if missing vt.exe and not in direct mode
-        if cli_status == 'missing' and not is_direct and app_state == "scanner":
+        # Enforce install view if missing vt.exe
+        if cli_status == 'missing' and app_state == "scanner":
             app_state = "install_cli"
             
         page.controls.clear()
@@ -162,19 +153,11 @@ def main(page: ft.Page):
         main_content = ft.Container(expand=True)
         
         if app_state == "install_cli":
-            def on_direct_mode_changed(e):
-                write_env_var("DIRECT_MODE", str(e.control.value))
-                nonlocal app_state
-                app_state = "scanner"
-                build_ui()
-                
             main_content.content = build_install_view(
                 cli_status,
                 cli_hash,
                 current_lang,
                 file_picker_cli,
-                on_direct_mode_changed,
-                is_direct,
                 on_cli_click
             )
         elif app_state == "scanning":
@@ -196,7 +179,7 @@ def main(page: ft.Page):
                 page
             )
         else:
-            main_content.content = build_scanner_view(cli_status, cli_hash, is_direct, current_lang, file_picker_scan, on_scan_click)
+            main_content.content = build_scanner_view(cli_status, cli_hash, current_lang, file_picker_scan, on_scan_click)
             
         outer_container = ft.Container(
             gradient=ft.LinearGradient(
@@ -219,6 +202,15 @@ def main(page: ft.Page):
         page.add(outer_container)
         page.update()
 
+    import asyncio
+    _loop = asyncio.get_event_loop()
+
+    def thread_safe_update():
+        _loop.call_soon_threadsafe(page.update)
+
+    def thread_safe_build():
+        _loop.call_soon_threadsafe(build_ui)
+
     # ==============================================================================
     # BACKGROUND PIPELINE
     # ==============================================================================
@@ -228,12 +220,12 @@ def main(page: ft.Page):
             scan_progress_bar.value = None
         else:
             scan_progress_bar.value = progress_value
-        page.update()
+        thread_safe_update()
 
     def show_scan_error(err_msg):
         nonlocal app_state
         app_state = "scanner"
-        build_ui()
+        thread_safe_build()
         show_alert(STRINGS[current_lang]["scan_failed"].format(e=""), err_msg)
 
     def show_results(results_data, file_hash, file_path):
@@ -242,12 +234,12 @@ def main(page: ft.Page):
         last_completed_sha256 = file_hash
         selected_target_file = file_path
         app_state = "results"
-        build_ui()
+        thread_safe_build()
 
     def run_scan_pipeline(file_path):
         nonlocal app_state
         app_state = "scanning"
-        build_ui()
+        thread_safe_build()
         
         throttler = ProgressThrottler(0.12)
         
@@ -262,7 +254,7 @@ def main(page: ft.Page):
                     current=current_mb,
                     total=total_mb
                 )
-                page.update()
+                thread_safe_update()
 
         try:
             # 1. Compute Hash
@@ -279,27 +271,20 @@ def main(page: ft.Page):
             # 3. Check Database
             set_scan_status(STRINGS[current_lang]["checking_vt"], 0.25)
             
-            is_direct = is_direct_mode()
-            existing_info = None
-            
-            if is_direct:
-                existing_info = check_file_exists_direct(sha256, api_key)
-            else:
-                vt_path = get_temp_bin_path()
-                if not os.path.exists(vt_path):
-                    raise ValueError("vt.exe was missing when scan was initiated.")
-                existing_info = check_file_exists_vt(vt_path, sha256)
+            vt_path = get_temp_bin_path()
+            if not os.path.exists(vt_path):
+                raise ValueError("vt.exe was missing when scan was initiated.")
+            existing_info = check_file_exists_vt(vt_path, sha256)
                 
             if existing_info:
                 # File already scanned! Fetch complete report.
                 set_scan_status(STRINGS[current_lang]["scan_success"], 1.0)
-                if not is_direct:
-                    try:
-                        web_info = check_file_exists_direct(sha256, api_key)
-                        if web_info:
-                            existing_info = web_info
-                    except Exception:
-                        pass
+                try:
+                    web_info = check_file_exists_direct(sha256, api_key)
+                    if web_info:
+                        existing_info = web_info
+                except Exception:
+                    pass
                 show_results(existing_info, sha256, file_path)
                 return
                 
@@ -307,35 +292,31 @@ def main(page: ft.Page):
             set_scan_status(STRINGS[current_lang]["uploading_file"], 0.4)
             analysis_id = None
             
-            if is_direct:
-                res = upload_file_direct(file_path, api_key, progress_callback=on_upload_progress)
-                analysis_id = res.get("data", {}).get("id")
-            else:
-                vt_path = get_temp_bin_path()
-                cmd = [vt_path, 'scan', 'file', file_path]
-                import subprocess
-                proc = subprocess.run(
-                    cmd,
-                    capture_output=True,
-                    text=True,
-                    encoding='utf-8',
-                    errors='replace'
-                )
-                if proc.returncode != 0:
-                    raise ValueError(f"vt.exe upload failed: {proc.stderr or proc.stdout}")
-                
-                stdout_lines = proc.stdout.strip().split('\n')
-                for line in stdout_lines:
-                    if not line.strip():
-                        continue
-                    parts = line.strip().rsplit(' ', 1)
-                    if len(parts) == 2:
-                        analysis_id = parts[1]
-                        break
-                if not analysis_id and stdout_lines:
-                    last_line = stdout_lines[-1]
-                    if "analysis" in last_line:
-                        analysis_id = last_line.split('/')[-1]
+            vt_path = get_temp_bin_path()
+            cmd = [vt_path, 'scan', 'file', file_path]
+            import subprocess
+            proc = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                encoding='utf-8',
+                errors='replace'
+            )
+            if proc.returncode != 0:
+                raise ValueError(f"vt.exe upload failed: {proc.stderr or proc.stdout}")
+            
+            stdout_lines = proc.stdout.strip().split('\n')
+            for line in stdout_lines:
+                if not line.strip():
+                    continue
+                parts = line.strip().rsplit(' ', 1)
+                if len(parts) == 2:
+                    analysis_id = parts[1]
+                    break
+            if not analysis_id and stdout_lines:
+                last_line = stdout_lines[-1]
+                if "analysis" in last_line:
+                    analysis_id = last_line.split('/')[-1]
                         
             if not analysis_id:
                 raise ValueError("Could not retrieve analysis ID from VirusTotal.")
@@ -349,28 +330,24 @@ def main(page: ft.Page):
             
             while True:
                 status = None
-                if is_direct:
-                    res = check_analysis_status_direct(analysis_id, api_key)
-                    status = res.get("data", {}).get("attributes", {}).get("status")
-                else:
-                    vt_path = get_temp_bin_path()
-                    import subprocess
-                    status_cmd = [vt_path, 'analysis', analysis_id, '--format', 'json']
-                    status_proc = subprocess.run(
-                        status_cmd,
-                        capture_output=True,
-                        text=True,
-                        encoding='utf-8',
-                        errors='replace'
-                    )
-                    if status_proc.returncode == 0:
-                        try:
-                            data = json.loads(status_proc.stdout)
-                            if isinstance(data, list) and len(data) > 0:
-                                data = data[0]
-                            status = data.get('status')
-                        except Exception:
-                            pass
+                vt_path = get_temp_bin_path()
+                import subprocess
+                status_cmd = [vt_path, 'analysis', analysis_id, '--format', 'json']
+                status_proc = subprocess.run(
+                    status_cmd,
+                    capture_output=True,
+                    text=True,
+                    encoding='utf-8',
+                    errors='replace'
+                )
+                if status_proc.returncode == 0:
+                    try:
+                        data = json.loads(status_proc.stdout)
+                        if isinstance(data, list) and len(data) > 0:
+                            data = data[0]
+                        status = data.get('status')
+                    except Exception:
+                        pass
                             
                 if status == "completed":
                     break
@@ -384,8 +361,7 @@ def main(page: ft.Page):
             
             final_report = check_file_exists_direct(sha256, api_key)
             if not final_report:
-                if not is_direct:
-                    final_report = check_file_exists_vt(vt_path, sha256)
+                final_report = check_file_exists_vt(vt_path, sha256)
                     
             if not final_report:
                 raise ValueError("Analysis completed, but failed to fetch the file details.")
@@ -415,8 +391,11 @@ def main(page: ft.Page):
         threading.Thread(target=run_scan_pipeline, args=(file_path,), daemon=True).start()
 
     async def on_scan_click(e):
-        files = await file_picker_scan.pick_files(allow_multiple=False)
-        on_scan_file_selected(files)
+        try:
+            files = await file_picker_scan.pick_files(allow_multiple=False)
+            on_scan_file_selected(files)
+        except Exception as ex:
+            show_alert("Error", str(ex))
 
     def on_cli_file_selected(files):
         nonlocal selected_installer_data, selected_installer_hash
@@ -441,7 +420,7 @@ def main(page: ft.Page):
             else:
                 # Custom Hash Warning Dialog
                 def approve_custom_binary(e):
-                    page.dialog.open = False
+                    page.pop_dialog()
                     temp_bin = get_temp_bin_path()
                     with open(temp_bin, "wb") as f:
                         f.write(selected_installer_data)
@@ -452,10 +431,9 @@ def main(page: ft.Page):
                     build_ui()
                     
                 def reject_custom_binary(e):
-                    page.dialog.open = False
-                    page.update()
+                    page.pop_dialog()
                     
-                page.dialog = ft.AlertDialog(
+                dlg = ft.AlertDialog(
                     title=ft.Text(STRINGS[current_lang]["hash_warning_title"], color="#FFFFFF", weight=ft.FontWeight.BOLD),
                     content=ft.Text(STRINGS[current_lang]["hash_warning_text"].format(hash=exe_hash)),
                     actions=[
@@ -464,19 +442,21 @@ def main(page: ft.Page):
                     ],
                     bgcolor="#151E33"
                 )
-                page.dialog.open = True
-                page.update()
+                page.show_dialog(dlg)
                 
         except Exception as ex:
             show_alert(STRINGS[current_lang]["verify_fail"].format(e=""), str(ex))
 
     async def on_cli_click(e):
-        files = await file_picker_cli.pick_files(
-            allow_multiple=False,
-            file_type=ft.FilePickerFileType.CUSTOM,
-            allowed_extensions=["zip", "exe"]
-        )
-        on_cli_file_selected(files)
+        try:
+            files = await file_picker_cli.pick_files(
+                allow_multiple=False,
+                file_type=ft.FilePickerFileType.CUSTOM,
+                allowed_extensions=["zip", "exe"]
+            )
+            on_cli_file_selected(files)
+        except Exception as ex:
+            show_alert("Error", str(ex))
 
     # Initialize file pickers
     file_picker_scan = ft.FilePicker()
@@ -489,11 +469,10 @@ def main(page: ft.Page):
     if init_file_path and os.path.exists(init_file_path):
         api_key = get_api_key()
         cli_status, _ = check_installed_binary()
-        is_direct = is_direct_mode()
         
         if not api_key:
             show_alert("Error / Ошибка", STRINGS[current_lang]["api_key_missing"])
-        elif cli_status == 'missing' and not is_direct:
+        elif cli_status == 'missing':
             show_alert("Error / Ошибка", STRINGS[current_lang]["download_instructions_title"])
         else:
             threading.Thread(target=run_scan_pipeline, args=(init_file_path,), daemon=True).start()
