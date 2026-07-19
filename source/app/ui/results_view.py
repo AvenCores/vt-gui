@@ -1,5 +1,4 @@
 import flet as ft
-import webbrowser
 import os
 from ..config import STRINGS
 from .theme import make_stat_card, make_file_details_card, make_engine_row

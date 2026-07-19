@@ -3,7 +3,6 @@ import urllib.request
 import urllib.error
 import subprocess
 import sys
-import os
 
 _NO_WINDOW = subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0
 
