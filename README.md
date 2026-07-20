@@ -33,6 +33,24 @@
 
 ![maxresdefault](https://i.ibb.co/8nB79Cn2/chrome-Go-WZgprng-Z.png)
 
+# 🎦 Видео гайд по установке и решению проблем
+
+![maxresdefault](https://i.ibb.co/5x2h3LgS/Chat-GPT-Image-18-2026-15-42-42.png)
+
+<div align="center">
+
+[**Смотреть на YouTube**](https://www.youtube.com/watch?v=KNdZoy6Ixxo)
+
+[**Смотреть на Dzen**](https://dzen.ru/video/watch/6a5b77343ceaa4017d1d50f6)
+
+[**Смотреть на Rutube**](https://rutube.ru/video/private/c402084c77dabec7cbf4e2152c7187ec/?p=ODGgUgedy78Lfdc2b74mew)
+
+[**Смотреть в VK Video**](https://vkvideo.ru/video-234234162_456239099)
+
+[**Смотреть в Telegram**](https://t.me/avencoreschat/558444)
+
+</div>
+
 ---
 
 ## ✨ Основные возможности
