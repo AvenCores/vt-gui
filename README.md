@@ -35,7 +35,7 @@
 
 # 🎦 Видео гайд по установке и решению проблем
 
-![maxresdefault](https://i.ibb.co/5x2h3LgS/Chat-GPT-Image-18-2026-15-42-42.png)
+![maxresdefault](https://i.ibb.co/39YVYSWV/1.png)
 
 <div align="center">
 
