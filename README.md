@@ -33,7 +33,7 @@
 
 ![maxresdefault](https://i.ibb.co/8nB79Cn2/chrome-Go-WZgprng-Z.png)
 
-# 🎦 Видео гайд по установке и решению проблем
+# 🎦 Видео гайд по установке и использованию программы
 
 ![maxresdefault](https://i.ibb.co/39YVYSWV/1.png)
 
