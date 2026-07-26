@@ -4,7 +4,7 @@ import time
 import json
 import subprocess
 from ..config import STRINGS, get_api_key, CLI_BINARY_NAME
-from ..cli_manager import get_temp_bin_path, compute_sha256
+from ..cli_manager import get_temp_bin_path, get_installed_binary_path, compute_sha256
 from ..vt_api import check_file_exists_direct, check_file_exists_vt
 from ..history_manager import add_scan_record
 
@@ -80,8 +80,8 @@ class ScanService:
             set_scan_status(STRINGS[self.current_lang]["checking_vt"], 0.25,
                             resolver=lambda lang: STRINGS[lang]["checking_vt"])
             
-            vt_path = get_temp_bin_path()
-            if not os.path.exists(vt_path):
+            vt_path = get_installed_binary_path()
+            if not vt_path or not os.path.exists(vt_path):
                 raise ValueError(f"{CLI_BINARY_NAME} was missing when scan was initiated.")
             existing_info = check_file_exists_vt(vt_path, sha256)
                 
@@ -113,7 +113,9 @@ class ScanService:
                             resolver=lambda lang: STRINGS[lang]["uploading_file"])
             analysis_id = None
             
-            vt_path = get_temp_bin_path()
+            vt_path = get_installed_binary_path()
+            if not vt_path or not os.path.exists(vt_path):
+                raise ValueError(f"{CLI_BINARY_NAME} was missing when upload was initiated.")
             cmd = [vt_path, 'scan', 'file', file_path]
             proc = subprocess.run(
                 cmd,
@@ -157,7 +159,9 @@ class ScanService:
                     raise ValueError(STRINGS[self.current_lang]["scan_timeout_err"].format(timeout=max_wait))
                     
                 status = None
-                vt_path = get_temp_bin_path()
+                vt_path = get_installed_binary_path()
+                if not vt_path or not os.path.exists(vt_path):
+                    raise ValueError(f"{CLI_BINARY_NAME} was missing during analysis polling.")
                 status_cmd = [vt_path, 'analysis', analysis_id, '--format', 'json']
                 status_proc = subprocess.run(
                     status_cmd,

@@ -12,11 +12,11 @@ from .theme import make_stat_card, make_engine_row
 _NO_WINDOW = subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0
 
 class IntelligenceView:
-    def __init__(self, search_states, current_lang, show_alert_fn, get_temp_bin_path_fn, thread_safe_build_fn, build_ui_fn, page: ft.Page):
+    def __init__(self, search_states, current_lang, show_alert_fn, get_installed_binary_path_fn, thread_safe_build_fn, build_ui_fn, page: ft.Page):
         self.search_states = search_states
         self.current_lang = current_lang
         self.show_alert_fn = show_alert_fn
-        self.get_temp_bin_path_fn = get_temp_bin_path_fn
+        self.get_installed_binary_path_fn = get_installed_binary_path_fn
         self.thread_safe_build_fn = thread_safe_build_fn
         self.build_ui_fn = build_ui_fn
         self.page = page
@@ -170,7 +170,9 @@ class IntelligenceView:
                 def download_sample(e):
                     def run_download_thread():
                         try:
-                            vt_path = self.get_temp_bin_path_fn()
+                            vt_path = self.get_installed_binary_path_fn()
+                            if not vt_path or not os.path.exists(vt_path):
+                                raise ValueError(f"{CLI_BINARY_NAME} CLI is not installed.")
                             downloads_dir = os.path.join(os.path.expanduser("~"), "Downloads")
                             cmd = [vt_path, 'download', file_hash, '-o', downloads_dir]
                             proc = subprocess.run(cmd, capture_output=True, text=True, encoding='utf-8', creationflags=_NO_WINDOW)
@@ -339,8 +341,8 @@ class IntelligenceView:
         
         def execute_query():
             try:
-                vt_path = self.get_temp_bin_path_fn()
-                if not os.path.exists(vt_path):
+                vt_path = self.get_installed_binary_path_fn()
+                if not vt_path or not os.path.exists(vt_path):
                     raise ValueError(f"{CLI_BINARY_NAME} CLI is not installed.")
                     
                 if tab_key == "url":

@@ -18,6 +18,7 @@ from app.config import (
 from app.cli_manager import (
     check_installed_binary,
     get_temp_bin_path,
+    get_installed_binary_path,
     process_selected_binary,
     compute_sha256,
     download_and_install_cli
@@ -129,7 +130,7 @@ def main(page: ft.Page):
         cli_status, cli_hash = check_installed_binary()
         
         # Enforce install view if missing vt CLI
-        if cli_status == 'missing' and app_state == "scanner":
+        if cli_status == 'missing':
             app_state = "install_cli"
             
         page.controls.clear()
@@ -312,12 +313,15 @@ def main(page: ft.Page):
                 else:  # failed
                     def make_retry_callback(scan_idx, path):
                         def retry_scan(e):
+                            nonlocal scan_service
                             active_scans[scan_idx]["status"] = "scanning"
                             active_scans[scan_idx]["status_text"] = STRINGS[current_lang]["computing_hash"]
                             active_scans[scan_idx]["progress"] = 0.0
                             active_scans[scan_idx]["error"] = None
+                            if scan_service is None:
+                                scan_service = ScanService(active_scans, current_lang, thread_safe_build, show_alert, page)
                             build_ui()
-                            threading.Thread(target=run_single_scan_pipeline, args=(scan_idx, path), daemon=True).start()
+                            threading.Thread(target=scan_service.run_single_scan_pipeline, args=(scan_idx, path), daemon=True).start()
                         return retry_scan
                         
                     tab_content = ft.Container(
@@ -467,7 +471,7 @@ def main(page: ft.Page):
             )
         else:
             files_view = build_scanner_view(cli_status, cli_hash, current_lang, file_picker_scan, on_scan_click)
-            intel_view = IntelligenceView(search_states, current_lang, show_alert, get_temp_bin_path, thread_safe_build, build_ui, page)
+            intel_view = IntelligenceView(search_states, current_lang, show_alert, get_installed_binary_path, thread_safe_build, build_ui, page)
             url_view = intel_view.build_lookup_tab("url", STRINGS[current_lang]["url_placeholder"], STRINGS[current_lang]["url_helper"])
             domain_view = intel_view.build_lookup_tab("domain", STRINGS[current_lang]["domain_placeholder"], STRINGS[current_lang]["domain_helper"])
             ip_view = intel_view.build_lookup_tab("ip", STRINGS[current_lang]["ip_placeholder"], STRINGS[current_lang]["ip_helper"])
@@ -595,8 +599,15 @@ def main(page: ft.Page):
     def on_scan_file_selected(files):
         if not files:
             return
-            
+
         nonlocal active_scans, app_state, current_tab_index, scan_service
+
+        cli_status, _ = check_installed_binary()
+        if cli_status == 'missing':
+            app_state = "install_cli"
+            build_ui()
+            return
+            
         active_scans = []
         current_tab_index = 0
         app_state = "scans"
