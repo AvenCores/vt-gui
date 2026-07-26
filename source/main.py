@@ -2,7 +2,6 @@ import os
 import sys
 import threading
 import time
-import webbrowser
 import flet as ft
 
 from app.config import (
