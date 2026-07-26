@@ -1,5 +1,5 @@
 import flet as ft
-from ..config import STRINGS, get_cli_display_name
+from ..config import STRINGS
 
 def build_install_view(cli_status, cli_hash, lang, install_status_text, install_progress_bar, on_auto_install_click, on_manual_install_click):
     """Builds the Flet container for the vt CLI automatic and manual installation screen."""

@@ -1,4 +1,3 @@
-import json
 import os
 import sys
 import threading
@@ -7,7 +6,6 @@ import webbrowser
 import flet as ft
 
 from app.config import (
-    load_env_vars,
     write_env_var,
     get_api_key,
     get_app_lang,
@@ -20,12 +18,7 @@ from app.cli_manager import (
     get_temp_bin_path,
     get_installed_binary_path,
     process_selected_binary,
-    compute_sha256,
     download_and_install_cli
-)
-from app.vt_api import (
-    check_file_exists_direct,
-    check_file_exists_vt
 )
 from app.ui.install_view import build_install_view
 from app.ui.scanner_view import build_scanner_view

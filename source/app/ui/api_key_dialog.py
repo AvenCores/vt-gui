@@ -2,8 +2,8 @@ import os
 import threading
 import flet as ft
 import webbrowser
-from ..config import write_env_var, STRINGS, get_api_key
-from ..cli_manager import check_installed_binary, download_and_install_cli
+from ..config import write_env_var, STRINGS
+from ..cli_manager import download_and_install_cli
 
 def open_api_key_dialog(page, lang, on_saved):
     """Opens a non-dismissable dialog for entering an API key on first launch."""

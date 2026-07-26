@@ -4,7 +4,7 @@ import time
 import json
 import subprocess
 from ..config import STRINGS, get_api_key, CLI_BINARY_NAME
-from ..cli_manager import get_temp_bin_path, get_installed_binary_path, compute_sha256
+from ..cli_manager import get_installed_binary_path, compute_sha256
 from ..vt_api import check_file_exists_direct, check_file_exists_vt
 from ..history_manager import add_scan_record
 
