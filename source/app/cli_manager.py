@@ -29,18 +29,20 @@ def _find_binary_in_path():
 def check_installed_binary():
     """Checks if the vt CLI binary is installed and validates its hash.
     First checks the temp directory, then falls back to system PATH.
-    Returns: status ('verified', 'custom', 'unapproved', 'missing') and the hash."""
+    Returns: (status, hash, source) where source is 'app', 'system', or None."""
     # Check our managed temp directory first
     path = get_temp_bin_path()
     if os.path.exists(path):
-        return _validate_binary(path)
+        status, file_hash = _validate_binary(path)
+        return status, file_hash, 'app'
 
     # Fall back to system PATH
     path_in_path = _find_binary_in_path()
     if path_in_path and os.path.exists(path_in_path):
-        return _validate_binary(path_in_path)
+        status, file_hash = _validate_binary(path_in_path)
+        return status, file_hash, 'system'
 
-    return 'missing', None
+    return 'missing', None, None
 
 def get_installed_binary_path():
     """Returns absolute path to the valid installed vt CLI binary, or None if missing."""

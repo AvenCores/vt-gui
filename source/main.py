@@ -105,7 +105,7 @@ def main(page: ft.Page):
 
     def build_ui():
         nonlocal app_state
-        cli_status, cli_hash = check_installed_binary()
+        cli_status, cli_hash, cli_source = check_installed_binary()
         
         # Enforce install view if missing vt CLI
         if cli_status == 'missing':
@@ -171,7 +171,7 @@ def main(page: ft.Page):
 
                 try:
                     download_and_install_cli(progress_callback=progress_cb, lang=current_lang)
-                    cli_status, _ = check_installed_binary()
+                    cli_status, _, _ = check_installed_binary()
                     if cli_status in ('verified', 'custom'):
                         status_text_widget.value = STRINGS[current_lang]["reinstall_success"]
                         status_icon.color = "#10B981"
@@ -191,7 +191,7 @@ def main(page: ft.Page):
         settings_button = ft.IconButton(
             icon=ft.Icons.SETTINGS,
             icon_color="#94A3B8",
-            on_click=lambda _: open_settings(page, current_lang, build_ui, on_reinstall_cli)
+            on_click=lambda _: open_settings(page, current_lang, build_ui, on_reinstall_cli, cli_source)
         )
         
         # Header Layout
@@ -236,7 +236,7 @@ def main(page: ft.Page):
                         download_and_install_cli(progress_callback=progress_cb, lang=current_lang)
                         
                         # Verify installation status
-                        cli_status, _ = check_installed_binary()
+                        cli_status, _, _ = check_installed_binary()
                         if cli_status in ('verified', 'custom'):
                             show_alert(STRINGS[current_lang]["app_title"], STRINGS[current_lang]["verify_success"])
                             nonlocal app_state
@@ -448,7 +448,7 @@ def main(page: ft.Page):
                 expand=True
             )
         else:
-            files_view = build_scanner_view(cli_status, cli_hash, current_lang, file_picker_scan, on_scan_click)
+            files_view = build_scanner_view(cli_status, cli_hash, cli_source, current_lang, file_picker_scan, on_scan_click)
             intel_view = IntelligenceView(search_states, current_lang, show_alert, get_installed_binary_path, thread_safe_build, build_ui, page)
             url_view = intel_view.build_lookup_tab("url", STRINGS[current_lang]["url_placeholder"], STRINGS[current_lang]["url_helper"])
             domain_view = intel_view.build_lookup_tab("domain", STRINGS[current_lang]["domain_placeholder"], STRINGS[current_lang]["domain_helper"])
@@ -578,7 +578,7 @@ def main(page: ft.Page):
 
         nonlocal active_scans, app_state, current_tab_index, scan_service
 
-        cli_status, _ = check_installed_binary()
+        cli_status, _, _ = check_installed_binary()
         if cli_status == 'missing':
             app_state = "install_cli"
             build_ui()
@@ -720,10 +720,11 @@ def main(page: ft.Page):
     if not get_api_key():
         def on_api_key_saved():
             build_ui()
-        open_api_key_dialog(page, current_lang, on_api_key_saved)
+        _, _, _cli_source = check_installed_binary()
+        open_api_key_dialog(page, current_lang, on_api_key_saved, _cli_source)
     elif init_file_path and os.path.exists(init_file_path):
         api_key = get_api_key()
-        cli_status, _ = check_installed_binary()
+        cli_status, _, _ = check_installed_binary()
         
         if not api_key:
             show_alert("Error / Ошибка", STRINGS[current_lang]["api_key_missing"])

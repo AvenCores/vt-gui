@@ -5,7 +5,7 @@ import webbrowser
 from ..config import write_env_var, STRINGS
 from ..cli_manager import download_and_install_cli
 
-def open_api_key_dialog(page, lang, on_saved):
+def open_api_key_dialog(page, lang, on_saved, cli_source=None):
     """Opens a non-dismissable dialog for entering an API key on first launch."""
     api_key_field = ft.TextField(
         label=STRINGS[lang]["api_key_label"],
@@ -162,22 +162,30 @@ def open_api_key_dialog(page, lang, on_saved):
     reinstall_icon = ft.Icon(ft.Icons.REFRESH_ROUNDED, color="#F59E0B", size=20)
     reinstall_label = ft.Text(STRINGS[lang]["btn_reinstall_cli"], color="#F59E0B", size=14, weight=ft.FontWeight.W_600)
 
+    # Determine if reinstall should be locked (system binary in use)
+    system_binary_active = (cli_source == 'system')
+
     reinstall_container = ft.Container(
         content=ft.Row(
             [reinstall_icon, reinstall_label],
             spacing=10,
             alignment=ft.MainAxisAlignment.START,
         ),
-        on_click=on_reinstall_click,
-        on_hover=on_reinstall_hover,
-        border=ft.Border.all(1, "#2E3C56"),
+        on_click=None if system_binary_active else on_reinstall_click,
+        on_hover=None if system_binary_active else on_reinstall_hover,
+        border=ft.Border.all(1, "#1E293B" if system_binary_active else "#2E3C56"),
         border_radius=12,
         bgcolor="#151E33",
         padding=ft.Padding(left=16, right=16, top=12, bottom=12),
         animate=ft.Animation(200, ft.AnimationCurve.EASE_OUT),
+        tooltip=STRINGS[lang].get("reinstall_disabled_system", "Disabled: using system VT CLI") if system_binary_active else None,
     )
     reinstall_container.data_on_click = on_reinstall_click
     reinstall_container.data_on_hover = on_reinstall_hover
+
+    if system_binary_active:
+        reinstall_icon.color = "#4B5563"
+        reinstall_label.color = "#4B5563"
 
     vt_cli_link_btn = ft.IconButton(
         icon=ft.Icons.LANGUAGE_ROUNDED,
@@ -193,6 +201,20 @@ def open_api_key_dialog(page, lang, on_saved):
         spacing=5,
     )
 
+    # Warning text when system binary is active
+    system_warning_row = ft.Container()
+    if system_binary_active:
+        system_warning_row = ft.Row(
+            [
+                ft.Icon(ft.Icons.INFO_OUTLINE_ROUNDED, color="#6366F1", size=14),
+                ft.Text(
+                    STRINGS[lang].get("reinstall_disabled_system", "Disabled: using system VT CLI from PATH"),
+                    color="#6366F1", size=11
+                )
+            ],
+            spacing=6,
+        )
+
     # --- Layout ---
     content = ft.Column(
         [
@@ -206,11 +228,12 @@ def open_api_key_dialog(page, lang, on_saved):
             ),
             ft.Divider(height=1, color="#2E3C56"),
             reinstall_row,
+            system_warning_row,
             reinstall_status_row,
         ],
         spacing=8,
         width=400,
-        height=260,
+        height=280,
         alignment=ft.MainAxisAlignment.START,
     )
 

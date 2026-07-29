@@ -1,7 +1,7 @@
 import flet as ft
 from ..config import STRINGS, KNOWN_HASHES
 
-def build_scanner_view(cli_status, cli_hash, lang, file_picker_scan, on_scan_click):
+def build_scanner_view(cli_status, cli_hash, cli_source, lang, file_picker_scan, on_scan_click):
     """Builds the main File Scanner view with drag-and-drop simulated click zone and badges."""
     # Build Status Badge for CLI
     if cli_status == 'verified':
@@ -32,6 +32,20 @@ def build_scanner_view(cli_status, cli_hash, lang, file_picker_scan, on_scan_cli
         border_radius=15,
     )
     
+    # Source badge: show when using a system-installed binary instead of app-downloaded
+    source_badge = None
+    if cli_source == 'system' and cli_status != 'missing':
+        source_badge = ft.Container(
+            content=ft.Row([
+                ft.Icon(ft.Icons.TERMINAL_ROUNDED, color="#FFFFFF", size=13),
+                ft.Text(STRINGS[lang].get("vt_exe_system", "System binary (PATH)"), color="#FFFFFF", size=11, weight=ft.FontWeight.W_600)
+            ], spacing=4, alignment=ft.MainAxisAlignment.CENTER),
+            bgcolor="#6366F1",
+            padding=ft.Padding(left=10, right=10, top=5, bottom=5),
+            border_radius=12,
+            tooltip=STRINGS[lang].get("vt_exe_system_tooltip", "Using vt CLI found in system PATH instead of app-downloaded binary")
+        )
+    
     # Dashed-look click area
     dashed_area = ft.Container(
         content=ft.Column(
@@ -61,11 +75,16 @@ def build_scanner_view(cli_status, cli_hash, lang, file_picker_scan, on_scan_cli
         
     dashed_area.on_hover = on_hover_dashed
     
+    # Build the status row with badges
+    badges = [status_badge]
+    if source_badge:
+        badges.append(source_badge)
+
     return ft.Column(
         [
             ft.Row([
                 ft.Text(STRINGS[lang]["vt_exe_status"] + ":", size=14, color="#94A3B8", weight=ft.FontWeight.BOLD),
-                status_badge
+                ft.Row(badges, spacing=8)
             ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
             ft.Container(height=10),
             dashed_area
