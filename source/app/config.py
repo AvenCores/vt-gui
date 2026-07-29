@@ -286,7 +286,8 @@ def _detect_system_lang():
         except Exception:
             pass
         try:
-            lang, _ = locale.getdefaultlocale()
+            # getdefaultlocale() is deprecated in 3.11+, use getlocale() fallback
+            lang = locale.getlocale(locale.LC_CTYPE)[0]
             if lang:
                 prefix = lang.split('_')[0].split('-')[0].lower()
                 if prefix in locale_map:

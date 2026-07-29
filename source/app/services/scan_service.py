@@ -40,6 +40,8 @@ class ScanService:
         self._current_lang = value
 
     def run_single_scan_pipeline(self, idx, file_path):
+        sha256 = None
+
         def set_scan_status(text, progress_value, rebuild=False, resolver=None):
             self.active_scans[idx]["status_text"] = text
             if resolver is not None:
@@ -113,7 +115,6 @@ class ScanService:
                             resolver=lambda lang: STRINGS[lang]["uploading_file"])
             analysis_id = None
             
-            vt_path = get_installed_binary_path()
             if not vt_path or not os.path.exists(vt_path):
                 raise ValueError(f"{CLI_BINARY_NAME} was missing when upload was initiated.")
             cmd = [vt_path, 'scan', 'file', file_path]
@@ -159,7 +160,6 @@ class ScanService:
                     raise ValueError(STRINGS[self.current_lang]["scan_timeout_err"].format(timeout=max_wait))
                     
                 status = None
-                vt_path = get_installed_binary_path()
                 if not vt_path or not os.path.exists(vt_path):
                     raise ValueError(f"{CLI_BINARY_NAME} was missing during analysis polling.")
                 status_cmd = [vt_path, 'analysis', analysis_id, '--format', 'json']
@@ -244,3 +244,4 @@ class ScanService:
                 error=str(ex)
             )
             self.thread_safe_build_fn()
+

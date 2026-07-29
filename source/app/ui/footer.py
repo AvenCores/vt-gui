@@ -94,7 +94,8 @@ def build_footer(lang="en", page=None):
 
     def on_donate_click(e):
         clipboard = ft.Clipboard()
-        e.control.page.services.append(clipboard)
+        if clipboard not in e.control.page.services:
+            e.control.page.services.append(clipboard)
 
         def copy_card(_):
             e.control.page.run_task(clipboard.set, card_number)

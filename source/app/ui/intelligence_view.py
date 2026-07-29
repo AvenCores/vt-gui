@@ -120,6 +120,8 @@ class IntelligenceView:
         elif item_type == "url":
             url_id = data_dict.get("_id", "")
             web_url = f"https://www.virustotal.com/gui/url/{url_id}"
+        else:
+            web_url = f"https://www.virustotal.com/gui/search/{item_id}"
             
         web_btn = ft.ElevatedButton(
             content=ft.Text(STRINGS[self.current_lang]["btn_open_web"]),

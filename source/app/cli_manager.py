@@ -5,6 +5,9 @@ import tempfile
 import zipfile
 from .config import KNOWN_HASHES, CLI_BINARY_NAME, IS_WINDOWS, load_env_vars
 
+# Cache for binary validation to avoid repeated SHA-256 computation
+_validation_cache = {}  # {path: (mtime, size, status, hash)}
+
 def get_temp_bin_path():
     """Returns the immutable temp directory binary file path."""
     temp_dir = os.path.join(tempfile.gettempdir(), "vt_cli_immutable")
@@ -56,20 +59,30 @@ def get_installed_binary_path():
     return None
 
 def _validate_binary(path):
-    """Validates a binary at the given path. Returns (status, hash)."""
+    """Validates a binary at the given path. Returns (status, hash).
+    Uses a cache keyed on (mtime, size) to avoid redundant hashing."""
     try:
+        stat = os.stat(path)
+        cache_key = path
+        cached = _validation_cache.get(cache_key)
+        if cached and cached[0] == stat.st_mtime and cached[1] == stat.st_size:
+            return cached[2], cached[3]
+
         with open(path, "rb") as f:
             data = f.read()
         file_hash = hashlib.sha256(data).hexdigest()
 
         if file_hash in KNOWN_HASHES:
-            return 'verified', file_hash
+            status = 'verified'
+        else:
+            env_vars = load_env_vars()
+            if env_vars.get(f"APPROVED_VT_HASH_{file_hash}") == "True":
+                status = 'custom'
+            else:
+                status = 'unapproved'
 
-        env_vars = load_env_vars()
-        if env_vars.get(f"APPROVED_VT_HASH_{file_hash}") == "True":
-            return 'custom', file_hash
-
-        return 'unapproved', file_hash
+        _validation_cache[cache_key] = (stat.st_mtime, stat.st_size, status, file_hash)
+        return status, file_hash
     except Exception:
         return 'missing', None
 
@@ -134,18 +147,20 @@ def download_and_install_cli(progress_callback=None, lang="en"):
         with urllib.request.urlopen(req) as response:
             total_size = int(response.info().get('Content-Length', 0))
             downloaded = 0
-            block_size = 8192
-            data = b""
+            block_size = 65536
+            chunks = []
 
             while True:
                 block = response.read(block_size)
                 if not block:
                     break
-                data += block
+                chunks.append(block)
                 downloaded += len(block)
                 if total_size > 0 and progress_callback:
                     percent = downloaded / total_size
                     progress_callback(strings.get("cli_downloading", "Downloading: {percent}%").format(percent=int(percent * 100)), 0.1 + percent * 0.7)
+
+            data = b"".join(chunks)
 
         if progress_callback:
             progress_callback(strings.get("cli_extracting", "Extracting CLI binary..."), 0.85)

@@ -1,6 +1,7 @@
 import os
 import json
 import time
+import uuid
 from .config import _get_config_dir
 
 HISTORY_FILE = "scan_history.json"
@@ -42,7 +43,7 @@ def save_history(records):
 def add_scan_record(filename, file_path, sha256, status, results=None, error=None):
     """Add a completed scan record to history. Returns the record."""
     record = {
-        "id": int(time.time() * 1000),
+        "id": uuid.uuid4().hex[:16],
         "type": "file",
         "filename": filename,
         "file_path": file_path,
@@ -63,7 +64,7 @@ def add_scan_record(filename, file_path, sha256, status, results=None, error=Non
 def add_lookup_record(lookup_type, query, status, results=None, error=None):
     """Add a completed lookup record (url/domain/ip/search) to history."""
     record = {
-        "id": int(time.time() * 1000),
+        "id": uuid.uuid4().hex[:16],
         "type": "lookup",
         "lookup_type": lookup_type,
         "query": query,

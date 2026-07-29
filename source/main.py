@@ -1,7 +1,6 @@
 import os
 import sys
 import threading
-import time
 import flet as ft
 
 from app.config import (
@@ -36,19 +35,6 @@ if len(sys.argv) > 1:
     files = [arg for arg in sys.argv[1:] if not arg.startswith('-')]
     if files:
         init_file_path = os.path.normpath(files[0])
-
-class ProgressThrottler:
-    """Limits UI updates frequency during uploads."""
-    def __init__(self, interval=0.15):
-        self.interval = interval
-        self.last_update = 0
-        
-    def should_update(self):
-        now = time.time()
-        if now - self.last_update >= self.interval:
-            self.last_update = now
-            return True
-        return False
 
 def main(page: ft.Page):
     # Load and sync API key from ~/.vt.toml on startup
@@ -480,9 +466,6 @@ def main(page: ft.Page):
                 active_scans = []
                 current_tab_index = 0
                 app_state = "scans"
-                class PseudoFile:
-                    def __init__(self, p):
-                        self.path = p
                 active_scans.append({
                     "file_path": path,
                     "filename": os.path.basename(path),
@@ -503,7 +486,8 @@ def main(page: ft.Page):
                 nonlocal active_scanner_tab_index, app_state
                 idx = int(e.control.selected_index)
                 active_scanner_tab_index = idx
-                if idx == 5:
+                HISTORY_TAB_INDEX = 5
+                if idx == HISTORY_TAB_INDEX:
                     app_state = "history"
                 else:
                     app_state = "scanner"
@@ -569,7 +553,10 @@ def main(page: ft.Page):
         page.update()
 
     import asyncio
-    _loop = asyncio.get_event_loop()
+    try:
+        _loop = asyncio.get_running_loop()
+    except RuntimeError:
+        _loop = asyncio.get_event_loop()
 
     def thread_safe_update():
         _loop.call_soon_threadsafe(page.update)
@@ -577,9 +564,6 @@ def main(page: ft.Page):
     def thread_safe_build():
         _loop.call_soon_threadsafe(build_ui)
 
-    # ==============================================================================
-    # BACKGROUND PIPELINE
-    # ==============================================================================
     # ==============================================================================
     # BACKGROUND PIPELINE
     # ==============================================================================
