@@ -256,6 +256,7 @@ def main(page: ft.Page):
             def on_manual_install_click(e):
                 on_cli_click(e)
                 
+            main_content.alignment = ft.Alignment.CENTER
             main_content.content = build_install_view(
                 cli_status,
                 cli_hash,

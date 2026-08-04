@@ -29,7 +29,7 @@ def build_install_view(cli_status, cli_hash, lang, install_status_text, install_
         )
     )
     
-    return ft.Container(
+    card = ft.Container(
         content=ft.Column(
             [
                 ft.Row([
@@ -44,7 +44,8 @@ def build_install_view(cli_status, cli_hash, lang, install_status_text, install_
                         manual_install_btn
                     ],
                     spacing=12,
-                    horizontal_alignment=ft.CrossAxisAlignment.STRETCH
+                    horizontal_alignment=ft.CrossAxisAlignment.STRETCH,
+                    tight=True
                 ),
                 ft.Container(height=10),
                 ft.Column(
@@ -53,14 +54,22 @@ def build_install_view(cli_status, cli_hash, lang, install_status_text, install_
                         install_progress_bar
                     ],
                     spacing=10,
-                    horizontal_alignment=ft.CrossAxisAlignment.STRETCH
+                    horizontal_alignment=ft.CrossAxisAlignment.STRETCH,
+                    tight=True
                 )
             ],
-            spacing=15
+            spacing=15,
+            tight=True
         ),
         bgcolor="#151E33",
         border=ft.Border.all(1, "#2E3C56"),
         border_radius=16,
         padding=25,
         width=550
+    )
+
+    return ft.Container(
+        content=card,
+        alignment=ft.Alignment.CENTER,
+        expand=True
     )
