@@ -253,8 +253,8 @@ def main(page: ft.Page):
                         
                 threading.Thread(target=run_download, daemon=True).start()
 
-            def on_manual_install_click(e):
-                on_cli_click(e)
+            async def on_manual_install_click(e):
+                await on_cli_click(e)
                 
             main_content.alignment = ft.Alignment.CENTER
             main_content.content = build_install_view(
