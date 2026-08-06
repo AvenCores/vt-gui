@@ -107,11 +107,69 @@ def build_history_view(lang, page, on_back, on_rescan, on_open_in_app=None):
             delete_scan_record(rid)
             refresh_view()
 
-        def on_rescan_click(e, path=file_path, rt=record_type, lt=lookup_type, q=query):
+        def on_rescan_click(e, path=file_path, rt=record_type, lt=lookup_type, q=query, rec=record):
             if rt == "lookup":
                 on_back()
             elif path and os.path.exists(path):
                 on_rescan(path)
+            else:
+                def open_report_from_missing(e_or):
+                    page.pop_dialog()
+                    on_open_report_click(e_or, rec=rec)
+
+                display_path = path if path else filename
+                btn_controls = []
+                if rec.get("results") or rec.get("sha256"):
+                    btn_controls.append(
+                        ft.ElevatedButton(
+                            content=ft.Row([
+                                ft.Icon(ft.Icons.ASSESSMENT_ROUNDED, size=18),
+                                ft.Text(STRINGS[lang].get("history_open_report_title", "Открыть отчет"), weight=ft.FontWeight.W_600)
+                            ], spacing=6, alignment=ft.MainAxisAlignment.CENTER),
+                            on_click=open_report_from_missing,
+                            bgcolor="#008DDA",
+                            color="#FFFFFF",
+                            style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8)),
+                            width=440
+                        )
+                    )
+                btn_controls.append(
+                    ft.TextButton(
+                        content=ft.Text(STRINGS[lang].get("btn_close", "Закрыть"), color="#94A3B8", size=13),
+                        on_click=lambda _: page.pop_dialog(),
+                        width=440
+                    )
+                )
+
+                missing_dlg = ft.AlertDialog(
+                    title=ft.Row([
+                        ft.Icon(ft.Icons.WARNING_ROUNDED, color="#F59E0B", size=22),
+                        ft.Text(
+                            STRINGS[lang].get("file_not_found_title", "Файл не найден"),
+                            color="#FFFFFF",
+                            weight=ft.FontWeight.BOLD
+                        )
+                    ], spacing=8),
+                    content=ft.Container(
+                        width=440,
+                        content=ft.Column([
+                            ft.Text(
+                                STRINGS[lang].get(
+                                    "file_not_found_desc",
+                                    "Файл по пути «{path}» был удален или перемещен. Повторное сканирование невозможно."
+                                ).format(path=display_path),
+                                color="#E2E8F0",
+                                size=13
+                            ),
+                            ft.Container(height=14),
+                            ft.Column(btn_controls, spacing=6, horizontal_alignment=ft.CrossAxisAlignment.CENTER)
+                        ], tight=True)
+                    ),
+                    actions_padding=ft.Padding(0, 0, 0, 0),
+                    content_padding=ft.Padding(left=24, right=24, top=20, bottom=20),
+                    bgcolor="#151E33"
+                )
+                page.show_dialog(missing_dlg)
 
         def on_web_report(e, rt=record_type, lt=lookup_type, q=query, h=sha256):
             if rt == "lookup":
@@ -157,9 +215,13 @@ def build_history_view(lang, page, on_back, on_rescan, on_open_in_app=None):
                             color="#FFFFFF",
                             weight=ft.FontWeight.BOLD
                         ),
-                        content=ft.Text(
-                            STRINGS[lang].get("history_no_local_results", "Для этой записи нет сохраненных локальных данных отчета."),
-                            color="#E2E8F0"
+                        content=ft.Container(
+                            width=420,
+                            content=ft.Text(
+                                STRINGS[lang].get("history_no_local_results", "Для этой записи нет сохраненных локальных данных отчета."),
+                                color="#E2E8F0",
+                                size=13
+                            )
                         ),
                         actions=[
                             ft.TextButton(
@@ -170,12 +232,14 @@ def build_history_view(lang, page, on_back, on_rescan, on_open_in_app=None):
                                 content=ft.Row([
                                     ft.Icon(ft.Icons.LANGUAGE_ROUNDED, size=16),
                                     ft.Text(STRINGS[lang].get("btn_open_in_browser", "В браузере"))
-                                ], spacing=6),
+                                ], spacing=6, alignment=ft.MainAxisAlignment.CENTER),
                                 on_click=confirm_browser,
                                 bgcolor="#008DDA",
-                                color="#FFFFFF"
+                                color="#FFFFFF",
+                                style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8))
                             )
                         ],
+                        actions_alignment=ft.MainAxisAlignment.END,
                         bgcolor="#151E33"
                     )
                     page.show_dialog(no_res_dlg)
@@ -189,41 +253,44 @@ def build_history_view(lang, page, on_back, on_rescan, on_open_in_app=None):
                         weight=ft.FontWeight.BOLD
                     )
                 ], spacing=8),
-                content=ft.Column([
-                    ft.Text(
-                        STRINGS[lang].get("history_open_report_desc", "Выберите, где вы хотите открыть отчет:"),
-                        color="#E2E8F0",
-                        size=13
-                    ),
-                    ft.Container(height=8),
-                    ft.Row([
-                        ft.ElevatedButton(
-                            content=ft.Row([
-                                ft.Icon(ft.Icons.DESKTOP_WINDOWS_ROUNDED, size=18),
-                                ft.Text(STRINGS[lang].get("btn_open_in_app", "В программе"), weight=ft.FontWeight.W_600)
-                            ], spacing=8, alignment=ft.MainAxisAlignment.CENTER),
-                            on_click=open_in_app,
-                            bgcolor="#008DDA",
-                            color="#FFFFFF",
-                            style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8)),
-                            expand=True
+                content=ft.Container(
+                    width=420,
+                    content=ft.Column([
+                        ft.Text(
+                            STRINGS[lang].get("history_open_report_desc", "Выберите, где вы хотите открыть отчет:"),
+                            color="#E2E8F0",
+                            size=13
                         ),
-                        ft.ElevatedButton(
-                            content=ft.Row([
-                                ft.Icon(ft.Icons.LANGUAGE_ROUNDED, size=18),
-                                ft.Text(STRINGS[lang].get("btn_open_in_browser", "В браузере"), weight=ft.FontWeight.W_600)
-                            ], spacing=8, alignment=ft.MainAxisAlignment.CENTER),
-                            on_click=open_in_browser,
-                            bgcolor="#1E293B",
-                            color="#00F0FF",
-                            style=ft.ButtonStyle(
-                                shape=ft.RoundedRectangleBorder(radius=8),
-                                side=ft.BorderSide(1, "#00F0FF")
+                        ft.Container(height=12),
+                        ft.Row([
+                            ft.ElevatedButton(
+                                content=ft.Row([
+                                    ft.Icon(ft.Icons.DESKTOP_WINDOWS_ROUNDED, size=18),
+                                    ft.Text(STRINGS[lang].get("btn_open_in_app", "В программе"), weight=ft.FontWeight.W_600)
+                                ], spacing=6, alignment=ft.MainAxisAlignment.CENTER),
+                                on_click=open_in_app,
+                                bgcolor="#008DDA",
+                                color="#FFFFFF",
+                                style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8)),
+                                expand=True
                             ),
-                            expand=True
-                        )
-                    ], spacing=10)
-                ], alignment=ft.MainAxisAlignment.CENTER, tight=True),
+                            ft.ElevatedButton(
+                                content=ft.Row([
+                                    ft.Icon(ft.Icons.LANGUAGE_ROUNDED, size=18),
+                                    ft.Text(STRINGS[lang].get("btn_open_in_browser", "В браузере"), weight=ft.FontWeight.W_600)
+                                ], spacing=6, alignment=ft.MainAxisAlignment.CENTER),
+                                on_click=open_in_browser,
+                                bgcolor="#1E293B",
+                                color="#00F0FF",
+                                style=ft.ButtonStyle(
+                                    shape=ft.RoundedRectangleBorder(radius=8),
+                                    side=ft.BorderSide(1, "#00F0FF")
+                                ),
+                                expand=True
+                            )
+                        ], spacing=10)
+                    ], alignment=ft.MainAxisAlignment.CENTER, tight=True)
+                ),
                 actions=[
                     ft.TextButton(STRINGS[lang].get("btn_cancel", "Отмена"), on_click=lambda _: page.pop_dialog())
                 ],
