@@ -71,9 +71,29 @@ LANG_NAMES = {
     "ar": "العربية",
 }
 
+# Country flag image asset paths for each language code
+LANG_FLAGS = {
+    "en": "flags/en.png",
+    "ru": "flags/ru.png",
+    "es": "flags/es.png",
+    "de": "flags/de.png",
+    "fr": "flags/fr.png",
+    "pt": "flags/pt.png",
+    "tr": "flags/tr.png",
+    "uk": "flags/uk.png",
+    "zh": "flags/zh.png",
+    "ja": "flags/ja.png",
+    "ko": "flags/ko.png",
+    "ar": "flags/ar.png",
+}
+
+def get_lang_flag(code):
+    """Returns country flag image asset path for a given language code."""
+    return LANG_FLAGS.get(code, "flags/en.png")
+
 def get_available_langs():
-    """Returns list of (code, display_name) for languages present in strings.json."""
-    return [(code, LANG_NAMES.get(code, code)) for code in STRINGS if code in LANG_NAMES]
+    """Returns list of (code, display_name, flag_asset) for languages present in strings.json."""
+    return [(code, LANG_NAMES.get(code, code), LANG_FLAGS.get(code, "flags/en.png")) for code in STRINGS if code in LANG_NAMES]
 
 def _get_config_dir():
     """Returns a writable, persistent config directory for the application."""

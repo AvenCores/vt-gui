@@ -8,6 +8,7 @@ from app.config import (
     get_api_key,
     get_app_lang,
     get_available_langs,
+    get_lang_flag,
     IS_WINDOWS,
     STRINGS
 )
@@ -128,17 +129,18 @@ def main(page: ft.Page):
             build_ui()
 
         available_langs = get_available_langs()
-        active_lang_name = dict(available_langs).get(current_lang, current_lang.upper())
+        active_lang_name = dict([(c, n) for c, n, f in available_langs]).get(current_lang, current_lang.upper())
+        active_lang_flag = get_lang_flag(current_lang)
 
         language_menu = ft.PopupMenuButton(
             content=ft.Container(
                 content=ft.Row(
                     [
-                        ft.Icon(ft.Icons.LANGUAGE, color="#00F0FF", size=18),
+                        ft.Image(src=active_lang_flag, width=20, height=14, fit=ft.BoxFit.CONTAIN, border_radius=2),
                         ft.Text(active_lang_name, color="#FFFFFF", size=13, weight=ft.FontWeight.W_600),
                         ft.Icon(ft.Icons.ARROW_DROP_DOWN_ROUNDED, color="#94A3B8", size=16),
                     ],
-                    spacing=5,
+                    spacing=6,
                     alignment=ft.MainAxisAlignment.CENTER
                 ),
                 padding=ft.Padding(left=10, right=8, top=6, bottom=6),
@@ -152,13 +154,14 @@ def main(page: ft.Page):
                     content=ft.Row(
                         [
                             ft.Icon(ft.Icons.CHECK_ROUNDED, color="#00F0FF" if current_lang == code else "transparent", size=16),
+                            ft.Image(src=flag, width=20, height=14, fit=ft.BoxFit.CONTAIN, border_radius=2),
                             ft.Text(name, color="#E2E8F0", size=13),
                         ],
-                        spacing=10
+                        spacing=8
                     ),
                     on_click=lambda _, c=code: change_language(c)
                 )
-                for code, name in available_langs
+                for code, name, flag in available_langs
             ]
         )
         
