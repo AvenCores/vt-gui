@@ -388,7 +388,10 @@ def main(page: ft.Page):
             
             def go_back_to_scanner(e):
                 nonlocal app_state, active_scans
-                app_state = "scanner"
+                if active_scanner_tab_index == 5:
+                    app_state = "history"
+                else:
+                    app_state = "scanner"
                 active_scans = []
                 build_ui()
                 
@@ -484,7 +487,40 @@ def main(page: ft.Page):
                 scan_service = ScanService(active_scans, current_lang, thread_safe_build, show_alert, page)
                 threading.Thread(target=scan_service.run_single_scan_pipeline, args=(0, path), daemon=True).start()
 
-            history_view = build_history_view(current_lang, page, on_history_back, on_history_rescan)
+            def on_history_open_in_app(record):
+                nonlocal active_scans, app_state, current_tab_index, active_scanner_tab_index
+                record_type = record.get("type", "file")
+                results = record.get("results")
+                if record_type == "file":
+                    file_path = record.get("file_path", "")
+                    filename = record.get("filename", os.path.basename(file_path) if file_path else "Unknown")
+                    sha256 = record.get("sha256", "")
+                    active_scans = [{
+                        "file_path": file_path,
+                        "filename": filename,
+                        "status": "completed",
+                        "sha256": sha256,
+                        "results": results,
+                        "error": None
+                    }]
+                    current_tab_index = 0
+                    app_state = "scans"
+                    build_ui()
+                elif record_type == "lookup":
+                    lookup_type = record.get("lookup_type", "url")
+                    query = record.get("query", "")
+                    if lookup_type in search_states:
+                        search_states[lookup_type]["input"] = query
+                        search_states[lookup_type]["results"] = results
+                        search_states[lookup_type]["status"] = "success" if results else "idle"
+                        search_states[lookup_type]["error"] = record.get("error")
+
+                    tab_indices = {"url": 1, "domain": 2, "ip": 3, "search": 4}
+                    active_scanner_tab_index = tab_indices.get(lookup_type, 1)
+                    app_state = "scanner"
+                    build_ui()
+
+            history_view = build_history_view(current_lang, page, on_history_back, on_history_rescan, on_history_open_in_app)
 
             def on_active_tab_change(e):
                 nonlocal active_scanner_tab_index, app_state
