@@ -73,20 +73,23 @@ def build_footer(lang="en", page=None):
 
         dlg = ft.AlertDialog(
             title=ft.Text(S.get("app_title", "VirusTotal File Scanner"), color="#FFFFFF", weight=ft.FontWeight.BOLD),
-            content=ft.Column([
-                ft.Text(f"{APP_VERSION}", color="#00F0FF", size=14, weight=ft.FontWeight.BOLD),
-                ft.Text(powered_by_text, color="#94A3B8", size=12),
-                ft.ElevatedButton(
-                    content=ft.Text("github.com/AvenCores/vt-gui", color="#FFFFFF", size=12),
-                    icon=ft.Icons.OPEN_IN_NEW_ROUNDED,
-                    on_click=open_repo,
-                    bgcolor="#2E3C56",
-                    color="#FFFFFF",
-                    style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8))
-                ),
-                ft.Text(f"{author_text} AvenCores", color="#94A3B8", size=11)
-            ], spacing=6, height=100, horizontal_alignment=ft.CrossAxisAlignment.CENTER),
-            actions=[ft.TextButton("OK", on_click=lambda _: e.control.page.pop_dialog())],
+            content=ft.Container(
+                width=340,
+                content=ft.Column([
+                    ft.Text(f"{APP_VERSION}", color="#00F0FF", size=14, weight=ft.FontWeight.BOLD),
+                    ft.Text(powered_by_text, color="#94A3B8", size=12),
+                    ft.ElevatedButton(
+                        content=ft.Text("github.com/AvenCores/vt-gui", color="#FFFFFF", size=12),
+                        icon=ft.Icons.OPEN_IN_NEW_ROUNDED,
+                        on_click=open_repo,
+                        bgcolor="#2E3C56",
+                        color="#FFFFFF",
+                        style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8))
+                    ),
+                    ft.Text(f"{author_text} AvenCores", color="#94A3B8", size=11)
+                ], spacing=6, tight=True, horizontal_alignment=ft.CrossAxisAlignment.CENTER)
+            ),
+            actions=[ft.TextButton(close_text, on_click=lambda _: e.control.page.pop_dialog())],
             actions_alignment=ft.MainAxisAlignment.END,
             bgcolor="#151E33"
         )
@@ -108,28 +111,31 @@ def build_footer(lang="en", page=None):
 
         dlg = ft.AlertDialog(
             title=ft.Text(donate_text, color="#FFFFFF", weight=ft.FontWeight.BOLD),
-            content=ft.Column([
-                ft.Row([
-                    ft.Image(src="sber.svg", width=28, height=28),
-                    ft.Text("SBER", color="#FFFFFF", size=15, weight=ft.FontWeight.BOLD)
-                ], spacing=10, alignment=ft.MainAxisAlignment.CENTER),
-                ft.Container(
-                    content=ft.Text(card_number, color="#FFFFFF", size=15, weight=ft.FontWeight.BOLD),
-                    alignment=ft.Alignment.CENTER,
-                    padding=ft.Padding(top=10, bottom=10, left=15, right=15),
-                    border=ft.Border.all(1, "#2E3C56"),
-                    border_radius=8,
-                    bgcolor="#0B0F19"
-                ),
-                ft.ElevatedButton(
-                    content=ft.Text(copy_text, color="#FFFFFF", size=13),
-                    icon=ft.Icons.COPY_ROUNDED,
-                    on_click=copy_card,
-                    bgcolor="#008DDA",
-                    color="#FFFFFF",
-                    style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8))
-                )
-            ], spacing=10, height=160, horizontal_alignment=ft.CrossAxisAlignment.CENTER),
+            content=ft.Container(
+                width=360,
+                content=ft.Column([
+                    ft.Row([
+                        ft.Image(src="sber.svg", width=28, height=28),
+                        ft.Text("SBER", color="#FFFFFF", size=15, weight=ft.FontWeight.BOLD)
+                    ], spacing=10, alignment=ft.MainAxisAlignment.CENTER),
+                    ft.Container(
+                        content=ft.Text(card_number, color="#FFFFFF", size=15, weight=ft.FontWeight.BOLD),
+                        alignment=ft.Alignment.CENTER,
+                        padding=ft.Padding(top=10, bottom=10, left=15, right=15),
+                        border=ft.Border.all(1, "#2E3C56"),
+                        border_radius=8,
+                        bgcolor="#0B0F19"
+                    ),
+                    ft.ElevatedButton(
+                        content=ft.Text(copy_text, color="#FFFFFF", size=13),
+                        icon=ft.Icons.COPY_ROUNDED,
+                        on_click=copy_card,
+                        bgcolor="#008DDA",
+                        color="#FFFFFF",
+                        style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8))
+                    )
+                ], spacing=10, tight=True, horizontal_alignment=ft.CrossAxisAlignment.CENTER)
+            ),
             actions=[ft.TextButton(close_text, on_click=lambda _: e.control.page.pop_dialog())],
             actions_alignment=ft.MainAxisAlignment.END,
             bgcolor="#151E33"

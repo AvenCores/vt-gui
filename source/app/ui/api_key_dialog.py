@@ -16,7 +16,6 @@ def open_api_key_dialog(page, lang, on_saved, cli_source=None):
         focused_border_color="#00F0FF",
         label_style=ft.TextStyle(color="#94A3B8"),
         text_style=ft.TextStyle(color="#E2E8F0"),
-        expand=True,
     )
 
     save_btn = ft.ElevatedButton(

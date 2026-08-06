@@ -17,7 +17,6 @@ def open_settings(page, lang, on_settings_saved, on_reinstall_cli=None, cli_sour
         focused_border_color="#00F0FF",
         label_style=ft.TextStyle(color="#94A3B8"),
         text_style=ft.TextStyle(color="#E2E8F0"),
-        expand=True,
     )
 
     get_api_key_btn = ft.TextButton(
@@ -185,20 +184,21 @@ def open_settings(page, lang, on_settings_saved, on_reinstall_cli=None, cli_sour
             spacing=6,
         )
 
-    settings_content = ft.Column(
-        [
-            api_key_field,
-            get_api_key_btn,
-            ft.Row([api_check_btn, api_check_row], alignment=ft.MainAxisAlignment.START, spacing=5),
-            ft.Divider(height=1, color="#2E3C56"),
-            reinstall_row,
-            system_warning_row,
-            status_row,
-        ],
-        spacing=10,
+    settings_content = ft.Container(
         width=400,
-        height=280,
-        alignment=ft.MainAxisAlignment.START,
+        content=ft.Column(
+            [
+                api_key_field,
+                get_api_key_btn,
+                ft.Row([api_check_btn, api_check_row], alignment=ft.MainAxisAlignment.START, spacing=5),
+                ft.Divider(height=1, color="#2E3C56"),
+                reinstall_row,
+                system_warning_row,
+                status_row,
+            ],
+            spacing=8,
+            tight=True,
+        )
     )
 
     dlg = ft.AlertDialog(
