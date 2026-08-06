@@ -140,7 +140,11 @@
         "footer_update_available": "Update available",
         "footer_up_to_date": "Up to date",
         "footer_update_error": "Could not check",
-        "footer_checking": "Checking..."
+        "footer_checking": "Checking...",
+        "update_error_title": "Update Check Failed",
+        "update_error_vpn_desc": "Failed to check for updates. GitHub might be blocked or unreachable — please enable a VPN.",
+        "update_error_vpn_promo": "Free VPN configs available here:",
+        "btn_free_vpn": "Free GOIDA VPN Configs"
     },
     "ru": {
         "app_title": "Сканер файлов VirusTotal",
@@ -283,7 +287,11 @@
         "footer_update_available": "Доступно обновление",
         "footer_up_to_date": "Уже актуально",
         "footer_update_error": "Не удалось проверить",
-        "footer_checking": "Проверка..."
+        "footer_checking": "Проверка...",
+        "update_error_title": "Ошибка проверки обновлений",
+        "update_error_vpn_desc": "Не удалось проверить обновления. Возможно, GitHub заблокирован или недоступен — включите VPN.",
+        "update_error_vpn_promo": "Бесплатный VPN (конфигурации):",
+        "btn_free_vpn": "Бесплатный GOIDA VPN"
     },
     "es": {
         "app_title": "Escáner de Archivos VirusTotal",
@@ -426,7 +434,11 @@
         "footer_update_available": "Actualización disponible",
         "footer_up_to_date": "Actualizado",
         "footer_update_error": "No se pudo verificar",
-        "footer_checking": "Verificando..."
+        "footer_checking": "Verificando...",
+        "update_error_title": "Error al verificar actualizaciones",
+        "update_error_vpn_desc": "No se pudo verificar las actualizaciones. Es posible que GitHub esté bloqueado o inaccesible — active una VPN.",
+        "update_error_vpn_promo": "Configuraciones de VPN gratuitas disponibles aquí:",
+        "btn_free_vpn": "GOIDA VPN Gratuito"
     },
     "de": {
         "app_title": "VirusTotal Dateiscanner",
@@ -569,7 +581,11 @@
         "footer_update_available": "Update verfügbar",
         "footer_up_to_date": "Aktuell",
         "footer_update_error": "Überprüfung fehlgeschlagen",
-        "footer_checking": "Überprüfe..."
+        "footer_checking": "Überprüfe...",
+        "update_error_title": "Fehler bei der Update-Prüfung",
+        "update_error_vpn_desc": "Updates konnten nicht überprüft werden. GitHub ist möglicherweise blockiert oder nicht erreichbar — bitte aktivieren Sie ein VPN.",
+        "update_error_vpn_promo": "Kostenlose VPN-Konfigurationen hier verfügbar:",
+        "btn_free_vpn": "Kostenloses GOIDA VPN"
     },
     "fr": {
         "app_title": "Scanner de Fichiers VirusTotal",
@@ -712,7 +728,11 @@
         "footer_update_available": "Mise à jour disponible",
         "footer_up_to_date": "À jour",
         "footer_update_error": "Vérification impossible",
-        "footer_checking": "Vérification..."
+        "footer_checking": "Vérification...",
+        "update_error_title": "Échec de la vérification de mise à jour",
+        "update_error_vpn_desc": "Impossible de vérifier les mises à jour. GitHub est peut-être bloqué ou inaccessible — veuillez activer un VPN.",
+        "update_error_vpn_promo": "Configurations VPN gratuites disponibles ici :",
+        "btn_free_vpn": "GOIDA VPN Gratuit"
     },
     "pt": {
         "app_title": "Scanner de Arquivos VirusTotal",
@@ -855,7 +875,11 @@
         "footer_update_available": "Atualização disponível",
         "footer_up_to_date": "Atualizado",
         "footer_update_error": "Falha na verificação",
-        "footer_checking": "Verificando..."
+        "footer_checking": "Verificando...",
+        "update_error_title": "Falha na verificação de atualização",
+        "update_error_vpn_desc": "Falha ao verificar atualizações. O GitHub pode estar bloqueado ou inacessível — ative uma VPN.",
+        "update_error_vpn_promo": "Configurações de VPN gratuitas disponíveis aqui:",
+        "btn_free_vpn": "GOIDA VPN Grátis"
     },
     "tr": {
         "app_title": "VirusTotal Dosya Tarayıcı",
@@ -998,7 +1022,11 @@
         "footer_update_available": "Güncelleme mevcut",
         "footer_up_to_date": "Güncel",
         "footer_update_error": "Kontrol edilemedi",
-        "footer_checking": "Kontrol ediliyor..."
+        "footer_checking": "Kontrol ediliyor...",
+        "update_error_title": "Güncelleme Kontrolü Başarısız",
+        "update_error_vpn_desc": "Güncellemeler kontrol edilemedi. GitHub engellenmiş veya erişilemez olabilir — lütfen bir VPN etkinleştirin.",
+        "update_error_vpn_promo": "Ücretsiz VPN yapılandırmaları burada mevcut:",
+        "btn_free_vpn": "Ücretsiz GOIDA VPN"
     },
     "uk": {
         "app_title": "Сканер файлів VirusTotal",
@@ -1141,7 +1169,11 @@
         "footer_update_available": "Доступне оновлення",
         "footer_up_to_date": "Оновлено",
         "footer_update_error": "Не вдалося перевірити",
-        "footer_checking": "Перевірка..."
+        "footer_checking": "Перевірка...",
+        "update_error_title": "Помилка перевірки оновлень",
+        "update_error_vpn_desc": "Не вдалося перевірити оновлення. Можливо, GitHub заблокований або недоступний — увімкніть VPN.",
+        "update_error_vpn_promo": "Безкоштовний VPN (конфігурації):",
+        "btn_free_vpn": "Безкоштовний GOIDA VPN"
     },
     "zh": {
         "app_title": "VirusTotal 文件扫描器",
@@ -1284,7 +1316,11 @@
         "footer_update_available": "有新版本",
         "footer_up_to_date": "已是最新",
         "footer_update_error": "检查失败",
-        "footer_checking": "检查中..."
+        "footer_checking": "检查中...",
+        "update_error_title": "检查更新失败",
+        "update_error_vpn_desc": "无法检查更新。GitHub 可能被封锁或无法访问 — 请启用 VPN。",
+        "update_error_vpn_promo": "在此获取免费 VPN 配置：",
+        "btn_free_vpn": "免费 GOIDA VPN 配置"
     },
     "ja": {
         "app_title": "VirusTotal ファイルスキャナー",
@@ -1427,7 +1463,11 @@
         "footer_update_available": "アップデートあり",
         "footer_up_to_date": "最新です",
         "footer_update_error": "確認失敗",
-        "footer_checking": "確認中..."
+        "footer_checking": "確認中...",
+        "update_error_title": "更新確認失敗",
+        "update_error_vpn_desc": "更新を確認できませんでした。GitHubがブロックされているかアクセスできません — VPNを有効にしてください。",
+        "update_error_vpn_promo": "無料のVPN設定はこちら：",
+        "btn_free_vpn": "無料 GOIDA VPN 設定"
     },
     "ko": {
         "app_title": "VirusTotal 파일 스캐너",
@@ -1570,7 +1610,11 @@
         "footer_update_available": "업데이트 가능",
         "footer_up_to_date": "최신 버전",
         "footer_update_error": "확인 실패",
-        "footer_checking": "확인 중..."
+        "footer_checking": "확인 중...",
+        "update_error_title": "업데이트 확인 실패",
+        "update_error_vpn_desc": "업데이트를 확인하지 못했습니다. GitHub가 차단되었거나 접근할 수 없습니다 — VPN을 활성화하세요.",
+        "update_error_vpn_promo": "무료 VPN 설정은 여기에서 이용할 수 있습니다:",
+        "btn_free_vpn": "무료 GOIDA VPN 설정"
     },
     "ar": {
         "app_title": "ماسح ملفات VirusTotal",
@@ -1713,6 +1757,10 @@
         "footer_update_available": "تحديث متاح",
         "footer_up_to_date": "محدّث",
         "footer_update_error": "فشل التحقق",
-        "footer_checking": "جاري التحقق..."
+        "footer_checking": "جاري التحقق...",
+        "update_error_title": "فشل التحقق من التحديثات",
+        "update_error_vpn_desc": "تعذر التحقق من التحديثات. قد يكون GitHub محظورًا أو لا يمكن الوصول إليه — يرجى تفعيل VPN.",
+        "update_error_vpn_promo": "تكوينات VPN المجانية متاحة هنا:",
+        "btn_free_vpn": "GOIDA VPN مجاني"
     }
 }

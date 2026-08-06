@@ -176,6 +176,80 @@ def build_footer(lang="en", page=None):
         update_btn_icon.color = "#FACC15"
         update_btn.update()
 
+        def _show_vpn_dialog(e_event=None):
+            target_page = page or (e_event.control.page if e_event and hasattr(e_event, "control") else None)
+            if not target_page:
+                return
+
+            vpn_title_text = S.get("update_error_title", "Update Check Failed")
+            vpn_msg_text = S.get("update_error_vpn_desc", "Could not connect to GitHub. Please check your internet connection or turn on a VPN.")
+            vpn_promo_text = S.get("update_error_vpn_promo", "Free VPN configs available here:")
+            btn_vpn_text = S.get("btn_free_vpn", "Free GOIDA VPN Configs")
+
+            def open_vpn(_):
+                webbrowser.open("https://github.com/AvenCores/goida-vpn-configs")
+
+            dlg = ft.AlertDialog(
+                title=ft.Row(
+                    [
+                        ft.Icon(ft.Icons.VPN_LOCK_ROUNDED, color="#F59E0B", size=26),
+                        ft.Text(vpn_title_text, color="#FFFFFF", weight=ft.FontWeight.BOLD, size=16),
+                    ],
+                    spacing=10,
+                    alignment=ft.MainAxisAlignment.CENTER,
+                ),
+                content=ft.Container(
+                    width=380,
+                    content=ft.Column(
+                        [
+                            ft.Text(vpn_msg_text, color="#CBD5E1", size=13, text_align=ft.TextAlign.CENTER),
+                            ft.Container(height=6),
+                            ft.Container(
+                                content=ft.Column(
+                                    [
+                                        ft.Text(vpn_promo_text, color="#94A3B8", size=12, weight=ft.FontWeight.W_500, text_align=ft.TextAlign.CENTER),
+                                        ft.ElevatedButton(
+                                            content=ft.Row(
+                                                [
+                                                    ft.Icon(ft.Icons.KEY_ROUNDED, size=16, color="#FFFFFF"),
+                                                    ft.Text(btn_vpn_text, color="#FFFFFF", size=13, weight=ft.FontWeight.BOLD),
+                                                    ft.Icon(ft.Icons.OPEN_IN_NEW_ROUNDED, size=14, color="#FFFFFF"),
+                                                ],
+                                                alignment=ft.MainAxisAlignment.CENTER,
+                                                spacing=8,
+                                                tight=True,
+                                            ),
+                                            on_click=open_vpn,
+                                            bgcolor="#008DDA",
+                                            color="#FFFFFF",
+                                            style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8)),
+                                        ),
+                                    ],
+                                    spacing=8,
+                                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                                ),
+                                padding=14,
+                                border=ft.Border.all(1, "#2E3C56"),
+                                border_radius=8,
+                                bgcolor="#0B0F19",
+                            ),
+                        ],
+                        spacing=10,
+                        tight=True,
+                        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                    ),
+                ),
+                actions=[
+                    ft.TextButton(
+                        close_text,
+                        on_click=lambda _: target_page.pop_dialog()
+                    )
+                ],
+                actions_alignment=ft.MainAxisAlignment.CENTER,
+                bgcolor="#151E33",
+            )
+            target_page.show_dialog(dlg)
+
         async def _do_check():
             result = await asyncio.to_thread(_check_for_update)
             if result is None:
@@ -184,6 +258,7 @@ def build_footer(lang="en", page=None):
                 update_btn_icon.color = "#EF4444"
                 update_btn.data = "error"
                 update_btn.update()
+                _show_vpn_dialog(e)
                 await asyncio.sleep(3)
                 _reset_btn(None)
                 return
