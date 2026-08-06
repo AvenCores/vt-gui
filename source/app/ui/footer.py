@@ -246,6 +246,7 @@ def build_footer(lang="en", page=None):
                     )
                 ],
                 actions_alignment=ft.MainAxisAlignment.CENTER,
+                on_dismiss=lambda _: _reset_btn(None),
                 bgcolor="#151E33",
             )
             target_page.show_dialog(dlg)
@@ -259,8 +260,6 @@ def build_footer(lang="en", page=None):
                 update_btn.data = "error"
                 update_btn.update()
                 _show_vpn_dialog(e)
-                await asyncio.sleep(3)
-                _reset_btn(None)
                 return
 
             latest_tag, html_url = result
