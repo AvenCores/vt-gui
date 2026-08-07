@@ -468,24 +468,40 @@ def main(page: ft.Page):
                 app_state = "scanner"
                 build_ui()
 
-            def on_history_rescan(path):
-                nonlocal active_scans, app_state, current_tab_index, scan_service
-                active_scans = []
-                current_tab_index = 0
-                app_state = "scans"
-                active_scans.append({
-                    "file_path": path,
-                    "filename": os.path.basename(path),
-                    "status": "scanning",
-                    "status_text": STRINGS[current_lang]["computing_hash"],
-                    "progress": 0.0,
-                    "sha256": None,
-                    "results": None,
-                    "error": None
-                })
-                build_ui()
-                scan_service = ScanService(active_scans, current_lang, thread_safe_build, show_alert, page)
-                threading.Thread(target=scan_service.run_single_scan_pipeline, args=(0, path), daemon=True).start()
+            def on_history_rescan(item):
+                nonlocal active_scans, app_state, current_tab_index, scan_service, active_scanner_tab_index
+                if isinstance(item, dict) and item.get("type") == "lookup":
+                    lookup_type = item.get("lookup_type", "url")
+                    query = item.get("query", "")
+                    if lookup_type in search_states:
+                        search_states[lookup_type]["input"] = query
+                    tab_indices = {"url": 1, "domain": 2, "ip": 3, "search": 4}
+                    active_scanner_tab_index = tab_indices.get(lookup_type, 1)
+                    app_state = "scanner"
+                    build_ui()
+                    intel_view.run_lookup_query(lookup_type)
+                elif isinstance(item, dict) and item.get("type") == "file":
+                    path = item.get("file_path", "")
+                    if path and os.path.exists(path):
+                        on_history_rescan(path)
+                elif isinstance(item, str):
+                    path = item
+                    active_scans = []
+                    current_tab_index = 0
+                    app_state = "scans"
+                    active_scans.append({
+                        "file_path": path,
+                        "filename": os.path.basename(path),
+                        "status": "scanning",
+                        "status_text": STRINGS[current_lang]["computing_hash"],
+                        "progress": 0.0,
+                        "sha256": None,
+                        "results": None,
+                        "error": None
+                    })
+                    build_ui()
+                    scan_service = ScanService(active_scans, current_lang, thread_safe_build, show_alert, page)
+                    threading.Thread(target=scan_service.run_single_scan_pipeline, args=(0, path), daemon=True).start()
 
             def on_history_open_in_app(record):
                 nonlocal active_scans, app_state, current_tab_index, active_scanner_tab_index

@@ -109,7 +109,7 @@ def build_history_view(lang, page, on_back, on_rescan, on_open_in_app=None):
 
         def on_rescan_click(e, path=file_path, rt=record_type, lt=lookup_type, q=query, rec=record):
             if rt == "lookup":
-                on_back()
+                on_rescan(rec)
             elif path and os.path.exists(path):
                 on_rescan(path)
             else:
