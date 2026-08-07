@@ -357,6 +357,30 @@ def main(page: ft.Page):
                 nonlocal current_tab_index
                 current_tab_index = int(e.control.selected_index)
                 build_ui()
+
+            add_tab_btn = ft.IconButton(
+                icon=ft.Icons.ADD_ROUNDED,
+                icon_color="#00F0FF",
+                tooltip=STRINGS[current_lang].get("add_file_tooltip", "Add file to scan"),
+                on_click=on_add_scan_click,
+                bgcolor="#1E293B",
+                style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8))
+            )
+            
+            tab_bar_row = ft.Row(
+                [
+                    ft.Container(
+                        content=ft.TabBar(
+                            tabs=tab_headers
+                        ),
+                        expand=True
+                    ),
+                    add_tab_btn
+                ],
+                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                spacing=8
+            )
                 
             tabs = ft.Tabs(
                 selected_index=current_tab_index,
@@ -366,9 +390,7 @@ def main(page: ft.Page):
                 content=ft.Column(
                     expand=True,
                     controls=[
-                        ft.TabBar(
-                            tabs=tab_headers
-                        ),
+                        tab_bar_row,
                         ft.TabBarView(
                             expand=True,
                             controls=tab_contents
@@ -628,7 +650,7 @@ def main(page: ft.Page):
     # ==============================================================================
     # FILE PICKER HANDLERS
     # ==============================================================================
-    def on_scan_file_selected(files):
+    def on_scan_file_selected(files, append=False):
         if not files:
             return
 
@@ -640,10 +662,6 @@ def main(page: ft.Page):
             build_ui()
             return
             
-        active_scans = []
-        current_tab_index = 0
-        app_state = "scans"
-        
         valid_files = []
         for f in files:
             if not f.path or not os.path.exists(f.path):
@@ -654,9 +672,14 @@ def main(page: ft.Page):
             valid_files.append(f)
             
         if not valid_files:
-            app_state = "scanner"
-            build_ui()
+            if not append and not active_scans:
+                app_state = "scanner"
+                build_ui()
             return
+            
+        start_idx = len(active_scans) if append else 0
+        if not append:
+            active_scans = []
             
         for f in valid_files:
             active_scans.append({
@@ -670,17 +693,31 @@ def main(page: ft.Page):
                 "error": None
             })
             
+        current_tab_index = start_idx
+        app_state = "scans"
         build_ui()
         
-        # Start scanning for each file in a separate thread
-        scan_service = ScanService(active_scans, current_lang, thread_safe_build, show_alert, page)
-        for idx, scan in enumerate(active_scans):
+        # Start scanning for each new file in a separate thread
+        if scan_service is None or not append:
+            scan_service = ScanService(active_scans, current_lang, thread_safe_build, show_alert, page)
+        else:
+            scan_service.active_scans = active_scans
+
+        for idx in range(start_idx, len(active_scans)):
+            scan = active_scans[idx]
             threading.Thread(target=scan_service.run_single_scan_pipeline, args=(idx, scan["file_path"]), daemon=True).start()
 
     async def on_scan_click(e):
         try:
             files = await file_picker_scan.pick_files(allow_multiple=True)
             on_scan_file_selected(files)
+        except Exception as ex:
+            show_alert("Error", str(ex))
+
+    async def on_add_scan_click(e):
+        try:
+            files = await file_picker_scan.pick_files(allow_multiple=True)
+            on_scan_file_selected(files, append=True)
         except Exception as ex:
             show_alert("Error", str(ex))
 
@@ -764,7 +801,7 @@ def main(page: ft.Page):
                     class PseudoFile:
                         def __init__(self, path):
                             self.path = path
-                    on_scan_file_selected([PseudoFile(p) for p in valid])
+                    on_scan_file_selected([PseudoFile(p) for p in valid], append=(app_state == "scans"))
             except Exception:
                 pass
 
