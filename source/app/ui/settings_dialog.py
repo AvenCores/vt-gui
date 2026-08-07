@@ -201,8 +201,22 @@ def open_settings(page, lang, on_settings_saved, on_reinstall_cli=None, cli_sour
         )
     )
 
+    settings_title_container = ft.Container(
+        content=ft.Row(
+            [
+                ft.Icon(ft.Icons.SETTINGS_ROUNDED, color="#00F0FF", size=22),
+                ft.Text(STRINGS[lang]["settings_title"], color="#FFFFFF", size=17, weight=ft.FontWeight.BOLD)
+            ],
+            alignment=ft.MainAxisAlignment.CENTER,
+            spacing=8
+        ),
+        padding=ft.Padding(top=6, bottom=12, left=10, right=10),
+        border=ft.Border.only(bottom=ft.BorderSide(1, "#2E3C56")),
+        alignment=ft.Alignment.CENTER
+    )
+
     dlg = ft.AlertDialog(
-        title=ft.Text(STRINGS[lang]["settings_title"], color="#FFFFFF", weight=ft.FontWeight.BOLD),
+        title=settings_title_container,
         content=settings_content,
         actions=[
             ft.TextButton(STRINGS[lang]["btn_no"], on_click=lambda _: page.pop_dialog()),
