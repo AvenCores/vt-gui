@@ -800,9 +800,14 @@ def main(page: ft.Page):
         else:
             scan_service.active_scans = active_scans
 
+        from concurrent.futures import ThreadPoolExecutor
+        if not hasattr(page, "_scan_pool") or getattr(page, "_scan_pool_shutdown", False):
+            page._scan_pool = ThreadPoolExecutor(max_workers=3)
+            page._scan_pool_shutdown = False
+
         for idx in range(start_idx, len(active_scans)):
             scan = active_scans[idx]
-            threading.Thread(target=scan_service.run_single_scan_pipeline, args=(idx, scan["file_path"]), daemon=True).start()
+            page._scan_pool.submit(scan_service.run_single_scan_pipeline, idx, scan["file_path"])
 
     async def on_scan_click(e):
         try:
@@ -811,23 +816,45 @@ def main(page: ft.Page):
         except Exception as ex:
             show_alert("Error", str(ex))
 
-    async def on_folder_click(e):
-        try:
-            dir_path = await file_picker_folder.get_directory_path()
-            if not dir_path:
-                return
-            collected_files = []
-            for root, _, filenames in os.walk(dir_path):
-                for fname in filenames:
-                    full_p = os.path.join(root, fname)
-                    class FileObj:
-                        def __init__(self, p):
-                            self.path = p
-                    collected_files.append(FileObj(full_p))
-            if collected_files:
-                on_scan_file_selected(collected_files)
-        except Exception as ex:
-            show_alert("Error", str(ex))
+    def on_folder_click(e):
+        def worker():
+            try:
+                import tkinter as tk
+                from tkinter import filedialog
+
+                root = tk.Tk()
+                root.withdraw()
+                root.attributes('-topmost', True)
+                dir_path = filedialog.askdirectory(title=STRINGS[current_lang].get("btn_scan_folder", "Scan Folder"))
+                root.destroy()
+
+                if not dir_path:
+                    return
+
+                collected_files = []
+                for root_dir, _, filenames in os.walk(dir_path):
+                    for fname in filenames:
+                        if fname.startswith("~$") or fname.startswith("."):
+                            continue
+                        full_p = os.path.join(root_dir, fname)
+                        if os.path.isfile(full_p):
+                            class FileObj:
+                                def __init__(self, p):
+                                    self.path = p
+                            collected_files.append(FileObj(full_p))
+                            if len(collected_files) >= 100:
+                                break
+                    if len(collected_files) >= 100:
+                        break
+
+                if collected_files:
+                    on_scan_file_selected(collected_files)
+                else:
+                    show_alert(STRINGS[current_lang]["app_title"], "No readable files found in selected directory.")
+            except Exception as ex:
+                show_alert("Error", str(ex))
+
+        threading.Thread(target=worker, daemon=True).start()
 
     async def on_add_scan_click(e):
         try:
