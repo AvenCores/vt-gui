@@ -7,7 +7,7 @@ import webbrowser
 import flet as ft
 from ..config import STRINGS, get_api_key, CLI_BINARY_NAME
 from ..vt_api import submit_url_scan, get_subdomains, get_dns_resolutions, reanalyze_item
-from ..exporter import export_report_to_file
+from ..exporter import export_report_to_file, prompt_export_report
 from ..history_manager import add_lookup_record
 from .theme import make_stat_card, make_engine_row
 
@@ -67,13 +67,7 @@ class IntelligenceView:
         )
 
         def handle_export(e):
-            ok, path = export_report_to_file(data_dict, f"{item_type}_{item_id}")
-            if ok:
-                msg = STRINGS[self.current_lang].get("toast_export_success", "Report exported to {file}!").format(file=os.path.basename(path))
-                self.page.show_dialog(ft.SnackBar(content=ft.Text(msg), bgcolor="#10B981"))
-            else:
-                msg = STRINGS[self.current_lang].get("toast_export_fail", "Export failed: {e}").format(e=path)
-                self.page.show_dialog(ft.SnackBar(content=ft.Text(msg), bgcolor="#EF4444"))
+            prompt_export_report(self.page, data_dict, f"{item_type}_{item_id}", self.current_lang)
 
         def handle_reanalyze(e):
             api_key = get_api_key()

@@ -3,7 +3,7 @@ import os
 import threading
 from ..config import STRINGS, get_api_key
 from ..vt_api import reanalyze_item, get_file_behaviours, get_comments, add_comment, vote_item
-from ..exporter import export_report_to_file
+from ..exporter import export_report_to_file, prompt_export_report
 from .theme import make_stat_card, make_file_details_card, make_engine_row
 
 def build_results_view(current_scan_results, selected_target_file, last_completed_sha256, lang, page):
@@ -84,13 +84,7 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
         threading.Thread(target=worker, daemon=True).start()
 
     def handle_export(e):
-        ok, path = export_report_to_file(current_scan_results, filename)
-        if ok:
-            msg = STRINGS[lang].get("toast_export_success", "Report exported to {file}!").format(file=os.path.basename(path))
-            page.show_dialog(ft.SnackBar(content=ft.Text(msg), bgcolor="#10B981"))
-        else:
-            msg = STRINGS[lang].get("toast_export_fail", "Export failed: {e}").format(e=path)
-            page.show_dialog(ft.SnackBar(content=ft.Text(msg), bgcolor="#EF4444"))
+        prompt_export_report(page, current_scan_results, filename, lang)
 
     def handle_vote(verdict):
         def vote_action(e):
