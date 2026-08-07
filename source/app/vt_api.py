@@ -270,8 +270,37 @@ def vote_item(collection, item_id, verdict, api_key):
     try:
         with urllib.request.urlopen(req) as response:
             return json.loads(response.read().decode('utf-8'))
+    except urllib.error.HTTPError as ex:
+        try:
+            err_body = ex.read().decode('utf-8')
+            err_json = json.loads(err_body)
+            msg = err_json.get("error", {}).get("message", str(ex))
+            raise ValueError(msg)
+        except Exception:
+            raise ex
     except Exception as ex:
         raise ex
+
+def get_user_vote(collection, item_id, api_key):
+    """Fetch current user's vote for an item ('harmless', 'malicious', or None)."""
+    url = f"https://www.virustotal.com/api/v3/{collection}/{item_id}/user_votes"
+    req = urllib.request.Request(
+        url,
+        headers={
+            "x-apikey": api_key,
+            "User-Agent": "Mozilla/5.0"
+        }
+    )
+    try:
+        with urllib.request.urlopen(req) as response:
+            data = json.loads(response.read().decode('utf-8'))
+            votes = data.get("data", [])
+            if votes and isinstance(votes, list):
+                first_vote = votes[0]
+                return first_vote.get("attributes", {}).get("verdict")
+    except Exception:
+        pass
+    return None
 
 def diff_files(hash1, hash2, vt_path):
     """Compare two file hashes using vt CLI `vt diff` or fetch both file details."""

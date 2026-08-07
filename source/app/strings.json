@@ -204,7 +204,11 @@
         "api_quota_daily": "Daily API Quota: {used} / {allowed} requests ({percent}%)",
         "api_quota_usage": "Daily API Usage: {used} requests used",
         "dns_loading": "Loading DNS resolutions & subdomains...",
-        "dns_no_data": "No DNS resolutions or subdomains found."
+        "dns_no_data": "No DNS resolutions or subdomains found.",
+        "voting_progress": "Sending vote to VirusTotal...",
+        "voted_harmless": "Voted Harmless",
+        "voted_malicious": "Voted Malicious",
+        "already_voted": "Already voted '{verdict}' for this file."
     },
     "ru": {
         "app_title": "Сканер файлов VirusTotal",
@@ -411,7 +415,11 @@
         "api_quota_daily": "Дневная квота API: {used} / {allowed} запросов ({percent}%)",
         "api_quota_usage": "Дневное использование API: использовано {used} запросов",
         "dns_loading": "Загрузка DNS-резолвинга и поддоменов...",
-        "dns_no_data": "DNS-резолвинг и поддомены не найдены."
+        "dns_no_data": "DNS-резолвинг и поддомены не найдены.",
+        "voting_progress": "Отправка голоса на VirusTotal...",
+        "voted_harmless": "Голос: Безопасно",
+        "voted_malicious": "Голос: Опасно",
+        "already_voted": "Вы уже проголосовали ({verdict}) за этот файл."
     },
     "es": {
         "app_title": "Escáner de Archivos VirusTotal",
@@ -618,7 +626,11 @@
         "api_quota_daily": "Daily API Quota: {used} / {allowed} requests ({percent}%)",
         "api_quota_usage": "Daily API Usage: {used} requests used",
         "dns_loading": "Loading DNS resolutions & subdomains...",
-        "dns_no_data": "No DNS resolutions or subdomains found."
+        "dns_no_data": "No DNS resolutions or subdomains found.",
+        "voting_progress": "Sending vote to VirusTotal...",
+        "voted_harmless": "Voted Harmless",
+        "voted_malicious": "Voted Malicious",
+        "already_voted": "Already voted '{verdict}' for this file."
     },
     "de": {
         "app_title": "VirusTotal Dateiscanner",
@@ -825,7 +837,11 @@
         "btn_compare_hashes": "Compare Hashes",
         "post_comment_hint": "Write a community note or comment...",
         "dns_loading": "Lade DNS-Auflösungen und Subdomains...",
-        "dns_no_data": "Keine DNS-Auflösungen oder Subdomains gefunden."
+        "dns_no_data": "Keine DNS-Auflösungen oder Subdomains gefunden.",
+        "voting_progress": "Sending vote to VirusTotal...",
+        "voted_harmless": "Als harmlos bewertet",
+        "voted_malicious": "Als bösartig bewertet",
+        "already_voted": "Sie haben bereits für diese Datei gestimmt."
     },
     "fr": {
         "app_title": "Scanner de Fichiers VirusTotal",
@@ -1032,7 +1048,11 @@
         "btn_compare_hashes": "Compare Hashes",
         "post_comment_hint": "Write a community note or comment...",
         "dns_loading": "Loading DNS resolutions & subdomains...",
-        "dns_no_data": "No DNS resolutions or subdomains found."
+        "dns_no_data": "No DNS resolutions or subdomains found.",
+        "voting_progress": "Sending vote to VirusTotal...",
+        "voted_harmless": "Voted Harmless",
+        "voted_malicious": "Voted Malicious",
+        "already_voted": "Already voted '{verdict}' for this file."
     },
     "pt": {
         "app_title": "Scanner de Arquivos VirusTotal",
@@ -1239,7 +1259,11 @@
         "btn_compare_hashes": "Compare Hashes",
         "post_comment_hint": "Write a community note or comment...",
         "dns_loading": "Loading DNS resolutions & subdomains...",
-        "dns_no_data": "No DNS resolutions or subdomains found."
+        "dns_no_data": "No DNS resolutions or subdomains found.",
+        "voting_progress": "Sending vote to VirusTotal...",
+        "voted_harmless": "Voted Harmless",
+        "voted_malicious": "Voted Malicious",
+        "already_voted": "Already voted '{verdict}' for this file."
     },
     "tr": {
         "app_title": "VirusTotal Dosya Tarayıcı",
@@ -1446,7 +1470,11 @@
         "btn_compare_hashes": "Compare Hashes",
         "post_comment_hint": "Write a community note or comment...",
         "dns_loading": "Loading DNS resolutions & subdomains...",
-        "dns_no_data": "No DNS resolutions or subdomains found."
+        "dns_no_data": "No DNS resolutions or subdomains found.",
+        "voting_progress": "Sending vote to VirusTotal...",
+        "voted_harmless": "Voted Harmless",
+        "voted_malicious": "Voted Malicious",
+        "already_voted": "Already voted '{verdict}' for this file."
     },
     "uk": {
         "app_title": "Сканер файлів VirusTotal",
@@ -1653,7 +1681,11 @@
         "btn_compare_hashes": "Compare Hashes",
         "post_comment_hint": "Write a community note or comment...",
         "dns_loading": "Loading DNS resolutions & subdomains...",
-        "dns_no_data": "No DNS resolutions or subdomains found."
+        "dns_no_data": "No DNS resolutions or subdomains found.",
+        "voting_progress": "Sending vote to VirusTotal...",
+        "voted_harmless": "Voted Harmless",
+        "voted_malicious": "Voted Malicious",
+        "already_voted": "Already voted '{verdict}' for this file."
     },
     "zh": {
         "app_title": "VirusTotal 文件扫描器",
@@ -1860,7 +1892,11 @@
         "btn_compare_hashes": "Compare Hashes",
         "post_comment_hint": "Write a community note or comment...",
         "dns_loading": "Loading DNS resolutions & subdomains...",
-        "dns_no_data": "No DNS resolutions or subdomains found."
+        "dns_no_data": "No DNS resolutions or subdomains found.",
+        "voting_progress": "Sending vote to VirusTotal...",
+        "voted_harmless": "Voted Harmless",
+        "voted_malicious": "Voted Malicious",
+        "already_voted": "Already voted '{verdict}' for this file."
     },
     "ja": {
         "app_title": "VirusTotal ファイルスキャナー",
@@ -2067,7 +2103,11 @@
         "btn_compare_hashes": "Compare Hashes",
         "post_comment_hint": "Write a community note or comment...",
         "dns_loading": "Loading DNS resolutions & subdomains...",
-        "dns_no_data": "No DNS resolutions or subdomains found."
+        "dns_no_data": "No DNS resolutions or subdomains found.",
+        "voting_progress": "Sending vote to VirusTotal...",
+        "voted_harmless": "Voted Harmless",
+        "voted_malicious": "Voted Malicious",
+        "already_voted": "Already voted '{verdict}' for this file."
     },
     "ko": {
         "app_title": "VirusTotal 파일 스캐너",
@@ -2274,7 +2314,11 @@
         "btn_compare_hashes": "Compare Hashes",
         "post_comment_hint": "Write a community note or comment...",
         "dns_loading": "Loading DNS resolutions & subdomains...",
-        "dns_no_data": "No DNS resolutions or subdomains found."
+        "dns_no_data": "No DNS resolutions or subdomains found.",
+        "voting_progress": "Sending vote to VirusTotal...",
+        "voted_harmless": "Voted Harmless",
+        "voted_malicious": "Voted Malicious",
+        "already_voted": "Already voted '{verdict}' for this file."
     },
     "ar": {
         "app_title": "ماسح ملفات VirusTotal",
@@ -2481,6 +2525,10 @@
         "btn_compare_hashes": "Compare Hashes",
         "post_comment_hint": "Write a community note or comment...",
         "dns_loading": "Loading DNS resolutions & subdomains...",
-        "dns_no_data": "No DNS resolutions or subdomains found."
+        "dns_no_data": "No DNS resolutions or subdomains found.",
+        "voting_progress": "Sending vote to VirusTotal...",
+        "voted_harmless": "Voted Harmless",
+        "voted_malicious": "Voted Malicious",
+        "already_voted": "Already voted '{verdict}' for this file."
     }
 }
