@@ -344,13 +344,42 @@ def build_history_view(lang, page, on_back, on_rescan, on_open_in_app=None):
             padding=ft.Padding(left=14, right=10, top=10, bottom=10),
         )
 
+    # Animated Header Back Action
+    back_icon = ft.Icon(
+        ft.Icons.ARROW_BACK_ROUNDED,
+        color="#FFFFFF",
+        size=22,
+        offset=ft.Offset(0, 0),
+        animate_offset=ft.Animation(50, ft.AnimationCurve.EASE_OUT)
+    )
+
+    def handle_back_click(e):
+        back_icon.offset = ft.Offset(-0.25, 0)
+        back_button_wrapper.scale = 0.90
+        page.update()
+        
+        def run_back():
+            import time
+            time.sleep(0.04)
+            on_back()
+            
+        import threading
+        threading.Thread(target=run_back, daemon=True).start()
+
+    back_button_wrapper = ft.Container(
+        content=back_icon,
+        padding=6,
+        border_radius=20,
+        scale=1.0,
+        animate_scale=ft.Animation(50, ft.AnimationCurve.EASE_OUT),
+        on_click=handle_back_click,
+        tooltip=STRINGS[lang].get("btn_back", "Back"),
+        ink=True
+    )
+
     # Header
     header = ft.Row([
-        ft.IconButton(
-            icon=ft.Icons.ARROW_BACK_ROUNDED,
-            icon_color="#FFFFFF",
-            on_click=lambda _: on_back(),
-        ),
+        back_button_wrapper,
         ft.Text(STRINGS[lang]["tab_history"], size=20, weight=ft.FontWeight.BOLD, color="#FFFFFF", expand=True),
         ft.TextButton(
             content=ft.Text(STRINGS[lang]["history_clear"], color="#EF4444", size=13),

@@ -104,6 +104,25 @@ def main(page: ft.Page):
 
     # Note: Search and threat intelligence lookup views and handlers have been moved to src/ui/intelligence_view.py
 
+    main_content = None
+
+    def animate_back_navigation(on_finish):
+        nonlocal main_content
+        if main_content is not None and main_content.content is not None:
+            main_content.opacity = 0.0
+            main_content.offset = ft.Offset(0.03, 0)
+            try:
+                page.update()
+            except Exception:
+                pass
+
+        def delayed_finish():
+            import time
+            time.sleep(0.04)
+            _loop.call_soon_threadsafe(on_finish)
+
+        threading.Thread(target=delayed_finish, daemon=True).start()
+
     def build_ui():
         nonlocal app_state
         cli_status, cli_hash, cli_source = check_installed_binary()
@@ -219,8 +238,14 @@ def main(page: ft.Page):
             border=ft.Border.only(bottom=ft.BorderSide(1, "#1E293B"))
         )
         
-        # Central view content switcher
-        main_content = ft.Container(expand=True)
+        # Central view content switcher with fast fade & slide transitions
+        main_content = ft.Container(
+            expand=True,
+            opacity=1.0,
+            offset=ft.Offset(0, 0),
+            animate_opacity=ft.Animation(70, ft.AnimationCurve.EASE_OUT),
+            animate_offset=ft.Animation(70, ft.AnimationCurve.EASE_OUT)
+        )
         
         if app_state == "install_cli":
             def on_auto_install_click(e):
@@ -409,22 +434,47 @@ def main(page: ft.Page):
                     report_url = f"https://www.virustotal.com/gui/file/{current_scan['sha256']}"
             
             def go_back_to_scanner(e):
-                nonlocal app_state, active_scans
-                if active_scanner_tab_index == 5:
-                    app_state = "history"
-                else:
-                    app_state = "scanner"
-                active_scans = []
-                build_ui()
+                back_icon.offset = ft.Offset(-0.25, 0)
+                back_btn_container.scale = 0.90
+                try:
+                    page.update()
+                except Exception:
+                    pass
                 
-            back_btn = ft.Button(
-                content=ft.Text(STRINGS[current_lang]["btn_back"]),
-                icon=ft.Icons.ARROW_BACK_ROUNDED,
-                on_click=go_back_to_scanner,
-                bgcolor="#1E293B",
+                def perform_back():
+                    nonlocal app_state, active_scans
+                    if active_scanner_tab_index == 5:
+                        app_state = "history"
+                    else:
+                        app_state = "scanner"
+                    active_scans = []
+                    build_ui()
+
+                animate_back_navigation(perform_back)
+                
+            back_icon = ft.Icon(
+                ft.Icons.ARROW_BACK_ROUNDED,
                 color="#FFFFFF",
-                style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8))
+                size=18,
+                offset=ft.Offset(0, 0),
+                animate_offset=ft.Animation(50, ft.AnimationCurve.EASE_OUT)
             )
+            
+            back_btn_container = ft.Container(
+                content=ft.Row([
+                    back_icon,
+                    ft.Text(STRINGS[current_lang]["btn_back"], color="#FFFFFF", size=14, weight=ft.FontWeight.W_500)
+                ], spacing=6, alignment=ft.MainAxisAlignment.CENTER),
+                padding=ft.Padding(left=14, right=16, top=8, bottom=8),
+                bgcolor="#1E293B",
+                border_radius=8,
+                scale=1.0,
+                animate_scale=ft.Animation(50, ft.AnimationCurve.EASE_OUT),
+                on_click=go_back_to_scanner,
+                ink=True,
+                tooltip=STRINGS[current_lang]["btn_back"]
+            )
+            back_btn = back_btn_container
             
             # Left side row with back button
             left_actions = ft.Row([back_btn], alignment=ft.MainAxisAlignment.START)
@@ -485,10 +535,13 @@ def main(page: ft.Page):
             search_view = intel_view.build_lookup_tab("search", STRINGS[current_lang]["search_placeholder"], STRINGS[current_lang]["search_helper"])
 
             def on_history_back():
-                nonlocal app_state, active_scanner_tab_index
-                active_scanner_tab_index = 0
-                app_state = "scanner"
-                build_ui()
+                def perform_back():
+                    nonlocal app_state, active_scanner_tab_index
+                    active_scanner_tab_index = 0
+                    app_state = "scanner"
+                    build_ui()
+
+                animate_back_navigation(perform_back)
 
             def on_history_rescan(item):
                 nonlocal active_scans, app_state, current_tab_index, scan_service, active_scanner_tab_index
