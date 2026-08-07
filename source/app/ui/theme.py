@@ -1,5 +1,26 @@
 import flet as ft
 
+def make_loading_card(message, height=140):
+    """Creates a premium, glowing glassmorphism loading card for async data fetching."""
+    return ft.Container(
+        content=ft.Column(
+            [
+                ft.ProgressRing(width=28, height=28, stroke_width=2.5, color="#00F0FF"),
+                ft.Text(message, color="#00F0FF", size=12, weight=ft.FontWeight.W_500, text_align=ft.TextAlign.CENTER)
+            ],
+            alignment=ft.MainAxisAlignment.CENTER,
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+            spacing=10
+        ),
+        alignment=ft.Alignment(0, 0),
+        padding=15,
+        height=height,
+        bgcolor="#151E33aa",
+        border_radius=12,
+        border=ft.Border.all(1, "#00F0FF33"),
+        shadow=ft.BoxShadow(blur_radius=10, color="#00F0FF10", offset=ft.Offset(0, 2))
+    )
+
 def make_stat_card(label, count, color_hex, icon):
     """Creates a beautiful, glowing stat card control."""
     return ft.Container(

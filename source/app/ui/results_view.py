@@ -4,7 +4,7 @@ import threading
 from ..config import STRINGS, get_api_key
 from ..vt_api import reanalyze_item, get_file_behaviours, get_comments, add_comment, vote_item, get_user_vote
 from ..exporter import export_report_to_file, prompt_export_report
-from .theme import make_stat_card, make_file_details_card, make_engine_row
+from .theme import make_stat_card, make_file_details_card, make_engine_row, make_loading_card
 
 def build_results_view(current_scan_results, selected_target_file, last_completed_sha256, lang, page):
     """Builds the enhanced results dashboard, showing detections, behaviors, comments, voting, and export options."""
@@ -287,22 +287,29 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
     ], scroll=ft.ScrollMode.ALWAYS, expand=True)
 
     # Tab 2: Behavior & Sandbox Reports
-    behavior_container = ft.Column(spacing=8, scroll=ft.ScrollMode.ALWAYS, expand=True)
+    behavior_loading_card = make_loading_card(STRINGS[lang].get("behavior_loading", "Loading sandbox execution reports..."))
+    behavior_container = ft.Column(controls=[behavior_loading_card], spacing=8, scroll=ft.ScrollMode.ALWAYS, expand=True)
     behavior_loaded = False
 
     def load_behavior(e=None):
         nonlocal behavior_loaded
         if behavior_loaded:
             return
-        behavior_container.controls = [ft.ProgressRing(color="#00F0FF"), ft.Text(STRINGS[lang].get("behavior_loading", "Loading sandbox reports..."), color="#00F0FF")]
-        page.update()
+        behavior_container.controls = [behavior_loading_card]
+        try:
+            page.update()
+        except Exception:
+            pass
         
         def worker():
             nonlocal behavior_loaded
             api_key = get_api_key()
             if not api_key:
                 behavior_container.controls = [ft.Text(STRINGS[lang].get("api_key_missing", "API key required."), color="#EF4444")]
-                page.update()
+                try:
+                    page.update()
+                except Exception:
+                    pass
                 return
             behaviours = get_file_behaviours(last_completed_sha256, api_key)
             behavior_loaded = True
@@ -332,11 +339,18 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
                         content=ft.Column(details, spacing=4),
                         padding=12, border_radius=10, bgcolor="#151E33", border=ft.Border.all(1, "#2E3C56")
                     ))
-            page.update()
+            try:
+                page.update()
+            except Exception:
+                pass
         threading.Thread(target=worker, daemon=True).start()
 
+    # Pre-trigger behavior load in background
+    load_behavior()
+
     # Tab 3: Comments
-    comments_container = ft.Column(spacing=8, scroll=ft.ScrollMode.ALWAYS, expand=True)
+    comments_loading_card = make_loading_card(STRINGS[lang].get("comments_loading", "Loading community comments..."))
+    comments_container = ft.Column(controls=[comments_loading_card], spacing=8, scroll=ft.ScrollMode.ALWAYS, expand=True)
     comment_input = ft.TextField(hint_text=STRINGS[lang].get("post_comment_hint", "Write a community note or comment..."), border_color="#2E3C56", expand=True)
     
     def post_comment(e):
@@ -362,7 +376,10 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
         api_key = get_api_key()
         if not api_key:
             comments_container.controls = [ft.Text(STRINGS[lang].get("api_key_missing", "API key required."), color="#94A3B8")]
-            page.update()
+            try:
+                page.update()
+            except Exception:
+                pass
             return
             
         def worker():
@@ -374,14 +391,16 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
                 for c in comms:
                     attrs = c.get("attributes", {})
                     txt = attrs.get("text", "")
-                    date_val = attrs.get("date", 0)
                     comments_container.controls.append(ft.Container(
                         content=ft.Column([
                             ft.Text(txt, color="#E2E8F0", size=12),
                         ], spacing=3),
                         padding=10, border_radius=8, bgcolor="#151E33", border=ft.Border.all(1, "#2E3C56")
                     ))
-            page.update()
+            try:
+                page.update()
+            except Exception:
+                pass
         threading.Thread(target=worker, daemon=True).start()
 
     load_comments()

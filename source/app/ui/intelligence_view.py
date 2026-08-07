@@ -9,7 +9,7 @@ from ..config import STRINGS, get_api_key, CLI_BINARY_NAME
 from ..vt_api import submit_url_scan, get_subdomains, get_dns_resolutions, reanalyze_item
 from ..exporter import export_report_to_file, prompt_export_report
 from ..history_manager import add_lookup_record
-from .theme import make_stat_card, make_engine_row
+from .theme import make_stat_card, make_engine_row, make_loading_card
 
 _NO_WINDOW = subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0
 
@@ -159,10 +159,7 @@ class IntelligenceView:
         # Extended relations view for Domain & IP
         relations_view = None
         if item_type in ("domain", "ip"):
-            loading_indicator = ft.Row([
-                ft.ProgressRing(width=14, height=14, stroke_width=2, color="#00F0FF"),
-                ft.Text(STRINGS[self.current_lang].get("dns_loading", "Загрузка DNS-резолвинга и поддоменов..."), color="#94A3B8", size=12)
-            ], spacing=8)
+            loading_indicator = make_loading_card(STRINGS[self.current_lang].get("dns_loading", "Loading DNS resolutions & subdomains..."), height=90)
             rel_container = ft.Column([loading_indicator], spacing=6)
             
             def load_relations():
