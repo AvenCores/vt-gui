@@ -1,9 +1,8 @@
 import flet as ft
 from ..config import STRINGS, KNOWN_HASHES
 
-def build_scanner_view(cli_status, cli_hash, cli_source, lang, file_picker_scan, on_scan_click):
-    """Builds the main File Scanner view with drag-and-drop simulated click zone and badges."""
-    # Build Status Badge for CLI
+def build_scanner_view(cli_status, cli_hash, cli_source, lang, file_picker_scan, on_scan_click, on_folder_click=None):
+    """Builds the main File Scanner view with drag-and-drop simulated click zone, badges, and folder scan button."""
     if cli_status == 'verified':
         version_str = KNOWN_HASHES.get(cli_hash, "CLI")
         badge_text = STRINGS[lang]["vt_exe_verified"].format(version=version_str)
@@ -32,7 +31,6 @@ def build_scanner_view(cli_status, cli_hash, cli_source, lang, file_picker_scan,
         border_radius=15,
     )
     
-    # Source badge: show when using a system-installed binary instead of app-downloaded
     source_badge = None
     if cli_source == 'system' and cli_status != 'missing':
         source_badge = ft.Container(
@@ -46,14 +44,13 @@ def build_scanner_view(cli_status, cli_hash, cli_source, lang, file_picker_scan,
             tooltip=STRINGS[lang].get("vt_exe_system_tooltip", "Using vt CLI found in system PATH instead of app-downloaded binary")
         )
     
-    # Dashed-look click area
     dashed_area = ft.Container(
         content=ft.Column(
             [
                 ft.Icon(ft.Icons.CLOUD_UPLOAD_ROUNDED, size=56, color="#00F0FF"),
                 ft.Text(STRINGS[lang]["drag_drop_text"], size=16, color="#E2E8F0", weight=ft.FontWeight.W_600, text_align=ft.TextAlign.CENTER),
                 ft.Text(STRINGS[lang].get("drag_drop_hint", ""), size=12, color="#94A3B8", text_align=ft.TextAlign.CENTER),
-                ft.Text("Max size: 650 MB", size=12, color="#94A3B8")
+                ft.Text("Max size: 650 MB per file", size=12, color="#94A3B8")
             ],
             alignment=ft.MainAxisAlignment.CENTER,
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
@@ -62,7 +59,7 @@ def build_scanner_view(cli_status, cli_hash, cli_source, lang, file_picker_scan,
         border=ft.Border.all(2, "#2E3C56"),
         border_radius=16,
         bgcolor="#151E33",
-        height=250,
+        height=220,
         alignment=ft.Alignment.CENTER,
         on_click=on_scan_click,
         animate=ft.Animation(200, ft.AnimationCurve.EASE_OUT)
@@ -74,8 +71,16 @@ def build_scanner_view(cli_status, cli_hash, cli_source, lang, file_picker_scan,
         dashed_area.update()
         
     dashed_area.on_hover = on_hover_dashed
+
+    folder_btn = ft.ElevatedButton(
+        STRINGS[lang].get("btn_scan_folder", "Scan Folder (Directory)"),
+        icon=ft.Icons.FOLDER_OPEN_ROUNDED,
+        on_click=on_folder_click,
+        bgcolor="#1E293B",
+        color="#00F0FF",
+        style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=10))
+    )
     
-    # Build the status row with badges
     badges = [status_badge]
     if source_badge:
         badges.append(source_badge)
@@ -86,9 +91,10 @@ def build_scanner_view(cli_status, cli_hash, cli_source, lang, file_picker_scan,
                 ft.Text(STRINGS[lang]["vt_exe_status"] + ":", size=14, color="#94A3B8", weight=ft.FontWeight.BOLD),
                 ft.Row(badges, spacing=8)
             ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
-            ft.Container(height=10),
-            dashed_area
+            ft.Container(height=5),
+            dashed_area,
+            ft.Row([folder_btn], alignment=ft.MainAxisAlignment.CENTER)
         ],
-        spacing=15,
+        spacing=12,
         expand=True
     )

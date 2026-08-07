@@ -2,9 +2,10 @@ import flet as ft
 import webbrowser
 import threading
 from ..config import write_env_var, STRINGS, get_api_key
+from ..vt_api import get_user_quota
 
 def open_settings(page, lang, on_settings_saved, on_reinstall_cli=None, cli_source=None):
-    """Opens a beautiful modal settings dialog with configuration options."""
+    """Opens a beautiful modal settings dialog with configuration options and API quota display."""
     api_key = get_api_key() or ""
 
     api_key_field = ft.TextField(
@@ -27,6 +28,31 @@ def open_settings(page, lang, on_settings_saved, on_reinstall_cli=None, cli_sour
 
     api_check_icon = ft.Icon(ft.Icons.VERIFIED_ROUNDED, color="transparent", size=16)
     api_check_text = ft.Text(" ", size=12, color="#94A3B8")
+
+    # API Quota progress section
+    quota_text = ft.Text(STRINGS[lang].get("api_quota_click", "API Quota: Click 'Check API' to fetch usage"), size=12, color="#94A3B8")
+    quota_progress = ft.ProgressBar(value=0.0, color="#00F0FF", bgcolor="#334155", height=4, visible=False)
+
+    def update_quota_display(key):
+        try:
+            q = get_user_quota(key)
+            if q:
+                used = q.get("daily_used", 0)
+                allowed = q.get("daily_allowed", 0)
+                if allowed > 0:
+                    percent = min(used / allowed, 1.0)
+                    quota_progress.value = percent
+                    quota_progress.color = "#FF3131" if percent > 0.9 else "#00F0FF"
+                    quota_progress.visible = True
+                    quota_text.value = STRINGS[lang].get("api_quota_daily", "Daily API Quota: {used} / {allowed} requests ({percent}%)").format(used=used, allowed=allowed, percent=int(percent*100))
+                else:
+                    quota_text.value = STRINGS[lang].get("api_quota_usage", "Daily API Usage: {used} requests used").format(used=used)
+                page.update()
+        except Exception:
+            pass
+
+    if api_key:
+        threading.Thread(target=lambda: update_quota_display(api_key), daemon=True).start()
 
     def on_check_api_click(e):
         key = api_key_field.value.strip()
@@ -53,6 +79,7 @@ def open_settings(page, lang, on_settings_saved, on_reinstall_cli=None, cli_sour
                     api_check_text.color = "#10B981"
                     api_check_icon.color = "#10B981"
                     api_check_icon.name = ft.Icons.CHECK_CIRCLE_ROUNDED
+                    update_quota_display(key)
                 else:
                     api_check_text.value = STRINGS[lang]["api_check_fail"].format(e=error)
                     api_check_text.color = "#EF4444"
@@ -131,7 +158,6 @@ def open_settings(page, lang, on_settings_saved, on_reinstall_cli=None, cli_sour
     reinstall_icon = ft.Icon(ft.Icons.REFRESH_ROUNDED, color="#F59E0B", size=20)
     reinstall_label = ft.Text(STRINGS[lang]["btn_reinstall_cli"], color="#F59E0B", size=14, weight=ft.FontWeight.W_600)
 
-    # Determine if reinstall should be locked (system binary in use)
     system_binary_active = (cli_source == 'system')
 
     reinstall_container = ft.Container(
@@ -170,7 +196,6 @@ def open_settings(page, lang, on_settings_saved, on_reinstall_cli=None, cli_sour
         spacing=5,
     )
 
-    # Warning text when system binary is active
     system_warning_row = ft.Container()
     if system_binary_active:
         system_warning_row = ft.Row(
@@ -184,18 +209,21 @@ def open_settings(page, lang, on_settings_saved, on_reinstall_cli=None, cli_sour
             spacing=6,
         )
 
+    column_controls = [
+        api_key_field,
+        get_api_key_btn,
+        ft.Row([api_check_btn, api_check_row], alignment=ft.MainAxisAlignment.START, spacing=5),
+        ft.Column([quota_text, quota_progress], spacing=4),
+        ft.Divider(height=1, color="#2E3C56"),
+        reinstall_row,
+        system_warning_row,
+        status_row,
+    ]
+
     settings_content = ft.Container(
-        width=400,
+        width=440,
         content=ft.Column(
-            [
-                api_key_field,
-                get_api_key_btn,
-                ft.Row([api_check_btn, api_check_row], alignment=ft.MainAxisAlignment.START, spacing=5),
-                ft.Divider(height=1, color="#2E3C56"),
-                reinstall_row,
-                system_warning_row,
-                status_row,
-            ],
+            column_controls,
             spacing=8,
             tight=True,
         )

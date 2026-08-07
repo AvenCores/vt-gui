@@ -11,6 +11,8 @@ LOOKUP_TYPE_ICONS = {
     "domain": ft.Icons.LANGUAGE_ROUNDED,
     "ip": ft.Icons.CELL_TOWER_ROUNDED,
     "search": ft.Icons.SEARCH_ROUNDED,
+    "diff": ft.Icons.COMPARE_ARROWS_ROUNDED,
+    "yara": ft.Icons.BUG_REPORT_ROUNDED,
 }
 
 LOOKUP_TYPE_NAMES = {
@@ -18,6 +20,8 @@ LOOKUP_TYPE_NAMES = {
     "domain": "Domain",
     "ip": "IP",
     "search": "Search",
+    "diff": "File Diff",
+    "yara": "YARA Rules",
 }
 
 

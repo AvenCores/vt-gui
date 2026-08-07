@@ -5,7 +5,9 @@ import subprocess
 import json
 import webbrowser
 import flet as ft
-from ..config import STRINGS, CLI_BINARY_NAME
+from ..config import STRINGS, get_api_key, CLI_BINARY_NAME
+from ..vt_api import submit_url_scan, get_subdomains, get_dns_resolutions, reanalyze_item
+from ..exporter import export_report_to_file
 from ..history_manager import add_lookup_record
 from .theme import make_stat_card, make_engine_row
 
@@ -63,6 +65,34 @@ class IntelligenceView:
             spacing=8,
             alignment=ft.MainAxisAlignment.SPACE_EVENLY
         )
+
+        def handle_export(e):
+            ok, path = export_report_to_file(data_dict, f"{item_type}_{item_id}")
+            if ok:
+                msg = STRINGS[self.current_lang].get("toast_export_success", "Report exported to {file}!").format(file=os.path.basename(path))
+                self.page.show_dialog(ft.SnackBar(content=ft.Text(msg), bgcolor="#10B981"))
+            else:
+                msg = STRINGS[self.current_lang].get("toast_export_fail", "Export failed: {e}").format(e=path)
+                self.page.show_dialog(ft.SnackBar(content=ft.Text(msg), bgcolor="#EF4444"))
+
+        def handle_reanalyze(e):
+            api_key = get_api_key()
+            if not api_key:
+                self.page.show_dialog(ft.SnackBar(content=ft.Text(STRINGS[self.current_lang]["api_key_missing"])))
+                return
+            def worker():
+                try:
+                    reanalyze_item(item_type, item_id, api_key)
+                    self.page.show_dialog(ft.SnackBar(content=ft.Text(STRINGS[self.current_lang].get("toast_reanalyze_success", "Re-analysis requested on VirusTotal!")), bgcolor="#10B981"))
+                except Exception as ex:
+                    msg = STRINGS[self.current_lang].get("toast_reanalyze_fail", "Re-analysis failed: {e}").format(e=str(ex))
+                    self.page.show_dialog(ft.SnackBar(content=ft.Text(msg), bgcolor="#EF4444"))
+            threading.Thread(target=worker, daemon=True).start()
+
+        action_buttons = ft.Row([
+            ft.ElevatedButton(STRINGS[self.current_lang].get("btn_reanalyze", "Re-analyze"), icon=ft.Icons.REFRESH_ROUNDED, on_click=handle_reanalyze, bgcolor="#1E293B", color="#00F0FF"),
+            ft.ElevatedButton(STRINGS[self.current_lang].get("btn_export_report", "Export Report"), icon=ft.Icons.DOWNLOAD_ROUNDED, on_click=handle_export, bgcolor="#1E293B", color="#FFFFFF")
+        ], alignment=ft.MainAxisAlignment.START, spacing=8)
         
         details_items = [
             ft.Row([ft.Text(STRINGS[self.current_lang]["lbl_type"], color="#94A3B8", size=12), ft.Text(item_type.upper(), color="#FFFFFF", size=12, weight=ft.FontWeight.BOLD)]),
@@ -131,17 +161,67 @@ class IntelligenceView:
             color="#FFFFFF",
             style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8))
         )
+
+        # Extended relations view for Domain & IP
+        relations_view = None
+        if item_type in ("domain", "ip"):
+            loading_indicator = ft.Row([
+                ft.ProgressRing(width=14, height=14, stroke_width=2, color="#00F0FF"),
+                ft.Text(STRINGS[self.current_lang].get("dns_loading", "Загрузка DNS-резолвинга и поддоменов..."), color="#94A3B8", size=12)
+            ], spacing=8)
+            rel_container = ft.Column([loading_indicator], spacing=6)
+            
+            def load_relations():
+                api_key = get_api_key()
+                if not api_key:
+                    rel_container.controls = [ft.Text(STRINGS[self.current_lang]["api_key_missing"], color="#F59E0B", size=12)]
+                    return
+                def worker():
+                    items = []
+                    if item_type == "domain":
+                        subs = get_subdomains(item_id, api_key)
+                        if subs:
+                            items.append(ft.Text(STRINGS[self.current_lang].get("lbl_subdomains", "Subdomains:"), weight=ft.FontWeight.BOLD, color="#00F0FF"))
+                            for s in subs[:10]:
+                                sub_id = s.get("id", "")
+                                items.append(ft.Text(f" • {sub_id}", color="#E2E8F0", size=12))
+                    res = get_dns_resolutions(item_type, item_id, api_key)
+                    if res:
+                        items.append(ft.Text(STRINGS[self.current_lang].get("lbl_dns_resolutions", "DNS Resolutions:"), weight=ft.FontWeight.BOLD, color="#00F0FF"))
+                        for r in res[:10]:
+                            attrs = r.get("attributes", {})
+                            host = attrs.get("host_name", attrs.get("ip_address", ""))
+                            items.append(ft.Text(f" • {host}", color="#E2E8F0", size=12))
+                    
+                    if items:
+                        rel_container.controls = items
+                    else:
+                        rel_container.controls = [ft.Text(STRINGS[self.current_lang].get("dns_no_data", "DNS-резолвинг и поддомены не найдены."), color="#64748B", size=12)]
+                    
+                    try:
+                        self.page.update()
+                    except Exception:
+                        pass
+                threading.Thread(target=worker, daemon=True).start()
+            load_relations()
+            relations_view = ft.Container(content=rel_container, padding=12, bgcolor="#151E33", border_radius=10, border=ft.Border.all(1, "#2E3C56"))
+
+        main_items = [
+            verdict_banner,
+            ft.Row([action_buttons, web_btn], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
+            ft.Container(height=5),
+            details_card,
+            stats_row,
+            ft.Divider(color="#1E293B"),
+            detections_list
+        ]
+        
+        if relations_view:
+            main_items.append(ft.Divider(color="#1E293B"))
+            main_items.append(relations_view)
         
         return ft.Column(
-            [
-                verdict_banner,
-                ft.Container(height=5),
-                details_card,
-                stats_row,
-                ft.Row([web_btn], alignment=ft.MainAxisAlignment.END),
-                ft.Divider(color="#1E293B"),
-                detections_list
-            ],
+            main_items,
             spacing=10,
             scroll=ft.ScrollMode.ALWAYS,
             expand=True
@@ -277,6 +357,38 @@ class IntelligenceView:
             height=48,
             width=48
         )
+
+        buttons_row = [input_field, search_btn]
+
+        if tab_key == "url":
+            def trigger_live_scan(e):
+                val = state["input"].strip()
+                if not val:
+                    return
+                api_key = get_api_key()
+                if not api_key:
+                    self.show_alert_fn("Error", STRINGS[self.current_lang]["api_key_missing"])
+                    return
+                state["status"] = "loading"
+                self.build_ui_fn()
+                def worker():
+                    try:
+                        submit_url_scan(val, api_key)
+                        self.run_lookup_query("url")
+                    except Exception as ex:
+                        state["status"] = "error"
+                        state["error"] = str(ex)
+                        self.thread_safe_build_fn()
+                threading.Thread(target=worker, daemon=True).start()
+
+            live_scan_btn = ft.ElevatedButton(
+                STRINGS[self.current_lang].get("btn_live_scan_url", "Scan Live URL"),
+                icon=ft.Icons.TRAVEL_EXPLORE_ROUNDED,
+                on_click=trigger_live_scan,
+                bgcolor="#008DDA",
+                color="#FFFFFF"
+            )
+            buttons_row.append(live_scan_btn)
         
         results_area = ft.Container(expand=True, alignment=ft.Alignment.CENTER)
         
@@ -322,7 +434,7 @@ class IntelligenceView:
             
         return ft.Column(
             [
-                ft.Row([input_field, search_btn], spacing=10),
+                ft.Row(buttons_row, spacing=10),
                 ft.Divider(color="#2E3C56", height=1),
                 results_area
             ],

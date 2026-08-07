@@ -29,6 +29,7 @@ from app.ui.intelligence_view import IntelligenceView
 from app.ui.footer import build_footer
 from app.services.scan_service import ScanService, resolve_scan_status
 from app.ui.history_view import build_history_view
+from app.ui.tools_view import ToolsView
 
 # Parse CLI arguments for context-menu invocation
 init_file_path = None
@@ -38,6 +39,48 @@ if len(sys.argv) > 1:
         init_file_path = os.path.normpath(files[0])
 
 def main(page: ft.Page):
+    def _show_dialog_impl(dlg):
+        dlg.open = True
+        if hasattr(page, 'open') and callable(getattr(page, 'open')):
+            try:
+                page.open(dlg)
+                return
+            except Exception:
+                pass
+        if isinstance(dlg, ft.SnackBar):
+            page.snack_bar = dlg
+        else:
+            page.dialog = dlg
+            if dlg not in page.overlay:
+                page.overlay.append(dlg)
+        try:
+            page.update()
+        except Exception:
+            pass
+
+    def _pop_dialog_impl(dlg=None):
+        target = dlg or getattr(page, 'dialog', None)
+        if target:
+            target.open = False
+            if target in page.overlay:
+                try:
+                    page.overlay.remove(target)
+                except Exception:
+                    pass
+        if hasattr(page, 'close') and callable(getattr(page, 'close')):
+            try:
+                page.close(target)
+                return
+            except Exception:
+                pass
+        try:
+            page.update()
+        except Exception:
+            pass
+
+    page.show_dialog = _show_dialog_impl
+    page.pop_dialog = _pop_dialog_impl
+
     # Load and sync API key from ~/.vt.toml on startup
     get_api_key()
     
@@ -527,12 +570,13 @@ def main(page: ft.Page):
                 expand=True
             )
         else:
-            files_view = build_scanner_view(cli_status, cli_hash, cli_source, current_lang, file_picker_scan, on_scan_click)
+            files_view = build_scanner_view(cli_status, cli_hash, cli_source, current_lang, file_picker_scan, on_scan_click, on_folder_click)
             intel_view = IntelligenceView(search_states, current_lang, show_alert, get_installed_binary_path, thread_safe_build, build_ui, page)
             url_view = intel_view.build_lookup_tab("url", STRINGS[current_lang]["url_placeholder"], STRINGS[current_lang]["url_helper"])
             domain_view = intel_view.build_lookup_tab("domain", STRINGS[current_lang]["domain_placeholder"], STRINGS[current_lang]["domain_helper"])
             ip_view = intel_view.build_lookup_tab("ip", STRINGS[current_lang]["ip_placeholder"], STRINGS[current_lang]["ip_helper"])
             search_view = intel_view.build_lookup_tab("search", STRINGS[current_lang]["search_placeholder"], STRINGS[current_lang]["search_helper"])
+            tools_view = ToolsView(current_lang, show_alert, page).build_tools_tab()
 
             def on_history_back():
                 def perform_back():
@@ -617,17 +661,15 @@ def main(page: ft.Page):
                 nonlocal active_scanner_tab_index, app_state
                 idx = int(e.control.selected_index)
                 active_scanner_tab_index = idx
-                HISTORY_TAB_INDEX = 5
-                if idx == HISTORY_TAB_INDEX:
+                if idx == 5:
                     app_state = "history"
                 else:
                     app_state = "scanner"
-                build_ui()
 
             landing_tabs = ft.Tabs(
                 selected_index=active_scanner_tab_index,
                 on_change=on_active_tab_change,
-                length=6,
+                length=7,
                 expand=True,
                 content=ft.Column(
                     expand=True,
@@ -640,6 +682,7 @@ def main(page: ft.Page):
                                 ft.Tab(label=STRINGS[current_lang]["tab_ips"], icon=ft.Icons.CELL_TOWER_ROUNDED),
                                 ft.Tab(label=STRINGS[current_lang]["tab_search"], icon=ft.Icons.SEARCH_ROUNDED),
                                 ft.Tab(label=STRINGS[current_lang]["tab_history"], icon=ft.Icons.HISTORY_ROUNDED),
+                                ft.Tab(label=STRINGS[current_lang]["tab_tools"], icon=ft.Icons.BUILD_ROUNDED),
                             ]
                         ),
                         ft.TabBarView(
@@ -651,6 +694,7 @@ def main(page: ft.Page):
                                 ft.Container(content=ip_view, padding=10),
                                 ft.Container(content=search_view, padding=10),
                                 ft.Container(content=history_view, padding=10),
+                                ft.Container(content=tools_view, padding=10),
                             ]
                         )
                     ]
@@ -767,6 +811,24 @@ def main(page: ft.Page):
         except Exception as ex:
             show_alert("Error", str(ex))
 
+    async def on_folder_click(e):
+        try:
+            dir_path = await file_picker_folder.get_directory_path()
+            if not dir_path:
+                return
+            collected_files = []
+            for root, _, filenames in os.walk(dir_path):
+                for fname in filenames:
+                    full_p = os.path.join(root, fname)
+                    class FileObj:
+                        def __init__(self, p):
+                            self.path = p
+                    collected_files.append(FileObj(full_p))
+            if collected_files:
+                on_scan_file_selected(collected_files)
+        except Exception as ex:
+            show_alert("Error", str(ex))
+
     async def on_add_scan_click(e):
         try:
             files = await file_picker_scan.pick_files(allow_multiple=True)
@@ -839,7 +901,8 @@ def main(page: ft.Page):
     # Initialize file pickers
     file_picker_scan = ft.FilePicker()
     file_picker_cli = ft.FilePicker()
-    page.services.extend([file_picker_scan, file_picker_cli, clipboard_service])
+    file_picker_folder = ft.FilePicker()
+    page.services.extend([file_picker_scan, file_picker_cli, file_picker_folder, clipboard_service])
 
     # Ctrl+V handler: paste file path from clipboard
     async def on_paste_keyboard(e):
