@@ -98,10 +98,10 @@ def main(page: ft.Page):
     icon_full_path = os.path.join(_script_dir, "assets", icon_file)
     if os.path.exists(icon_full_path):
         page.window.icon = icon_full_path
-    page.window_width = 800
-    page.window_height = 700
-    page.window_min_width = 650
-    page.window_min_height = 600
+    page.window_width = 980
+    page.window_height = 860
+    page.window_min_width = 800
+    page.window_min_height = 650
     page.padding = 0
 
     # Use system font to prevent network loading and font layout shifts (jumping)

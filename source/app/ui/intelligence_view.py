@@ -214,7 +214,6 @@ class IntelligenceView:
         return ft.Column(
             main_items,
             spacing=10,
-            scroll=ft.ScrollMode.ALWAYS,
             expand=True
         )
 

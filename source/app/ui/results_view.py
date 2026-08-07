@@ -413,7 +413,7 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
 
     tabs = ft.Tabs(
         length=3,
-        expand=True,
+        height=480,
         content=ft.Column(
             expand=True,
             controls=[
@@ -443,4 +443,4 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
         stats_row,
         ft.Divider(color="#1E293B"),
         tabs
-    ], expand=True, spacing=10)
+    ], expand=True, spacing=10, scroll=ft.ScrollMode.AUTO)
