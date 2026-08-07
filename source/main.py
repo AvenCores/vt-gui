@@ -661,7 +661,7 @@ def main(page: ft.Page):
                 nonlocal active_scanner_tab_index, app_state
                 idx = int(e.control.selected_index)
                 active_scanner_tab_index = idx
-                if idx == 5:
+                if idx == 6:
                     app_state = "history"
                 else:
                     app_state = "scanner"
@@ -681,8 +681,8 @@ def main(page: ft.Page):
                                 ft.Tab(label=STRINGS[current_lang]["tab_domains"], icon=ft.Icons.LANGUAGE_ROUNDED),
                                 ft.Tab(label=STRINGS[current_lang]["tab_ips"], icon=ft.Icons.CELL_TOWER_ROUNDED),
                                 ft.Tab(label=STRINGS[current_lang]["tab_search"], icon=ft.Icons.SEARCH_ROUNDED),
-                                ft.Tab(label=STRINGS[current_lang]["tab_history"], icon=ft.Icons.HISTORY_ROUNDED),
                                 ft.Tab(label=STRINGS[current_lang]["tab_tools"], icon=ft.Icons.BUILD_ROUNDED),
+                                ft.Tab(label=STRINGS[current_lang]["tab_history"], icon=ft.Icons.HISTORY_ROUNDED),
                             ]
                         ),
                         ft.TabBarView(
@@ -693,8 +693,8 @@ def main(page: ft.Page):
                                 ft.Container(content=domain_view, padding=10),
                                 ft.Container(content=ip_view, padding=10),
                                 ft.Container(content=search_view, padding=10),
-                                ft.Container(content=history_view, padding=10),
                                 ft.Container(content=tools_view, padding=10),
+                                ft.Container(content=history_view, padding=10),
                             ]
                         )
                     ]
