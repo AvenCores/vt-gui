@@ -2,7 +2,7 @@ import flet as ft
 import os
 import threading
 from ..config import STRINGS, get_api_key
-from ..vt_api import reanalyze_item, get_file_behaviours, get_comments, add_comment, vote_item, get_user_vote
+from ..vt_api import reanalyze_item, get_file_behaviours, get_comments, add_comment, delete_comment, vote_item, get_user_vote
 from ..exporter import export_report_to_file, prompt_export_report
 from .theme import make_stat_card, make_file_details_card, make_engine_row, make_loading_card
 
@@ -351,9 +351,32 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
     # Tab 3: Comments
     comments_loading_card = make_loading_card(STRINGS[lang].get("comments_loading", "Loading community comments..."))
     comments_container = ft.Column(controls=[comments_loading_card], spacing=8, scroll=ft.ScrollMode.ALWAYS, expand=True)
-    comment_input = ft.TextField(hint_text=STRINGS[lang].get("post_comment_hint", "Write a community note or comment..."), border_color="#2E3C56", expand=True)
-    
-    def post_comment(e):
+
+    send_progress = ft.ProgressRing(width=20, height=20, stroke_width=2.5, color="#00F0FF", visible=False)
+    send_button = ft.IconButton(
+        icon=ft.Icons.SEND_ROUNDED,
+        icon_color="#00F0FF",
+        on_click=lambda e: post_comment(e),
+        tooltip=STRINGS[lang].get("btn_send_comment", "Send comment")
+    )
+
+    comment_input = ft.TextField(
+        hint_text=STRINGS[lang].get("post_comment_hint", "Write a community note or comment..."),
+        border_color="#2E3C56",
+        expand=True,
+        on_submit=lambda e: post_comment(e)
+    )
+
+    def set_sending_state(is_sending):
+        comment_input.disabled = is_sending
+        send_button.visible = not is_sending
+        send_progress.visible = is_sending
+        try:
+            page.update()
+        except Exception:
+            pass
+
+    def post_comment(e=None):
         txt = comment_input.value.strip()
         if not txt:
             return
@@ -361,6 +384,9 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
         if not api_key:
             page.show_dialog(ft.SnackBar(content=ft.Text(STRINGS[lang]["api_key_missing"])))
             return
+            
+        set_sending_state(True)
+
         def worker():
             try:
                 add_comment("files", last_completed_sha256, txt, api_key)
@@ -370,7 +396,127 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
             except Exception as ex:
                 msg = STRINGS[lang].get("toast_comment_fail", "Failed to post comment: {e}").format(e=str(ex))
                 page.show_dialog(ft.SnackBar(content=ft.Text(msg), bgcolor="#EF4444"))
+            finally:
+                set_sending_state(False)
+
         threading.Thread(target=worker, daemon=True).start()
+
+    def confirm_delete_comment(cid):
+        overlay_holder = [None]
+        is_deleting = False
+
+        def close_overlay():
+            ov = overlay_holder[0]
+            if ov is not None and ov in page.overlay:
+                page.overlay.remove(ov)
+                try:
+                    page.update()
+                except Exception:
+                    pass
+            overlay_holder[0] = None
+
+        def on_backdrop_click(e):
+            if not is_deleting:
+                close_overlay()
+
+        cancel_btn = ft.TextButton(
+            content=ft.Text(STRINGS[lang].get("btn_cancel", "Cancel"), color="#94A3B8", size=13),
+            on_click=lambda _: close_overlay()
+        )
+
+        delete_btn = ft.ElevatedButton(
+            content=ft.Text(STRINGS[lang].get("btn_delete", "Delete"), weight=ft.FontWeight.W_600),
+            on_click=lambda e: start_deletion(),
+            bgcolor="#EF4444",
+            color="#FFFFFF",
+            style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8))
+        )
+
+        loading_indicator = ft.Row([
+            ft.ProgressRing(width=16, height=16, stroke_width=2, color="#EF4444"),
+            ft.Text(
+                STRINGS[lang].get("deleting_comment", "Deleting comment..."),
+                color="#EF4444",
+                size=13,
+                weight=ft.FontWeight.W_500
+            )
+        ], spacing=10, alignment=ft.MainAxisAlignment.END, visible=False)
+
+        actions_row = ft.Row([cancel_btn, delete_btn], alignment=ft.MainAxisAlignment.END, spacing=10)
+
+        panel = ft.Container(
+            width=420,
+            bgcolor="#151E33",
+            border_radius=12,
+            padding=ft.Padding(left=24, right=24, top=20, bottom=20),
+            border=ft.Border.all(1, "#2E3C56"),
+            content=ft.Column([
+                ft.Row([
+                    ft.Icon(ft.Icons.DELETE_ROUNDED, color="#EF4444", size=22),
+                    ft.Text(
+                        STRINGS[lang].get("dlg_delete_comment_title", "Delete comment"),
+                        color="#FFFFFF",
+                        weight=ft.FontWeight.BOLD,
+                        size=16
+                    )
+                ], spacing=8),
+                ft.Container(height=8),
+                ft.Text(
+                    STRINGS[lang].get("dlg_delete_comment_confirm", "Are you sure you want to delete this comment?"),
+                    color="#E2E8F0",
+                    size=13
+                ),
+                ft.Container(height=16),
+                actions_row,
+                loading_indicator
+            ], tight=True)
+        )
+
+        overlay = ft.Container(
+            expand=True,
+            bgcolor="#88000000",
+            alignment=ft.Alignment.CENTER,
+            on_click=on_backdrop_click,
+            content=panel
+        )
+        overlay_holder[0] = overlay
+
+        def start_deletion():
+            nonlocal is_deleting
+            api_key = get_api_key()
+            if not api_key:
+                page.show_dialog(ft.SnackBar(content=ft.Text(STRINGS[lang].get("api_key_missing", "API key required."))))
+                return
+
+            is_deleting = True
+            actions_row.visible = False
+            loading_indicator.visible = True
+            try:
+                page.update()
+            except Exception:
+                pass
+
+            def worker():
+                try:
+                    delete_comment(cid, api_key)
+                    close_overlay()
+                    load_comments()
+                    page.show_dialog(ft.SnackBar(
+                        content=ft.Text(STRINGS[lang].get("toast_comment_delete_success", "Comment deleted!")),
+                        bgcolor="#10B981"
+                    ))
+                except Exception as ex:
+                    close_overlay()
+                    msg = STRINGS[lang].get("toast_comment_delete_fail", "Failed to delete comment: {e}").format(e=str(ex))
+                    page.show_dialog(ft.SnackBar(content=ft.Text(msg), bgcolor="#EF4444"))
+
+            threading.Thread(target=worker, daemon=True).start()
+
+        page.overlay.append(overlay)
+        try:
+            page.update()
+        except Exception:
+            pass
 
     def load_comments(e=None):
         api_key = get_api_key()
@@ -389,13 +535,41 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
                 comments_container.controls.append(ft.Text(STRINGS[lang].get("comments_empty", "No community comments yet."), color="#94A3B8"))
             else:
                 for c in comms:
+                    cid = c.get("id")
                     attrs = c.get("attributes", {})
                     txt = attrs.get("text", "")
+                    date_val = attrs.get("date")
+                    
+                    date_str = ""
+                    if date_val:
+                        try:
+                            from datetime import datetime
+                            date_str = datetime.fromtimestamp(date_val).strftime("%d.%m.%Y %H:%M")
+                        except Exception:
+                            pass
+
+                    delete_btn = ft.IconButton(
+                        icon=ft.Icons.DELETE_OUTLINE_ROUNDED,
+                        icon_color="#EF4444",
+                        icon_size=18,
+                        tooltip=STRINGS[lang].get("btn_delete_comment", "Delete comment"),
+                        on_click=lambda e, comment_id=cid: confirm_delete_comment(comment_id)
+                    ) if cid else ft.Container()
+
+                    content_controls = []
+                    if date_str:
+                        content_controls.append(ft.Text(date_str, color="#64748B", size=10))
+                    content_controls.append(ft.Text(txt, color="#E2E8F0", size=12, selectable=True))
+
                     comments_container.controls.append(ft.Container(
-                        content=ft.Column([
-                            ft.Text(txt, color="#E2E8F0", size=12),
-                        ], spacing=3),
-                        padding=10, border_radius=8, bgcolor="#151E33", border=ft.Border.all(1, "#2E3C56")
+                        content=ft.Row([
+                            ft.Column(content_controls, spacing=2, expand=True),
+                            delete_btn
+                        ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN, vertical_alignment=ft.CrossAxisAlignment.CENTER),
+                        padding=ft.Padding(left=12, right=8, top=8, bottom=8),
+                        border_radius=8,
+                        bgcolor="#151E33",
+                        border=ft.Border.all(1, "#2E3C56")
                     ))
             try:
                 page.update()
@@ -406,7 +580,14 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
     load_comments()
 
     comments_tab_view = ft.Column([
-        ft.Row([comment_input, ft.IconButton(ft.Icons.SEND_ROUNDED, icon_color="#00F0FF", on_click=post_comment)]),
+        ft.Row([
+            comment_input,
+            ft.Container(
+                content=ft.Stack([send_button, send_progress], alignment=ft.Alignment.CENTER),
+                alignment=ft.Alignment.CENTER,
+                padding=ft.Padding(right=6, left=0, top=0, bottom=0)
+            )
+        ]),
         ft.Divider(color="#2E3C56"),
         comments_container
     ], expand=True)

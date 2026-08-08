@@ -245,6 +245,26 @@ def add_comment(collection, item_id, text, api_key):
     except Exception as ex:
         raise ex
 
+def delete_comment(comment_id, api_key):
+    """Delete a comment by its ID on VirusTotal."""
+    url = f"https://www.virustotal.com/api/v3/comments/{comment_id}"
+    req = urllib.request.Request(
+        url,
+        headers={
+            "x-apikey": api_key,
+            "User-Agent": "Mozilla/5.0"
+        },
+        method="DELETE"
+    )
+    try:
+        with urllib.request.urlopen(req) as response:
+            res_bytes = response.read()
+            if res_bytes:
+                return json.loads(res_bytes.decode('utf-8'))
+            return {"data": "deleted"}
+    except Exception as ex:
+        raise ex
+
 def vote_item(collection, item_id, verdict, api_key):
     """Submit a vote ('harmless' or 'malicious') for an item on VirusTotal."""
     url = f"https://www.virustotal.com/api/v3/{collection}/{item_id}/votes"
