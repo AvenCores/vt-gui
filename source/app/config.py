@@ -8,10 +8,6 @@ import platform
 IS_WINDOWS = sys.platform == "win32"
 CLI_BINARY_NAME = "vt.exe" if IS_WINDOWS else "vt"
 
-def get_cli_display_name():
-    """Returns a human-readable name for the CLI binary."""
-    return "vt.exe" if IS_WINDOWS else "vt"
-
 # Official SHA-256 hashes of the vt CLI binary itself
 KNOWN_HASHES = {
     # Version 1.3.1 — Windows
