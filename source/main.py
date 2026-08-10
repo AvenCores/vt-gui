@@ -39,47 +39,38 @@ if len(sys.argv) > 1:
         init_file_path = os.path.normpath(files[0])
 
 def main(page: ft.Page):
-    def _show_dialog_impl(dlg):
-        dlg.open = True
-        if hasattr(page, 'open') and callable(getattr(page, 'open')):
+    # Only install fallback dialog methods when the native methods are unavailable.
+    if not (hasattr(page, 'show_dialog') and callable(getattr(page, 'show_dialog'))):
+        def _show_dialog_impl(dlg):
+            dlg.open = True
+            if isinstance(dlg, ft.SnackBar):
+                page.snack_bar = dlg
+            else:
+                page.dialog = dlg
+                if dlg not in page.overlay:
+                    page.overlay.append(dlg)
             try:
-                page.open(dlg)
-                return
+                page.update()
             except Exception:
                 pass
-        if isinstance(dlg, ft.SnackBar):
-            page.snack_bar = dlg
-        else:
-            page.dialog = dlg
-            if dlg not in page.overlay:
-                page.overlay.append(dlg)
-        try:
-            page.update()
-        except Exception:
-            pass
+        page.show_dialog = _show_dialog_impl
 
-    def _pop_dialog_impl(dlg=None):
-        target = dlg or getattr(page, 'dialog', None)
-        if target:
-            target.open = False
-            if target in page.overlay:
-                try:
-                    page.overlay.remove(target)
-                except Exception:
-                    pass
-        if hasattr(page, 'close') and callable(getattr(page, 'close')):
+    if not (hasattr(page, 'pop_dialog') and callable(getattr(page, 'pop_dialog'))):
+        def _pop_dialog_impl(dlg=None):
+            target = dlg or getattr(page, 'dialog', None)
+            if target:
+                target.open = False
+                if target in getattr(page, 'overlay', []):
+                    try:
+                        page.overlay.remove(target)
+                    except Exception:
+                        pass
+                page.dialog = None
             try:
-                page.close(target)
-                return
+                page.update()
             except Exception:
                 pass
-        try:
-            page.update()
-        except Exception:
-            pass
-
-    page.show_dialog = _show_dialog_impl
-    page.pop_dialog = _pop_dialog_impl
+        page.pop_dialog = _pop_dialog_impl
 
     # Load and sync API key from ~/.vt.toml on startup
     get_api_key()
