@@ -341,8 +341,7 @@ def main(page: ft.Page):
             async def on_manual_install_click(e):
                 await on_cli_click(e)
                 
-            main_content.alignment = ft.Alignment.CENTER
-            main_content.content = build_install_view(
+            current_view_body = build_install_view(
                 cli_status,
                 cli_hash,
                 current_lang,
@@ -576,7 +575,7 @@ def main(page: ft.Page):
                 spacing=10
             )
             
-            main_content.content = ft.Column(
+            current_view_body = ft.Column(
                 [
                     top_buttons_row,
                     tabs
@@ -639,6 +638,8 @@ def main(page: ft.Page):
                     scan_service = ScanService(active_scans, current_lang, thread_safe_build, show_alert, page)
                     threading.Thread(target=scan_service.run_single_scan_pipeline, args=(0, path), daemon=True).start()
 
+            select_tab_ref = [None]
+
             def on_history_open_in_app(record):
                 nonlocal active_scans, app_state, current_tab_index, active_scanner_tab_index, scan_service
                 record_type = record.get("type", "file")
@@ -660,6 +661,7 @@ def main(page: ft.Page):
                             "error": None
                         }]
                         current_tab_index = 0
+                        active_scanner_tab_index = 0
                         app_state = "scans"
                         build_ui()
                     else:
@@ -678,6 +680,7 @@ def main(page: ft.Page):
                             "error": None
                         }]
                         current_tab_index = 0
+                        active_scanner_tab_index = 0
                         app_state = "scans"
                         build_ui()
 
@@ -731,9 +734,13 @@ def main(page: ft.Page):
                         search_states[lookup_type]["error"] = record.get("error")
 
                     tab_indices = {"url": 1, "domain": 2, "ip": 3, "search": 4}
-                    active_scanner_tab_index = tab_indices.get(lookup_type, 1)
+                    target_tab_idx = tab_indices.get(lookup_type, 1)
+                    active_scanner_tab_index = target_tab_idx
                     app_state = "scanner"
-                    build_ui()
+                    if select_tab_ref[0]:
+                        select_tab_ref[0](target_tab_idx)
+                    else:
+                        build_ui()
 
                     if not results and query and lookup_type in search_states:
                         intel_view.run_lookup_query(lookup_type)
@@ -794,8 +801,6 @@ def main(page: ft.Page):
 
             def select_tab(idx):
                 nonlocal active_scanner_tab_index, app_state
-                if active_scanner_tab_index == idx:
-                    return
                 active_scanner_tab_index = idx
                 if idx == 6:
                     app_state = "history"
@@ -814,6 +819,8 @@ def main(page: ft.Page):
                     animated_tab_content.update()
                 except Exception:
                     build_ui()
+
+            select_tab_ref[0] = select_tab
 
             for idx, label, icon, _ in tab_definitions:
                 is_active = (active_scanner_tab_index == idx)
@@ -874,7 +881,22 @@ def main(page: ft.Page):
                 expand=True,
                 spacing=10
             )
-            main_content.content = landing_tabs
+            current_view_body = landing_tabs
+            
+        active_scan_sha = active_scans[0].get('sha256', '') if active_scans else ''
+        main_content = ft.AnimatedSwitcher(
+            content=ft.Container(
+                key=f"main_content_state_{app_state}_{active_scanner_tab_index}_{active_scan_sha}",
+                content=current_view_body,
+                expand=True
+            ),
+            transition=ft.AnimatedSwitcherTransition.FADE,
+            duration=250,
+            reverse_duration=200,
+            switch_in_curve=ft.AnimationCurve.EASE_OUT,
+            switch_out_curve=ft.AnimationCurve.EASE_IN,
+            expand=True
+        )
             
         # Build footer with social links
         footer = build_footer(current_lang, page)
