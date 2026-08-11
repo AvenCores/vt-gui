@@ -221,62 +221,146 @@ def build_footer(lang="en", page=None):
             e.control.page.run_task(safe_copy_to_clipboard, e.control.page, card_number, clipboard)
             e.control.page.show_dialog(
                 ft.SnackBar(
-                    content=ft.Text(copied_text, color="#FFFFFF"),
+                    content=ft.Row([
+                        ft.Icon(ft.Icons.CHECK_CIRCLE_ROUNDED, color="#FFFFFF", size=18),
+                        ft.Text(copied_text, color="#FFFFFF", weight=ft.FontWeight.W_600)
+                    ], spacing=8),
                     bgcolor="#10B981"
                 )
             )
 
-        donate_title_container = ft.Container(
-            content=ft.Row(
+        modal_header = ft.Container(
+            content=ft.Column(
                 [
-                    ft.Icon(ft.Icons.FAVORITE_ROUNDED, color="#EC4899", size=20),
+                    ft.Container(
+                        content=ft.Icon(ft.Icons.FAVORITE_ROUNDED, color="#EC4899", size=36),
+                        padding=12,
+                        bgcolor="#3B1527",
+                        border=ft.Border.all(1.5, "#EC4899"),
+                        shape=ft.BoxShape.CIRCLE
+                    ),
                     ft.Text(
                         donate_text,
                         color="#FFFFFF",
-                        size=16,
+                        size=18,
                         weight=ft.FontWeight.BOLD,
+                        text_align=ft.TextAlign.CENTER
+                    ),
+                    ft.Text(
+                        "Ваша поддержка помогает развивать проект и добавлять новые функции!"
+                        if lang == "ru"
+                        else "Your support helps develop the project and add new features!",
+                        color="#94A3B8",
+                        size=12,
                         text_align=ft.TextAlign.CENTER
                     )
                 ],
-                alignment=ft.MainAxisAlignment.CENTER,
-                spacing=6
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                spacing=8
             ),
-            padding=ft.Padding(top=2, bottom=8, left=5, right=5),
-            border=ft.Border.only(bottom=ft.BorderSide(1, "#2E3C56")),
+            padding=ft.Padding(top=10, bottom=10, left=10, right=10),
             alignment=ft.Alignment.CENTER
         )
 
-        dlg = ft.AlertDialog(
-            title=donate_title_container,
-            title_padding=ft.Padding(left=16, right=16, top=16, bottom=4),
-            content_padding=ft.Padding(left=16, right=16, top=8, bottom=8),
-            actions_padding=ft.Padding(left=16, right=16, top=4, bottom=12),
-            content=ft.Container(
-                width=300,
-                content=ft.Column([
-                    ft.Row([
-                        ft.Image(src="sber.svg", width=24, height=24),
-                        ft.Text("SBER", color="#FFFFFF", size=14, weight=ft.FontWeight.BOLD)
-                    ], spacing=8, alignment=ft.MainAxisAlignment.CENTER),
+        card_box = ft.Container(
+            content=ft.Column(
+                [
+                    ft.Row(
+                        [
+                            ft.Row(
+                                [
+                                    ft.Image(src="sber.svg", width=22, height=22),
+                                    ft.Text("Сбербанк / SBER", color="#E2E8F0", size=13, weight=ft.FontWeight.BOLD)
+                                ],
+                                spacing=8
+                            ),
+                            ft.Container(
+                                content=ft.Text("MIR", color="#10B981", size=10, weight=ft.FontWeight.BOLD),
+                                padding=ft.Padding(left=6, right=6, top=2, bottom=2),
+                                bgcolor="#064E3B",
+                                border_radius=4
+                            )
+                        ],
+                        alignment=ft.MainAxisAlignment.SPACE_BETWEEN
+                    ),
                     ft.Container(
-                        content=ft.Text(card_number, color="#FFFFFF", size=14, weight=ft.FontWeight.BOLD),
-                        alignment=ft.Alignment.CENTER,
-                        padding=ft.Padding(top=8, bottom=8, left=12, right=12),
-                        border=ft.Border.all(1, "#2E3C56"),
-                        border_radius=8,
-                        bgcolor="#0B0F19"
+                        content=ft.Row(
+                            [
+                                ft.Text(card_number, color="#00F0FF", size=16, weight=ft.FontWeight.BOLD),
+                                ft.IconButton(
+                                    icon=ft.Icons.CONTENT_COPY_ROUNDED,
+                                    icon_color="#00F0FF",
+                                    icon_size=18,
+                                    tooltip=copy_text,
+                                    on_click=copy_card
+                                )
+                            ],
+                            alignment=ft.MainAxisAlignment.SPACE_BETWEEN
+                        ),
+                        padding=ft.Padding(left=12, right=8, top=6, bottom=6),
+                        bgcolor="#0F172A",
+                        border=ft.Border.all(1, "#00F0FF"),
+                        border_radius=8
                     ),
                     ft.ElevatedButton(
-                        content=ft.Text(copy_text, color="#FFFFFF", size=12),
-                        icon=ft.Icons.COPY_ROUNDED,
+                        content=ft.Row(
+                            [
+                                ft.Icon(ft.Icons.COPY_ROUNDED, color="#FFFFFF", size=16),
+                                ft.Text(copy_text, color="#FFFFFF", size=13, weight=ft.FontWeight.W_600)
+                            ],
+                            alignment=ft.MainAxisAlignment.CENTER,
+                            spacing=8
+                        ),
                         on_click=copy_card,
                         bgcolor="#008DDA",
                         color="#FFFFFF",
                         style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8))
                     )
-                ], spacing=8, tight=True, horizontal_alignment=ft.CrossAxisAlignment.CENTER)
+                ],
+                spacing=12,
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER
             ),
-            actions=[ft.TextButton(close_text, on_click=lambda _: e.control.page.pop_dialog())],
+            padding=ft.Padding(left=16, right=16, top=14, bottom=14),
+            bgcolor="#1E293B",
+            border=ft.Border.all(1, "#2E3C56"),
+            border_radius=12
+        )
+
+        thank_you_box = ft.Text(
+            "❤️ Спасибо за использование и поддержку приложения!"
+            if lang == "ru"
+            else "❤️ Thank you for using and supporting the app!",
+            color="#94A3B8",
+            size=11,
+            text_align=ft.TextAlign.CENTER
+        )
+
+        dialog_content = ft.Container(
+            width=400,
+            content=ft.Column(
+                [
+                    modal_header,
+                    card_box,
+                    thank_you_box
+                ],
+                spacing=14,
+                tight=True,
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER
+            )
+        )
+
+        dlg = ft.AlertDialog(
+            content=dialog_content,
+            content_padding=ft.Padding(left=20, right=20, top=16, bottom=16),
+            actions=[
+                ft.ElevatedButton(
+                    close_text,
+                    on_click=lambda _: e.control.page.pop_dialog(),
+                    bgcolor="#2E3C56",
+                    color="#FFFFFF",
+                    style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8))
+                )
+            ],
             actions_alignment=ft.MainAxisAlignment.CENTER,
             bgcolor="#151E33"
         )
