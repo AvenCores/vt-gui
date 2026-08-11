@@ -409,18 +409,20 @@ def build_history_view(lang, page, on_back, on_rescan, on_open_in_app=None, on_i
     header = ft.Row(header_controls, alignment=ft.MainAxisAlignment.START, spacing=8)
 
     if not history:
-        empty_controls = [
-            header,
-            ft.Container(height=40),
-            ft.Icon(ft.Icons.HISTORY_ROUNDED, size=64, color="#2E3C56"),
-            ft.Text(STRINGS[lang]["history_empty"], size=16, color="#64748B", text_align=ft.TextAlign.CENTER),
-        ]
-        if import_btn:
-            empty_controls.extend([
-                ft.Container(height=10),
-                import_btn
-            ])
-        content = ft.Column(empty_controls, horizontal_alignment=ft.CrossAxisAlignment.CENTER, spacing=10, expand=True)
+        empty_placeholder = ft.Container(
+            content=ft.Column(
+                [
+                    ft.Icon(ft.Icons.HISTORY_ROUNDED, size=64, color="#2E3C56"),
+                    ft.Text(STRINGS[lang]["history_empty"], size=16, color="#64748B", text_align=ft.TextAlign.CENTER)
+                ],
+                alignment=ft.MainAxisAlignment.CENTER,
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                spacing=12
+            ),
+            alignment=ft.Alignment.CENTER,
+            expand=True
+        )
+        content = ft.Column([header, empty_placeholder], spacing=10, expand=True)
     else:
         cards = [make_history_card(record) for record in history]
         content = ft.Column([
