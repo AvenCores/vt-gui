@@ -134,7 +134,7 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
                 page.show_dialog(ft.SnackBar(content=ft.Text(STRINGS[lang]["api_key_missing"])))
                 return
             if not target_sha256:
-                page.show_dialog(ft.SnackBar(content=ft.Text("SHA-256 is missing for voting."), bgcolor="#EF4444"))
+                page.show_dialog(ft.SnackBar(content=ft.Text(STRINGS[lang].get("vote_sha_missing", "SHA-256 is missing for voting.")), bgcolor="#EF4444"))
                 return
 
             if user_vote_state[0] == verdict:

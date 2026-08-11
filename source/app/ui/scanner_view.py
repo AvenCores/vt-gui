@@ -50,7 +50,7 @@ def build_scanner_view(cli_status, cli_hash, cli_source, lang, file_picker_scan,
                 ft.Icon(ft.Icons.CLOUD_UPLOAD_ROUNDED, size=56, color="#00F0FF"),
                 ft.Text(STRINGS[lang]["drag_drop_text"], size=16, color="#E2E8F0", weight=ft.FontWeight.W_600, text_align=ft.TextAlign.CENTER),
                 ft.Text(STRINGS[lang].get("drag_drop_hint", ""), size=12, color="#94A3B8", text_align=ft.TextAlign.CENTER),
-                ft.Text("Max size: 650 MB per file", size=12, color="#94A3B8")
+                ft.Text(STRINGS[lang].get("max_file_size", "Max size: 650 MB per file"), size=12, color="#94A3B8")
             ],
             alignment=ft.MainAxisAlignment.CENTER,
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,

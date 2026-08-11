@@ -221,7 +221,9 @@
         "btn_delete": "Delete",
         "btn_send_comment": "Send comment",
         "deleting_comment": "Deleting comment...",
-        "toast_importing": "Importing report..."
+        "toast_importing": "Importing report...",
+        "max_file_size": "Max size: 650 MB per file",
+        "vote_sha_missing": "SHA-256 is missing for voting."
     },
     "ru": {
         "app_title": "Сканер файлов VirusTotal",
@@ -445,7 +447,9 @@
         "btn_delete": "Удалить",
         "btn_send_comment": "Отправить комментарий",
         "deleting_comment": "Удаление комментария...",
-        "toast_importing": "Импорт отчета..."
+        "toast_importing": "Импорт отчета...",
+        "max_file_size": "Макс. размер: 650 МБ на файл",
+        "vote_sha_missing": "SHA-256 отсутствует для голосования."
     },
     "es": {
         "app_title": "Escáner de Archivos VirusTotal",
@@ -669,7 +673,9 @@
         "btn_import_report": "Importar informe",
         "toast_import_success": "¡Informe importado con éxito!",
         "toast_import_fail": "Error al importar el informe: {e}",
-        "toast_importing": "Importando informe..."
+        "toast_importing": "Importando informe...",
+        "max_file_size": "Tamaño máx.: 650 MB por archivo",
+        "vote_sha_missing": "Falta SHA-256 para votar."
     },
     "de": {
         "app_title": "VirusTotal Dateiscanner",
@@ -893,7 +899,9 @@
         "btn_import_report": "Bericht importieren",
         "toast_import_success": "Bericht erfolgreich importiert!",
         "toast_import_fail": "Fehler beim Importieren des Berichts: {e}",
-        "toast_importing": "Bericht wird importiert..."
+        "toast_importing": "Bericht wird importiert...",
+        "max_file_size": "Max. Größe: 650 MB pro Datei",
+        "vote_sha_missing": "SHA-256 fehlt für die Abstimmung."
     },
     "fr": {
         "app_title": "Scanner de Fichiers VirusTotal",
@@ -1117,7 +1125,9 @@
         "btn_import_report": "Importer le rapport",
         "toast_import_success": "Rapport importé avec succès !",
         "toast_import_fail": "Échec de l'importation du rapport : {e}",
-        "toast_importing": "Importation du rapport..."
+        "toast_importing": "Importation du rapport...",
+        "max_file_size": "Taille max. : 650 Mo par fichier",
+        "vote_sha_missing": "Le SHA-256 est manquant pour le vote."
     },
     "pt": {
         "app_title": "Scanner de Arquivos VirusTotal",
@@ -1341,7 +1351,9 @@
         "btn_import_report": "Importar relatório",
         "toast_import_success": "Relatório importado com sucesso!",
         "toast_import_fail": "Falha ao importar relatório: {e}",
-        "toast_importing": "Importando relatório..."
+        "toast_importing": "Importando relatório...",
+        "max_file_size": "Tamanho máx.: 650 MB por arquivo",
+        "vote_sha_missing": "Falta SHA-256 para votar."
     },
     "tr": {
         "app_title": "VirusTotal Dosya Tarayıcı",
@@ -1565,7 +1577,9 @@
         "btn_import_report": "Raporu İçe Aktar",
         "toast_import_success": "Rapor başarıyla içe aktarıldı!",
         "toast_import_fail": "Rapor içe aktarılamadı: {e}",
-        "toast_importing": "Rapor içe aktarılıyor..."
+        "toast_importing": "Rapor içe aktarılıyor...",
+        "max_file_size": "Dosya başına maks. boyut: 650 MB",
+        "vote_sha_missing": "Oylama için SHA-256 eksik."
     },
     "uk": {
         "app_title": "Сканер файлів VirusTotal",
@@ -1789,7 +1803,9 @@
         "btn_import_report": "Імпорт звіту",
         "toast_import_success": "Звіт успішно імпортовано!",
         "toast_import_fail": "Помилка імпорту звіту: {e}",
-        "toast_importing": "Імпорт звіту..."
+        "toast_importing": "Імпорт звіту...",
+        "max_file_size": "Макс. розмір: 650 МБ на файл",
+        "vote_sha_missing": "SHA-256 відсутній для голосування."
     },
     "zh": {
         "app_title": "VirusTotal 文件扫描器",
@@ -2013,7 +2029,9 @@
         "btn_import_report": "导入报告",
         "toast_import_success": "报告导入成功！",
         "toast_import_fail": "导入报告失败：{e}",
-        "toast_importing": "正在导入报告..."
+        "toast_importing": "正在导入报告...",
+        "max_file_size": "每个文件最大 650 MB",
+        "vote_sha_missing": "缺少用于投票的 SHA-256。"
     },
     "ja": {
         "app_title": "VirusTotal ファイルスキャナー",
@@ -2237,7 +2255,9 @@
         "btn_import_report": "レポートをインポート",
         "toast_import_success": "レポートが正常にインポートされました！",
         "toast_import_fail": "レポートのインポートに失敗しました: {e}",
-        "toast_importing": "レポートをインポート中..."
+        "toast_importing": "レポートをインポート中...",
+        "max_file_size": "ファイルあたりの最大サイズ: 650 MB",
+        "vote_sha_missing": "投票用の SHA-256 がありません。"
     },
     "ko": {
         "app_title": "VirusTotal 파일 스캐너",
@@ -2461,7 +2481,9 @@
         "btn_import_report": "보고서 가져오기",
         "toast_import_success": "보고서를 성공적으로 가져왔습니다!",
         "toast_import_fail": "보고서 가져오기 실패: {e}",
-        "toast_importing": "보고서 가져오는 중..."
+        "toast_importing": "보고서 가져오는 중...",
+        "max_file_size": "파일당 최대 크기: 650MB",
+        "vote_sha_missing": "투표용 SHA-256이 없습니다."
     },
     "ar": {
         "app_title": "ماسح ملفات VirusTotal",
@@ -2685,6 +2707,8 @@
         "btn_import_report": "استيراد التقرير",
         "toast_import_success": "تم استيراد التقرير بنجاح!",
         "toast_import_fail": "فشل استيراد التقرير: {e}",
-        "toast_importing": "جاري استيراد التقرير..."
+        "toast_importing": "جاري استيراد التقرير...",
+        "max_file_size": "الحد الأقصى للحجم: 650 ميجابايت لكل ملف",
+        "vote_sha_missing": "SHA-256 مفقود للتصويت."
     }
 }
