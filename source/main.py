@@ -114,8 +114,8 @@ def main(page: ft.Page):
         page.window.icon = icon_full_path
     page.window_width = 980
     page.window_height = 860
-    page.window_min_width = 800
-    page.window_min_height = 650
+    page.window_min_width = 980
+    page.window_min_height = 860
     page.padding = 0
 
     # Use system font to prevent network loading and font layout shifts (jumping)
@@ -436,18 +436,50 @@ def main(page: ft.Page):
                 elif scan["status"] == "failed":
                     icon = "⚠️"
                     
-                tab_headers.append(
-                    ft.Tab(
-                        label=f"{icon} {scan['filename']}"
+                is_active = (current_tab_index == idx)
+                
+                def make_tab_btn(i, scan_icon, scan_name, is_act):
+                    btn = ft.Container(
+                        content=ft.Row(
+                            [
+                                ft.Text(scan_icon, size=16),
+                                ft.Text(scan_name, color="#FFFFFF" if is_act else "#94A3B8", size=12, weight=ft.FontWeight.W_600)
+                            ],
+                            alignment=ft.MainAxisAlignment.CENTER,
+                            vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                            spacing=6
+                        ),
+                        padding=ft.Padding(left=12, right=12, top=8, bottom=8),
+                        border_radius=8,
+                        border=ft.Border.all(1, "#00F0FF" if is_act else "transparent"),
+                        bgcolor="#1E293B" if is_act else "transparent",
+                        animate=ft.Animation(150, ft.AnimationCurve.EASE_OUT),
+                        on_click=lambda _, idx=i: on_tab_change(idx)
                     )
-                )
+                    
+                    def on_tab_hover(e):
+                        if current_tab_index != i:
+                            if e.data == "true":
+                                btn.border = ft.Border.all(1, "#00F0FF")
+                                btn.bgcolor = "#152035"
+                            else:
+                                btn.border = ft.Border.all(1, "transparent")
+                                btn.bgcolor = "transparent"
+                            try:
+                                btn.update()
+                            except Exception:
+                                pass
+                    
+                    btn.on_hover = on_tab_hover
+                    return btn
+                
+                tab_headers.append(make_tab_btn(idx, icon, scan['filename'], is_active))
                 tab_contents.append(
                     ft.Container(content=tab_content, padding=15)
                 )
                 
-            def on_tab_change(e):
+            def on_tab_change(new_index):
                 nonlocal current_tab_index
-                new_index = int(e.control.selected_index)
                 if new_index != current_tab_index:
                     current_tab_index = new_index
                     build_ui()
@@ -464,8 +496,10 @@ def main(page: ft.Page):
             tab_bar_row = ft.Row(
                 [
                     ft.Container(
-                        content=ft.TabBar(
-                            tabs=tab_headers
+                        content=ft.Row(
+                            controls=tab_headers,
+                            scroll=ft.ScrollMode.AUTO,
+                            spacing=8
                         ),
                         expand=True
                     ),
@@ -476,18 +510,15 @@ def main(page: ft.Page):
                 spacing=8
             )
                 
-            tabs = ft.Tabs(
-                selected_index=current_tab_index,
-                on_change=on_tab_change,
-                length=len(active_scans),
+            tabs = ft.Container(
                 expand=True,
                 content=ft.Column(
                     expand=True,
                     controls=[
                         tab_bar_row,
-                        ft.TabBarView(
-                            expand=True,
-                            controls=tab_contents
+                        ft.Container(
+                            content=tab_contents[current_tab_index] if tab_contents else ft.Container(),
+                            expand=True
                         )
                     ]
                 )
