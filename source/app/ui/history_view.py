@@ -212,67 +212,24 @@ def build_history_view(lang, page, on_back, on_rescan, on_open_in_app=None):
 
             def open_in_app(e_a):
                 close_overlay()
-                if rec.get("results"):
-                    if on_open_in_app:
-                        on_open_in_app(rec)
-                else:
-                    def confirm_browser(e_cb):
-                        close_overlay()
-                        on_web_report(
-                            e_cb,
-                            rt=rec.get("type", "file"),
-                            lt=rec.get("lookup_type", ""),
-                            q=rec.get("query", ""),
-                            h=rec.get("sha256", "")
-                        )
+                if on_open_in_app:
+                    on_open_in_app(rec)
 
-                    no_res_panel = ft.Container(
-                        width=420,
-                        bgcolor="#151E33",
-                        border_radius=12,
-                        padding=ft.Padding(left=24, right=24, top=20, bottom=20),
-                        content=ft.Column([
-                            ft.Text(
-                                STRINGS[lang].get("history_open_report_title", "Открыть отчет"),
-                                color="#FFFFFF",
-                                weight=ft.FontWeight.BOLD
-                            ),
-                            ft.Container(height=8),
-                            ft.Text(
-                                STRINGS[lang].get("history_no_local_results", "Для этой записи нет сохраненных локальных данных отчета."),
-                                color="#E2E8F0",
-                                size=13
-                            ),
-                            ft.Container(height=14),
-                            ft.Row([
-                                ft.TextButton(
-                                    STRINGS[lang].get("btn_close", "Закрыть"),
-                                    on_click=lambda _: close_overlay()
-                                ),
-                                ft.ElevatedButton(
-                                    content=ft.Row([
-                                        ft.Icon(ft.Icons.LANGUAGE_ROUNDED, size=16),
-                                        ft.Text(STRINGS[lang].get("btn_open_in_browser", "В браузере"))
-                                    ], spacing=6, alignment=ft.MainAxisAlignment.CENTER),
-                                    on_click=confirm_browser,
-                                    bgcolor="#008DDA",
-                                    color="#FFFFFF",
-                                    style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8))
-                                )
-                            ], alignment=ft.MainAxisAlignment.END)
-                        ], tight=True)
-                    )
-                    no_res_overlay = ft.Container(
-                        expand=True,
-                        bgcolor="#88000000",
-                        alignment=ft.Alignment.CENTER,
-                        on_click=lambda _: close_overlay(),
-                        content=no_res_panel
-                    )
-                    overlay_holder[0] = no_res_overlay
-                    page.overlay.append(no_res_overlay)
-                    page.update()
-                    return
+            def open_in_app_from_dialog(e_d):
+                close_overlay()
+                if on_open_in_app:
+                    on_open_in_app(rec)
+
+            def confirm_browser(e_cb):
+                close_overlay()
+                on_web_report(
+                    e_cb,
+                    rt=rec.get("type", "file"),
+                    lt=rec.get("lookup_type", ""),
+                    q=rec.get("query", ""),
+                    h=rec.get("sha256", "")
+                )
+
 
             panel = ft.Container(
                 width=420,

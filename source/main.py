@@ -30,6 +30,8 @@ from app.ui.footer import build_footer
 from app.services.scan_service import ScanService, resolve_scan_status
 from app.ui.history_view import build_history_view
 from app.ui.tools_view import ToolsView
+from app.vt_api import check_file_exists_direct, check_file_exists_vt
+from app.history_manager import update_scan_record_results
 
 # Parse CLI arguments for context-menu invocation
 init_file_path = None
@@ -614,24 +616,87 @@ def main(page: ft.Page):
                     threading.Thread(target=scan_service.run_single_scan_pipeline, args=(0, path), daemon=True).start()
 
             def on_history_open_in_app(record):
-                nonlocal active_scans, app_state, current_tab_index, active_scanner_tab_index
+                nonlocal active_scans, app_state, current_tab_index, active_scanner_tab_index, scan_service
                 record_type = record.get("type", "file")
                 results = record.get("results")
+                record_id = record.get("id")
+
                 if record_type == "file":
                     file_path = record.get("file_path", "")
                     filename = record.get("filename", os.path.basename(file_path) if file_path else "Unknown")
                     sha256 = record.get("sha256", "")
-                    active_scans = [{
-                        "file_path": file_path,
-                        "filename": filename,
-                        "status": "completed",
-                        "sha256": sha256,
-                        "results": results,
-                        "error": None
-                    }]
-                    current_tab_index = 0
-                    app_state = "scans"
-                    build_ui()
+
+                    if results:
+                        active_scans = [{
+                            "file_path": file_path,
+                            "filename": filename,
+                            "status": "completed",
+                            "sha256": sha256,
+                            "results": results,
+                            "error": None
+                        }]
+                        current_tab_index = 0
+                        app_state = "scans"
+                        build_ui()
+                    else:
+                        if not sha256 and file_path and os.path.exists(file_path):
+                            on_history_rescan(file_path)
+                            return
+
+                        active_scans = [{
+                            "file_path": file_path,
+                            "filename": filename,
+                            "status": "scanning",
+                            "status_text": STRINGS[current_lang].get("checking_vt", "Checking VirusTotal..."),
+                            "progress": 0.5,
+                            "sha256": sha256,
+                            "results": None,
+                            "error": None
+                        }]
+                        current_tab_index = 0
+                        app_state = "scans"
+                        build_ui()
+
+                        def fetch_and_show():
+                            try:
+                                api_key = get_api_key()
+                                vt_path = get_installed_binary_path()
+                                info = None
+                                if sha256:
+                                    if api_key:
+                                        try:
+                                            info = check_file_exists_direct(sha256, api_key)
+                                        except Exception:
+                                            pass
+                                    if not info and vt_path and os.path.exists(vt_path):
+                                        info = check_file_exists_vt(vt_path, sha256)
+
+                                if not info and file_path and os.path.exists(file_path):
+                                    if scan_service is None:
+                                        scan_service = ScanService(active_scans, current_lang, thread_safe_build, show_alert, page)
+                                    scan_service.run_single_scan_pipeline(0, file_path)
+                                    return
+
+                                if info:
+                                    active_scans[0]["results"] = info
+                                    active_scans[0]["status"] = "completed"
+                                    active_scans[0].pop("_status_text_widget", None)
+                                    active_scans[0].pop("_progress_bar_widget", None)
+                                    record["results"] = info
+                                    update_scan_record_results(record_id, info)
+                                else:
+                                    active_scans[0]["status"] = "failed"
+                                    active_scans[0]["error"] = STRINGS[current_lang].get(
+                                        "history_no_local_results",
+                                        "Для этой записи нет сохраненных локальных данных отчета."
+                                    )
+                            except Exception as ex:
+                                active_scans[0]["status"] = "failed"
+                                active_scans[0]["error"] = str(ex)
+                            thread_safe_build()
+
+                        threading.Thread(target=fetch_and_show, daemon=True).start()
+
                 elif record_type == "lookup":
                     lookup_type = record.get("lookup_type", "url")
                     query = record.get("query", "")
@@ -645,6 +710,9 @@ def main(page: ft.Page):
                     active_scanner_tab_index = tab_indices.get(lookup_type, 1)
                     app_state = "scanner"
                     build_ui()
+
+                    if not results and query and lookup_type in search_states:
+                        intel_view.run_lookup_query(lookup_type)
 
             history_view = build_history_view(current_lang, page, on_history_back, on_history_rescan, on_history_open_in_app)
 

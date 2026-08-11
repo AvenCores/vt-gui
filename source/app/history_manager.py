@@ -89,6 +89,23 @@ def delete_scan_record(record_id):
     save_history(records)
 
 
+def update_scan_record_results(record_id, results):
+    """Update results for a scan record by ID."""
+    if not record_id:
+        return
+    records = load_history()
+    updated = False
+    for r in records:
+        if r.get("id") == record_id:
+            r["results"] = results
+            r["status"] = "completed"
+            updated = True
+            break
+    if updated:
+        save_history(records)
+
+
 def clear_history():
     """Clear all scan history."""
     save_history([])
+
