@@ -229,27 +229,48 @@ def open_settings(page, lang, on_settings_saved, on_reinstall_cli=None, cli_sour
         )
     )
 
-    settings_title_container = ft.Container(
-        content=ft.Row(
+    modal_header = ft.Container(
+        content=ft.Column(
             [
-                ft.Icon(ft.Icons.SETTINGS_ROUNDED, color="#00F0FF", size=22),
-                ft.Text(STRINGS[lang]["settings_title"], color="#FFFFFF", size=17, weight=ft.FontWeight.BOLD)
+                ft.Container(
+                    content=ft.Icon(ft.Icons.SETTINGS_ROUNDED, color="#00F0FF", size=36),
+                    padding=12,
+                    bgcolor="#1E2A47",
+                    border=ft.Border.all(1.5, "#00F0FF"),
+                    shape=ft.BoxShape.CIRCLE
+                ),
+                ft.Text(
+                    STRINGS[lang]["settings_title"],
+                    color="#FFFFFF",
+                    size=18,
+                    weight=ft.FontWeight.BOLD,
+                    text_align=ft.TextAlign.CENTER
+                )
             ],
-            alignment=ft.MainAxisAlignment.CENTER,
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
             spacing=8
         ),
-        padding=ft.Padding(top=6, bottom=12, left=10, right=10),
-        border=ft.Border.only(bottom=ft.BorderSide(1, "#2E3C56")),
+        padding=ft.Padding(top=4, bottom=4, left=10, right=10),
         alignment=ft.Alignment.CENTER
     )
 
     dlg = ft.AlertDialog(
-        title=settings_title_container,
+        title=modal_header,
+        title_padding=ft.Padding(left=16, right=16, top=16, bottom=4),
+        content_padding=ft.Padding(left=16, right=16, top=8, bottom=8),
+        actions_padding=ft.Padding(left=16, right=16, top=4, bottom=12),
         content=settings_content,
         actions=[
             ft.TextButton(STRINGS[lang]["btn_no"], on_click=lambda _: page.pop_dialog()),
-            ft.ElevatedButton(STRINGS[lang]["btn_save"], on_click=save_settings, bgcolor="#008DDA", color="#FFFFFF")
+            ft.ElevatedButton(
+                STRINGS[lang]["btn_save"],
+                on_click=save_settings,
+                bgcolor="#008DDA",
+                color="#FFFFFF",
+                style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8))
+            )
         ],
+        actions_alignment=ft.MainAxisAlignment.END,
         bgcolor="#151E33"
     )
 
