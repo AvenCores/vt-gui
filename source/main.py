@@ -565,7 +565,8 @@ def main(page: ft.Page):
                     back_icon,
                     ft.Text(STRINGS[current_lang]["btn_back"], color="#FFFFFF", size=14, weight=ft.FontWeight.W_500)
                 ], spacing=6, alignment=ft.MainAxisAlignment.CENTER),
-                padding=ft.Padding(left=14, right=16, top=8, bottom=8),
+                padding=ft.Padding(left=14, right=16, top=0, bottom=0),
+                height=40,
                 bgcolor="#1E293B",
                 border_radius=8,
                 scale=1.0,
@@ -609,6 +610,7 @@ def main(page: ft.Page):
                     on_click=open_web_report,
                     bgcolor="#008DDA",
                     color="#FFFFFF",
+                    height=40,
                     style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8))
                 )
                 right_actions.controls.extend([copy_btn, web_btn])
