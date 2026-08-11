@@ -151,6 +151,9 @@
         "tab_yara": "YARA Rulesets (Livehunt)",
         "btn_reanalyze": "Re-analyze",
         "btn_export_report": "Export Report",
+        "btn_import_report": "Import Report",
+        "toast_import_success": "Report imported successfully!",
+        "toast_import_fail": "Import failed: {e}",
         "vote_harmless": "Vote Harmless",
         "vote_malicious": "Vote Malicious",
         "tab_detections": "Detections",
@@ -371,6 +374,9 @@
         "tab_yara": "Правила YARA (Livehunt)",
         "btn_reanalyze": "Повторный анализ",
         "btn_export_report": "Экспорт отчета",
+        "btn_import_report": "Импорт отчета",
+        "toast_import_success": "Отчет успешно импортирован!",
+        "toast_import_fail": "Ошибка импорта отчета: {e}",
         "vote_harmless": "Голосовать: Безопасно",
         "vote_malicious": "Голосовать: Опасно",
         "tab_detections": "Вердикты",
@@ -657,7 +663,10 @@
         "btn_cancel": "Cancelar",
         "btn_delete": "Eliminar",
         "btn_send_comment": "Enviar comentario",
-        "deleting_comment": "Eliminando comentario..."
+        "deleting_comment": "Eliminando comentario...",
+        "btn_import_report": "Importar informe",
+        "toast_import_success": "¡Informe importado con éxito!",
+        "toast_import_fail": "Error al importar el informe: {e}"
     },
     "de": {
         "app_title": "VirusTotal Dateiscanner",
@@ -877,7 +886,10 @@
         "btn_cancel": "Abbrechen",
         "btn_delete": "Löschen",
         "btn_send_comment": "Kommentar senden",
-        "deleting_comment": "Kommentar wird gelöscht..."
+        "deleting_comment": "Kommentar wird gelöscht...",
+        "btn_import_report": "Bericht importieren",
+        "toast_import_success": "Bericht erfolgreich importiert!",
+        "toast_import_fail": "Fehler beim Importieren des Berichts: {e}"
     },
     "fr": {
         "app_title": "Scanner de Fichiers VirusTotal",
@@ -1097,7 +1109,10 @@
         "btn_cancel": "Annuler",
         "btn_delete": "Supprimer",
         "btn_send_comment": "Envoyer le commentaire",
-        "deleting_comment": "Suppression du commentaire..."
+        "deleting_comment": "Suppression du commentaire...",
+        "btn_import_report": "Importer le rapport",
+        "toast_import_success": "Rapport importé avec succès !",
+        "toast_import_fail": "Échec de l'importation du rapport : {e}"
     },
     "pt": {
         "app_title": "Scanner de Arquivos VirusTotal",
@@ -1317,7 +1332,10 @@
         "btn_cancel": "Cancelar",
         "btn_delete": "Excluir",
         "btn_send_comment": "Enviar comentário",
-        "deleting_comment": "Excluindo comentário..."
+        "deleting_comment": "Excluindo comentário...",
+        "btn_import_report": "Importar relatório",
+        "toast_import_success": "Relatório importado com sucesso!",
+        "toast_import_fail": "Falha ao importar relatório: {e}"
     },
     "tr": {
         "app_title": "VirusTotal Dosya Tarayıcı",
@@ -1537,7 +1555,10 @@
         "btn_cancel": "İptal",
         "btn_delete": "Sil",
         "btn_send_comment": "Yorum gönder",
-        "deleting_comment": "Yorum siliniyor..."
+        "deleting_comment": "Yorum siliniyor...",
+        "btn_import_report": "Raporu İçe Aktar",
+        "toast_import_success": "Rapor başarıyla içe aktarıldı!",
+        "toast_import_fail": "Rapor içe aktarılamadı: {e}"
     },
     "uk": {
         "app_title": "Сканер файлів VirusTotal",
@@ -1757,7 +1778,10 @@
         "btn_cancel": "Скасувати",
         "btn_delete": "Видалити",
         "btn_send_comment": "Надіслати коментар",
-        "deleting_comment": "Видалення коментаря..."
+        "deleting_comment": "Видалення коментаря...",
+        "btn_import_report": "Імпорт звіту",
+        "toast_import_success": "Звіт успішно імпортовано!",
+        "toast_import_fail": "Помилка імпорту звіту: {e}"
     },
     "zh": {
         "app_title": "VirusTotal 文件扫描器",
@@ -1977,7 +2001,10 @@
         "btn_cancel": "取消",
         "btn_delete": "删除",
         "btn_send_comment": "发送评论",
-        "deleting_comment": "正在删除评论..."
+        "deleting_comment": "正在删除评论...",
+        "btn_import_report": "导入报告",
+        "toast_import_success": "报告导入成功！",
+        "toast_import_fail": "导入报告失败：{e}"
     },
     "ja": {
         "app_title": "VirusTotal ファイルスキャナー",
@@ -2197,7 +2224,10 @@
         "btn_cancel": "キャンセル",
         "btn_delete": "削除",
         "btn_send_comment": "コメントを送信",
-        "deleting_comment": "コメントを削除中..."
+        "deleting_comment": "コメントを削除中...",
+        "btn_import_report": "レポートをインポート",
+        "toast_import_success": "レポートが正常にインポートされました！",
+        "toast_import_fail": "レポートのインポートに失敗しました: {e}"
     },
     "ko": {
         "app_title": "VirusTotal 파일 스캐너",
@@ -2417,7 +2447,10 @@
         "btn_cancel": "취소",
         "btn_delete": "삭제",
         "btn_send_comment": "댓글 전송",
-        "deleting_comment": "댓글 삭제 중..."
+        "deleting_comment": "댓글 삭제 중...",
+        "btn_import_report": "보고서 가져오기",
+        "toast_import_success": "보고서를 성공적으로 가져왔습니다!",
+        "toast_import_fail": "보고서 가져오기 실패: {e}"
     },
     "ar": {
         "app_title": "ماسح ملفات VirusTotal",
@@ -2637,6 +2670,9 @@
         "btn_cancel": "إلغاء",
         "btn_delete": "حذف",
         "btn_send_comment": "إرسال التعليق",
-        "deleting_comment": "جاري حذف التعليق..."
+        "deleting_comment": "جاري حذف التعليق...",
+        "btn_import_report": "استيراد التقرير",
+        "toast_import_success": "تم استيراد التقرير بنجاح!",
+        "toast_import_fail": "فشل استيراد التقرير: {e}"
     }
 }

@@ -25,7 +25,7 @@ LOOKUP_TYPE_NAMES = {
 }
 
 
-def build_history_view(lang, page, on_back, on_rescan, on_open_in_app=None):
+def build_history_view(lang, page, on_back, on_rescan, on_open_in_app=None, on_import_click=None):
     """Build the scan history view."""
     history = load_history()
 
@@ -378,25 +378,49 @@ def build_history_view(lang, page, on_back, on_rescan, on_open_in_app=None):
         ink=True
     )
 
-    # Header
-    header = ft.Row([
+    import_btn = ft.ElevatedButton(
+        content=ft.Row([
+            ft.Icon(ft.Icons.UPLOAD_FILE_ROUNDED, size=16),
+            ft.Text(STRINGS[lang].get("btn_import_report", "Import Report"), size=12, weight=ft.FontWeight.W_600)
+        ], spacing=6, alignment=ft.MainAxisAlignment.CENTER),
+        on_click=on_import_click,
+        bgcolor="#1E293B",
+        color="#00F0FF",
+        style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8))
+    ) if on_import_click else None
+
+    header_controls = [
         back_button_wrapper,
-        ft.Text(STRINGS[lang]["tab_history"], size=20, weight=ft.FontWeight.BOLD, color="#FFFFFF", expand=True),
-        ft.TextButton(
-            content=ft.Text(STRINGS[lang]["history_clear"], color="#EF4444", size=13),
-            icon=ft.Icons.DELETE_SWEEP_ROUNDED,
-            icon_color="#EF4444",
-            on_click=on_clear_click,
-        ) if history else ft.Container(),
-    ], alignment=ft.MainAxisAlignment.START)
+        ft.Text(STRINGS[lang]["tab_history"], size=20, weight=ft.FontWeight.BOLD, color="#FFFFFF", expand=True)
+    ]
+    if import_btn:
+        header_controls.append(import_btn)
+    if history:
+        header_controls.append(
+            ft.TextButton(
+                content=ft.Text(STRINGS[lang]["history_clear"], color="#EF4444", size=13),
+                icon=ft.Icons.DELETE_SWEEP_ROUNDED,
+                icon_color="#EF4444",
+                on_click=on_clear_click,
+            )
+        )
+
+    # Header
+    header = ft.Row(header_controls, alignment=ft.MainAxisAlignment.START, spacing=8)
 
     if not history:
-        content = ft.Column([
+        empty_controls = [
             header,
             ft.Container(height=40),
             ft.Icon(ft.Icons.HISTORY_ROUNDED, size=64, color="#2E3C56"),
             ft.Text(STRINGS[lang]["history_empty"], size=16, color="#64748B", text_align=ft.TextAlign.CENTER),
-        ], horizontal_alignment=ft.CrossAxisAlignment.CENTER, spacing=10, expand=True)
+        ]
+        if import_btn:
+            empty_controls.extend([
+                ft.Container(height=10),
+                import_btn
+            ])
+        content = ft.Column(empty_controls, horizontal_alignment=ft.CrossAxisAlignment.CENTER, spacing=10, expand=True)
     else:
         cards = [make_history_card(record) for record in history]
         content = ft.Column([

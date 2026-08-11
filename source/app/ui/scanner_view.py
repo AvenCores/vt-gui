@@ -1,8 +1,8 @@
 import flet as ft
 from ..config import STRINGS, KNOWN_HASHES
 
-def build_scanner_view(cli_status, cli_hash, cli_source, lang, file_picker_scan, on_scan_click, on_folder_click=None):
-    """Builds the main File Scanner view with drag-and-drop simulated click zone, badges, and folder scan button."""
+def build_scanner_view(cli_status, cli_hash, cli_source, lang, file_picker_scan, on_scan_click, on_folder_click=None, on_import_click=None):
+    """Builds the main File Scanner view with drag-and-drop simulated click zone, badges, folder scan, and import report buttons."""
     if cli_status == 'verified':
         version_str = KNOWN_HASHES.get(cli_hash, "CLI")
         badge_text = STRINGS[lang]["vt_exe_verified"].format(version=version_str)
@@ -80,10 +80,23 @@ def build_scanner_view(cli_status, cli_hash, cli_source, lang, file_picker_scan,
         color="#00F0FF",
         style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=10))
     )
+
+    import_btn = ft.ElevatedButton(
+        STRINGS[lang].get("btn_import_report", "Import Report"),
+        icon=ft.Icons.UPLOAD_FILE_ROUNDED,
+        on_click=on_import_click,
+        bgcolor="#1E293B",
+        color="#FFFFFF",
+        style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=10))
+    ) if on_import_click else None
     
     badges = [status_badge]
     if source_badge:
         badges.append(source_badge)
+
+    action_buttons = [folder_btn]
+    if import_btn:
+        action_buttons.append(import_btn)
 
     return ft.Column(
         [
@@ -93,7 +106,7 @@ def build_scanner_view(cli_status, cli_hash, cli_source, lang, file_picker_scan,
             ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
             ft.Container(height=5),
             dashed_area,
-            ft.Row([folder_btn], alignment=ft.MainAxisAlignment.CENTER)
+            ft.Row(action_buttons, alignment=ft.MainAxisAlignment.CENTER, spacing=10)
         ],
         spacing=12,
         expand=True

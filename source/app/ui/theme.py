@@ -45,7 +45,10 @@ def make_stat_card(label, count, color_hex, icon):
 
 def make_file_details_card(filename, size, sha256, strings, lang):
     """Creates a clean metadata display card for the scanned file."""
-    size_mb = size / (1024 * 1024) if size else 0
+    safe_size = size if isinstance(size, (int, float)) else 0
+    size_mb = safe_size / (1024 * 1024) if safe_size else 0
+    filename_str = str(filename or "Unknown_File")
+    sha256_str = str(sha256 or "")
     return ft.Container(
         content=ft.Column(
             [
@@ -53,15 +56,15 @@ def make_file_details_card(filename, size, sha256, strings, lang):
                 ft.Divider(color="#1E293B", height=1),
                 ft.Row([
                     ft.Text(f"{strings[lang]['file_name']}:", size=13, color="#94A3B8"),
-                    ft.Text(filename, size=13, color="#E2E8F0", weight=ft.FontWeight.W_600),
+                    ft.Text(filename_str, size=13, color="#E2E8F0", weight=ft.FontWeight.W_600),
                 ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
                 ft.Row([
                     ft.Text(f"{strings[lang]['file_size']}:", size=13, color="#94A3B8"),
-                    ft.Text(f"{size_mb:.2f} MB ({size} bytes)" if size else strings[lang]["unknown"], size=13, color="#E2E8F0"),
+                    ft.Text(f"{size_mb:.2f} MB ({safe_size} bytes)" if safe_size else strings[lang]["unknown"], size=13, color="#E2E8F0"),
                 ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
                 ft.Row([
                     ft.Text(f"{strings[lang]['file_hash']}:", size=13, color="#94A3B8"),
-                    ft.Text(sha256, size=11, color="#00F0FF", selectable=True),
+                    ft.Text(sha256_str, size=11, color="#00F0FF", selectable=True),
                 ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
             ],
             spacing=6

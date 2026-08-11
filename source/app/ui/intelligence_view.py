@@ -24,13 +24,37 @@ class IntelligenceView:
         self.page = page
 
     def build_lookup_results_view(self, data_dict, item_type, item_id):
-        stats = data_dict.get("last_analysis_stats", {})
-        results = data_dict.get("last_analysis_results", {})
-        
-        malicious = stats.get("malicious", 0)
-        suspicious = stats.get("suspicious", 0)
-        harmless = stats.get("harmless", 0)
-        undetected = stats.get("undetected", 0)
+        if not isinstance(data_dict, dict):
+            if isinstance(data_dict, list) and len(data_dict) > 0 and isinstance(data_dict[0], dict):
+                data_dict = data_dict[0]
+            else:
+                data_dict = {}
+
+        data_obj = data_dict.get("data") if isinstance(data_dict, dict) else None
+        if isinstance(data_obj, dict):
+            attrs = data_obj.get("attributes", {})
+        else:
+            attrs = data_dict.get("attributes", {}) if isinstance(data_dict, dict) else {}
+
+        if not isinstance(attrs, dict):
+            attrs = data_dict if isinstance(data_dict, dict) else {}
+
+        stats = attrs.get("last_analysis_stats") if isinstance(attrs, dict) else None
+        if not isinstance(stats, dict) and isinstance(data_dict, dict):
+            stats = data_dict.get("last_analysis_stats", {})
+        if not isinstance(stats, dict):
+            stats = {}
+
+        results = attrs.get("last_analysis_results") if isinstance(attrs, dict) else None
+        if not isinstance(results, dict) and isinstance(data_dict, dict):
+            results = data_dict.get("last_analysis_results", {})
+        if not isinstance(results, dict):
+            results = {}
+
+        malicious = stats.get("malicious", 0) if isinstance(stats, dict) else 0
+        suspicious = stats.get("suspicious", 0) if isinstance(stats, dict) else 0
+        harmless = stats.get("harmless", 0) if isinstance(stats, dict) else 0
+        undetected = stats.get("undetected", 0) if isinstance(stats, dict) else 0
         
         if malicious > 0:
             banner_text = STRINGS[self.current_lang]["verdict_malicious"].format(malicious=malicious)
@@ -116,11 +140,21 @@ class IntelligenceView:
         detections_list = ft.Column(spacing=5)
         mal_susp_list = []
         clean_list = []
-        if results:
+        if results and isinstance(results, dict):
             for engine, info in results.items():
-                category = info.get("category", "undetected")
-                res = info.get("result")
-                method = info.get("method", "unknown")
+                if isinstance(info, dict):
+                    category = info.get("category", "undetected")
+                    res = info.get("result")
+                    method = info.get("method", "unknown")
+                elif isinstance(info, str):
+                    category = "malicious" if info.lower() in ("malicious", "suspicious", "detected") else ("harmless" if info.lower() in ("clean", "harmless", "undetected") else info)
+                    res = info
+                    method = "export"
+                else:
+                    category = "undetected"
+                    res = None
+                    method = "unknown"
+
                 if category in ("malicious", "suspicious"):
                     mal_susp_list.append((engine, category, res, method))
                 else:
@@ -171,17 +205,20 @@ class IntelligenceView:
                     items = []
                     if item_type == "domain":
                         subs = get_subdomains(item_id, api_key)
-                        if subs:
+                        if subs and isinstance(subs, list):
                             items.append(ft.Text(STRINGS[self.current_lang].get("lbl_subdomains", "Subdomains:"), weight=ft.FontWeight.BOLD, color="#00F0FF"))
                             for s in subs[:10]:
-                                sub_id = s.get("id", "")
+                                sub_id = s.get("id", "") if isinstance(s, dict) else str(s)
                                 items.append(ft.Text(f" • {sub_id}", color="#E2E8F0", size=12))
                     res = get_dns_resolutions(item_type, item_id, api_key)
-                    if res:
+                    if res and isinstance(res, list):
                         items.append(ft.Text(STRINGS[self.current_lang].get("lbl_dns_resolutions", "DNS Resolutions:"), weight=ft.FontWeight.BOLD, color="#00F0FF"))
                         for r in res[:10]:
-                            attrs = r.get("attributes", {})
-                            host = attrs.get("host_name", attrs.get("ip_address", ""))
+                            attrs = r.get("attributes", {}) if isinstance(r, dict) else {}
+                            if isinstance(attrs, dict):
+                                host = attrs.get("host_name") or attrs.get("ip_address") or str(r)
+                            else:
+                                host = str(r)
                             items.append(ft.Text(f" • {host}", color="#E2E8F0", size=12))
                     
                     if items:

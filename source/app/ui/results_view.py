@@ -10,38 +10,61 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
     """Builds the enhanced results dashboard, showing detections, behaviors, comments, voting, and export options."""
     
     def get_stats_and_results(data_dict):
-        data = data_dict.get("data", {})
-        attributes = data.get("attributes")
-        if attributes:
-            stats = attributes.get("last_analysis_stats")
-            results = attributes.get("last_analysis_results")
-            names = attributes.get("names", [])
-            size = attributes.get("size", 0)
-            return stats, results, names, size, attributes
-            
-        if isinstance(data_dict, list) and len(data_dict) > 0:
-            data_dict = data_dict[0]
-            
-        stats = data_dict.get("last_analysis_stats")
-        results = data_dict.get("last_analysis_results")
-        names = data_dict.get("names", [])
-        attrs = data_dict.get("attributes", {})
-        size = attrs.get("size", data_dict.get("size", 0))
-        return stats, results, names, size, attrs
+        if not isinstance(data_dict, dict):
+            if isinstance(data_dict, list) and len(data_dict) > 0 and isinstance(data_dict[0], dict):
+                data_dict = data_dict[0]
+            else:
+                data_dict = {}
+
+        data = data_dict.get("data") if isinstance(data_dict, dict) else {}
+        if isinstance(data, list) and len(data) > 0 and isinstance(data[0], dict):
+            data = data[0]
+
+        attributes = None
+        if isinstance(data, dict):
+            attributes = data.get("attributes")
+        if not isinstance(attributes, dict):
+            attributes = data_dict.get("attributes") if isinstance(data_dict, dict) else {}
+        if not isinstance(attributes, dict):
+            attributes = data_dict if isinstance(data_dict, dict) else {}
+
+        stats = attributes.get("last_analysis_stats") if isinstance(attributes, dict) else None
+        if not isinstance(stats, dict) and isinstance(data_dict, dict):
+            stats = data_dict.get("last_analysis_stats")
+        if not isinstance(stats, dict):
+            stats = {}
+
+        results = attributes.get("last_analysis_results") if isinstance(attributes, dict) else None
+        if not isinstance(results, dict) and isinstance(data_dict, dict):
+            results = data_dict.get("last_analysis_results")
+        if not isinstance(results, dict):
+            results = {}
+
+        names = attributes.get("names", []) if isinstance(attributes, dict) else []
+        if not isinstance(names, list) and isinstance(data_dict, dict):
+            names = data_dict.get("names", [])
+        if not isinstance(names, list):
+            names = []
+
+        size = attributes.get("size", 0) if isinstance(attributes, dict) else 0
+        if not size and isinstance(data_dict, dict):
+            size = data_dict.get("size", 0)
+
+        return stats, results, names, size, attributes
 
     stats, results_dict, names, size, attributes = get_stats_and_results(current_scan_results)
     
     filename = selected_target_file if selected_target_file else "Unknown_File"
-    if names:
+    if names and isinstance(names, list) and len(names) > 0 and isinstance(names[0], str):
         filename = names[0]
     else:
         filename = os.path.basename(filename)
         
-    malicious = stats.get("malicious", 0) if stats else 0
-    suspicious = stats.get("suspicious", 0) if stats else 0
-    harmless = stats.get("harmless", 0) if stats else 0
-    undetected = stats.get("undetected", 0) if stats else 0
-    
+    malicious = stats.get("malicious", 0) if isinstance(stats, dict) else 0
+    suspicious = stats.get("suspicious", 0) if isinstance(stats, dict) else 0
+    harmless = stats.get("harmless", 0) if isinstance(stats, dict) else 0
+    undetected = stats.get("undetected", 0) if isinstance(stats, dict) else 0
+
     # 1. Verdict Banner
     if malicious > 0:
         banner_text = STRINGS[lang]["verdict_malicious"].format(malicious=malicious)
@@ -86,15 +109,16 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
     def handle_export(e):
         prompt_export_report(page, current_scan_results, filename, lang)
 
-    target_sha256 = (
-        last_completed_sha256
-        or attributes.get("sha256")
-        or attributes.get("md5")
-        or current_scan_results.get("sha256")
-        or current_scan_results.get("data", {}).get("id")
-        or current_scan_results.get("data", {}).get("attributes", {}).get("sha256")
-        or ""
-    )
+    target_sha256 = last_completed_sha256 or ""
+    if not target_sha256 and isinstance(attributes, dict):
+        target_sha256 = attributes.get("sha256") or attributes.get("md5") or ""
+    if not target_sha256 and isinstance(current_scan_results, dict):
+        target_sha256 = current_scan_results.get("sha256") or ""
+        data_val = current_scan_results.get("data")
+        if not target_sha256 and isinstance(data_val, dict):
+            target_sha256 = data_val.get("id") or ""
+        elif not target_sha256 and isinstance(data_val, str) and len(data_val) == 64:
+            target_sha256 = data_val
 
     user_vote_state = [None]  # "harmless", "malicious", or None
     is_voting_state = [False]
@@ -232,11 +256,21 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
     detections_list = ft.Column(spacing=5, expand=True)
     mal_susp_list = []
     clean_list = []
-    if results_dict:
+    if isinstance(results_dict, dict):
         for engine, info in results_dict.items():
-            category = info.get("category", "undetected")
-            res = info.get("result")
-            method = info.get("method", "unknown")
+            if isinstance(info, dict):
+                category = info.get("category", "undetected")
+                res = info.get("result")
+                method = info.get("method", "unknown")
+            elif isinstance(info, str):
+                category = "malicious" if info.lower() in ("malicious", "suspicious", "detected") else ("harmless" if info.lower() in ("clean", "harmless", "undetected") else info)
+                res = info
+                method = "export"
+            else:
+                category = "undetected"
+                res = None
+                method = "unknown"
+
             if category in ("malicious", "suspicious"):
                 mal_susp_list.append((engine, category, res, method))
             else:

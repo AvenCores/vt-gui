@@ -32,6 +32,7 @@ from app.ui.history_view import build_history_view
 from app.ui.tools_view import ToolsView
 from app.vt_api import check_file_exists_direct, check_file_exists_vt
 from app.history_manager import update_scan_record_results
+from app.exporter import prompt_import_report
 
 # Parse CLI arguments for context-menu invocation
 init_file_path = None
@@ -563,7 +564,10 @@ def main(page: ft.Page):
                 expand=True
             )
         else:
-            files_view = build_scanner_view(cli_status, cli_hash, cli_source, current_lang, file_picker_scan, on_scan_click, on_folder_click)
+            def on_import_report_click(e=None):
+                prompt_import_report(page, current_lang, on_history_open_in_app)
+
+            files_view = build_scanner_view(cli_status, cli_hash, cli_source, current_lang, file_picker_scan, on_scan_click, on_folder_click, on_import_report_click)
             intel_view = IntelligenceView(search_states, current_lang, show_alert, get_installed_binary_path, thread_safe_build, build_ui, page)
             url_view = intel_view.build_lookup_tab("url", STRINGS[current_lang]["url_placeholder"], STRINGS[current_lang]["url_helper"])
             domain_view = intel_view.build_lookup_tab("domain", STRINGS[current_lang]["domain_placeholder"], STRINGS[current_lang]["domain_helper"])
@@ -714,7 +718,7 @@ def main(page: ft.Page):
                     if not results and query and lookup_type in search_states:
                         intel_view.run_lookup_query(lookup_type)
 
-            history_view = build_history_view(current_lang, page, on_history_back, on_history_rescan, on_history_open_in_app)
+            history_view = build_history_view(current_lang, page, on_history_back, on_history_rescan, on_history_open_in_app, on_import_report_click)
 
             def on_active_tab_change(e):
                 nonlocal active_scanner_tab_index, app_state
