@@ -72,48 +72,141 @@ def build_footer(lang="en", page=None):
         def open_repo(_):
             webbrowser.open("https://github.com/AvenCores/vt-gui")
 
-        about_title_container = ft.Container(
+        app_desc_text = (
+            "Современный графический интерфейс для быстрой мульти-проверки файлов, ссылок, доменов, IP-адресов и YARA-правил через официальные API и CLI VirusTotal."
+            if lang == "ru"
+            else "Modern GUI application for fast scanning of files, URLs, domains, IP addresses, and YARA rules via official VirusTotal API & CLI."
+        )
+
+        def make_tag_pill(text, icon):
+            return ft.Container(
+                content=ft.Row(
+                    [
+                        ft.Icon(icon, color="#00F0FF", size=13),
+                        ft.Text(text, color="#E2E8F0", size=11, weight=ft.FontWeight.W_600)
+                    ],
+                    spacing=4,
+                    tight=True
+                ),
+                padding=ft.Padding(left=8, right=8, top=4, bottom=4),
+                bgcolor="#1E2A47",
+                border=ft.Border.all(1, "#2E3C56"),
+                border_radius=12
+            )
+
+        tags_row = ft.Row(
+            [
+                make_tag_pill("VirusTotal V3 API", ft.Icons.API_ROUNDED),
+                make_tag_pill("vt-cli Engine", ft.Icons.TERMINAL_ROUNDED),
+                make_tag_pill("Cross-Platform", ft.Icons.DEVICES_ROUNDED),
+                make_tag_pill("12 Languages", ft.Icons.TRANSLATE_ROUNDED),
+            ],
+            alignment=ft.MainAxisAlignment.CENTER,
+            wrap=True,
+            spacing=6,
+            run_spacing=6
+        )
+
+        repo_button = ft.Container(
             content=ft.Row(
                 [
-                    ft.Icon(ft.Icons.INFO_ROUNDED, color="#00F0FF", size=20),
-                    ft.Text(
-                        S.get("app_title", "VirusTotal File Scanner"),
-                        color="#FFFFFF",
-                        size=16,
-                        weight=ft.FontWeight.BOLD,
-                        text_align=ft.TextAlign.CENTER
-                    )
+                    ft.Icon(ft.Icons.CODE_ROUNDED, color="#00F0FF", size=16),
+                    ft.Text("github.com/AvenCores/vt-gui", color="#FFFFFF", size=12, weight=ft.FontWeight.W_600),
+                    ft.Icon(ft.Icons.OPEN_IN_NEW_ROUNDED, color="#94A3B8", size=14)
                 ],
                 alignment=ft.MainAxisAlignment.CENTER,
-                spacing=6
+                spacing=8
             ),
-            padding=ft.Padding(top=2, bottom=8, left=5, right=5),
-            border=ft.Border.only(bottom=ft.BorderSide(1, "#2E3C56")),
+            padding=ft.Padding(left=14, right=14, top=10, bottom=10),
+            bgcolor="#1E293B",
+            border=ft.Border.all(1, "#00F0FF"),
+            border_radius=10,
+            on_click=open_repo,
             alignment=ft.Alignment.CENTER
         )
 
-        dlg = ft.AlertDialog(
-            title=about_title_container,
-            title_padding=ft.Padding(left=16, right=16, top=16, bottom=4),
-            content_padding=ft.Padding(left=16, right=16, top=8, bottom=8),
-            actions_padding=ft.Padding(left=16, right=16, top=4, bottom=12),
-            content=ft.Container(
-                width=300,
-                content=ft.Column([
-                    ft.Text(f"{APP_VERSION}", color="#00F0FF", size=13, weight=ft.FontWeight.BOLD),
-                    ft.Text(powered_by_text, color="#94A3B8", size=12),
-                    ft.ElevatedButton(
-                        content=ft.Text("github.com/AvenCores/vt-gui", color="#FFFFFF", size=12),
-                        icon=ft.Icons.OPEN_IN_NEW_ROUNDED,
-                        on_click=open_repo,
-                        bgcolor="#2E3C56",
-                        color="#FFFFFF",
-                        style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8))
-                    ),
-                    ft.Text(f"{author_text} AvenCores", color="#94A3B8", size=11)
-                ], spacing=6, tight=True, horizontal_alignment=ft.CrossAxisAlignment.CENTER)
+        info_box = ft.Container(
+            content=ft.Column(
+                [
+                    ft.Text(f"{author_text} AvenCores", color="#E2E8F0", size=12, weight=ft.FontWeight.W_600),
+                    ft.Text(powered_by_text, color="#94A3B8", size=11),
+                    ft.Text("License: GNU GPL v3", color="#94A3B8", size=11)
+                ],
+                spacing=4,
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER
             ),
-            actions=[ft.TextButton(close_text, on_click=lambda _: e.control.page.pop_dialog())],
+            padding=ft.Padding(left=14, right=14, top=10, bottom=10),
+            bgcolor="#0F172A",
+            border=ft.Border.all(1, "#1E293B"),
+            border_radius=10,
+            alignment=ft.Alignment.CENTER
+        )
+
+        modal_header = ft.Container(
+            content=ft.Column(
+                [
+                    ft.Container(
+                        content=ft.Icon(ft.Icons.SECURITY_ROUNDED, color="#00F0FF", size=36),
+                        padding=12,
+                        bgcolor="#1E2A47",
+                        border=ft.Border.all(1.5, "#00F0FF"),
+                        shape=ft.BoxShape.CIRCLE
+                    ),
+                    ft.Text(
+                        S.get("app_title", "VirusTotal File Scanner"),
+                        color="#FFFFFF",
+                        size=18,
+                        weight=ft.FontWeight.BOLD,
+                        text_align=ft.TextAlign.CENTER
+                    ),
+                    ft.Container(
+                        content=ft.Text(f"{APP_VERSION}", color="#00F0FF", size=12, weight=ft.FontWeight.BOLD),
+                        padding=ft.Padding(left=10, right=10, top=3, bottom=3),
+                        bgcolor="#1E293B",
+                        border=ft.Border.all(1, "#00F0FF"),
+                        border_radius=12
+                    )
+                ],
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                spacing=8
+            ),
+            padding=ft.Padding(top=10, bottom=10, left=10, right=10),
+            alignment=ft.Alignment.CENTER
+        )
+
+        dialog_content = ft.Container(
+            width=420,
+            content=ft.Column(
+                [
+                    modal_header,
+                    tags_row,
+                    ft.Text(
+                        app_desc_text,
+                        color="#94A3B8",
+                        size=12,
+                        text_align=ft.TextAlign.CENTER
+                    ),
+                    repo_button,
+                    info_box
+                ],
+                spacing=14,
+                tight=True,
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER
+            )
+        )
+
+        dlg = ft.AlertDialog(
+            content=dialog_content,
+            content_padding=ft.Padding(left=20, right=20, top=16, bottom=16),
+            actions=[
+                ft.ElevatedButton(
+                    close_text,
+                    on_click=lambda _: e.control.page.pop_dialog(),
+                    bgcolor="#008DDA",
+                    color="#FFFFFF",
+                    style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8))
+                )
+            ],
             actions_alignment=ft.MainAxisAlignment.CENTER,
             bgcolor="#151E33"
         )
