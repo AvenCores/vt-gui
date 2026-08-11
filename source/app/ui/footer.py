@@ -413,60 +413,96 @@ def build_footer(lang="en", page=None):
             def open_vpn(_):
                 webbrowser.open("https://github.com/AvenCores/goida-vpn-configs")
 
-            dlg = ft.AlertDialog(
-                title=ft.Row(
+            modal_header = ft.Container(
+                content=ft.Column(
                     [
-                        ft.Icon(ft.Icons.VPN_LOCK_ROUNDED, color="#F59E0B", size=26),
-                        ft.Text(vpn_title_text, color="#FFFFFF", weight=ft.FontWeight.BOLD, size=16),
+                        ft.Container(
+                            content=ft.Icon(ft.Icons.VPN_LOCK_ROUNDED, color="#F59E0B", size=36),
+                            padding=12,
+                            bgcolor="#2D1F07",
+                            border=ft.Border.all(1.5, "#F59E0B"),
+                            shape=ft.BoxShape.CIRCLE
+                        ),
+                        ft.Text(
+                            vpn_title_text,
+                            color="#FFFFFF",
+                            size=18,
+                            weight=ft.FontWeight.BOLD,
+                            text_align=ft.TextAlign.CENTER
+                        ),
+                        ft.Text(
+                            vpn_msg_text,
+                            color="#94A3B8",
+                            size=12,
+                            text_align=ft.TextAlign.CENTER
+                        ),
+                    ],
+                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                    spacing=8
+                ),
+                padding=ft.Padding(top=10, bottom=10, left=10, right=10),
+                alignment=ft.Alignment.CENTER
+            )
+
+            vpn_box = ft.Container(
+                content=ft.Column(
+                    [
+                        ft.Text(
+                            vpn_promo_text,
+                            color="#94A3B8",
+                            size=12,
+                            weight=ft.FontWeight.W_500,
+                            text_align=ft.TextAlign.CENTER
+                        ),
+                        ft.ElevatedButton(
+                            content=ft.Row(
+                                [
+                                    ft.Icon(ft.Icons.KEY_ROUNDED, size=16, color="#FFFFFF"),
+                                    ft.Text(btn_vpn_text, color="#FFFFFF", size=13, weight=ft.FontWeight.BOLD),
+                                    ft.Icon(ft.Icons.OPEN_IN_NEW_ROUNDED, size=14, color="#FFFFFF"),
+                                ],
+                                alignment=ft.MainAxisAlignment.CENTER,
+                                spacing=8,
+                                tight=True,
+                            ),
+                            on_click=open_vpn,
+                            bgcolor="#008DDA",
+                            color="#FFFFFF",
+                            style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8)),
+                        ),
                     ],
                     spacing=10,
-                    alignment=ft.MainAxisAlignment.CENTER,
+                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                 ),
-                content=ft.Container(
-                    width=380,
-                    content=ft.Column(
-                        [
-                            ft.Text(vpn_msg_text, color="#CBD5E1", size=13, text_align=ft.TextAlign.CENTER),
-                            ft.Container(height=6),
-                            ft.Container(
-                                content=ft.Column(
-                                    [
-                                        ft.Text(vpn_promo_text, color="#94A3B8", size=12, weight=ft.FontWeight.W_500, text_align=ft.TextAlign.CENTER),
-                                        ft.ElevatedButton(
-                                            content=ft.Row(
-                                                [
-                                                    ft.Icon(ft.Icons.KEY_ROUNDED, size=16, color="#FFFFFF"),
-                                                    ft.Text(btn_vpn_text, color="#FFFFFF", size=13, weight=ft.FontWeight.BOLD),
-                                                    ft.Icon(ft.Icons.OPEN_IN_NEW_ROUNDED, size=14, color="#FFFFFF"),
-                                                ],
-                                                alignment=ft.MainAxisAlignment.CENTER,
-                                                spacing=8,
-                                                tight=True,
-                                            ),
-                                            on_click=open_vpn,
-                                            bgcolor="#008DDA",
-                                            color="#FFFFFF",
-                                            style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8)),
-                                        ),
-                                    ],
-                                    spacing=8,
-                                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                                ),
-                                padding=14,
-                                border=ft.Border.all(1, "#2E3C56"),
-                                border_radius=8,
-                                bgcolor="#0B0F19",
-                            ),
-                        ],
-                        spacing=10,
-                        tight=True,
-                        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                    ),
-                ),
+                padding=ft.Padding(left=16, right=16, top=14, bottom=14),
+                bgcolor="#1E293B",
+                border=ft.Border.all(1, "#2E3C56"),
+                border_radius=12
+            )
+
+            dialog_content = ft.Container(
+                width=400,
+                content=ft.Column(
+                    [
+                        modal_header,
+                        vpn_box,
+                    ],
+                    spacing=14,
+                    tight=True,
+                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                )
+            )
+
+            dlg = ft.AlertDialog(
+                content=dialog_content,
+                content_padding=ft.Padding(left=20, right=20, top=16, bottom=16),
                 actions=[
-                    ft.TextButton(
+                    ft.ElevatedButton(
                         close_text,
-                        on_click=lambda _: target_page.pop_dialog()
+                        on_click=lambda _: target_page.pop_dialog(),
+                        bgcolor="#2E3C56",
+                        color="#FFFFFF",
+                        style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8))
                     )
                 ],
                 actions_alignment=ft.MainAxisAlignment.CENTER,
