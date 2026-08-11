@@ -33,6 +33,7 @@ from app.ui.tools_view import ToolsView
 from app.vt_api import check_file_exists_direct, check_file_exists_vt
 from app.history_manager import update_scan_record_results
 from app.exporter import prompt_import_report
+from app.clipboard_utils import safe_copy_to_clipboard
 
 # Parse CLI arguments for context-menu invocation
 init_file_path = None
@@ -42,9 +43,22 @@ if len(sys.argv) > 1:
         init_file_path = os.path.normpath(files[0])
 
 def main(page: ft.Page):
-    # Only install fallback dialog methods when the native methods are unavailable.
-    if not (hasattr(page, 'show_dialog') and callable(getattr(page, 'show_dialog'))):
-        def _show_dialog_impl(dlg):
+    import asyncio
+    try:
+        main_loop = asyncio.get_running_loop()
+    except RuntimeError:
+        main_loop = asyncio.get_event_loop()
+
+    native_show_dialog = getattr(page, 'show_dialog', None)
+
+    def safe_show_dialog(dlg):
+        def _do_show():
+            if native_show_dialog and callable(native_show_dialog) and native_show_dialog != safe_show_dialog:
+                try:
+                    native_show_dialog(dlg)
+                    return
+                except Exception:
+                    pass
             dlg.open = True
             if isinstance(dlg, ft.SnackBar):
                 page.snack_bar = dlg
@@ -56,7 +70,13 @@ def main(page: ft.Page):
                 page.update()
             except Exception:
                 pass
-        page.show_dialog = _show_dialog_impl
+
+        if main_loop and main_loop.is_running():
+            main_loop.call_soon_threadsafe(_do_show)
+        else:
+            _do_show()
+
+    page.show_dialog = safe_show_dialog
 
     if not (hasattr(page, 'pop_dialog') and callable(getattr(page, 'pop_dialog'))):
         def _pop_dialog_impl(dlg=None):
@@ -525,7 +545,7 @@ def main(page: ft.Page):
                     webbrowser.open(url)
                     
                 def copy_web_report_link(e, url=report_url):
-                    page.run_task(clipboard_service.set, url)
+                    page.run_task(safe_copy_to_clipboard, page, url, clipboard_service)
                     page.show_dialog(
                         ft.SnackBar(
                             content=ft.Text(STRINGS[current_lang]["link_copied"], color="#FFFFFF"),

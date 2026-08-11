@@ -214,10 +214,21 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
             controls.extend([harmless_btn, malicious_btn])
 
         vote_buttons_container.controls = controls
+        def _do_update():
+            try:
+                page.update()
+            except Exception:
+                pass
+
         try:
-            page.update()
+            import asyncio
+            loop = asyncio.get_event_loop()
+            if loop.is_running():
+                loop.call_soon_threadsafe(_do_update)
+            else:
+                _do_update()
         except Exception:
-            pass
+            _do_update()
 
     def load_user_vote():
         api_key = get_api_key()

@@ -9,6 +9,7 @@ from ..config import STRINGS, get_api_key, CLI_BINARY_NAME
 from ..vt_api import submit_url_scan, get_subdomains, get_dns_resolutions, reanalyze_item
 from ..exporter import export_report_to_file, prompt_export_report
 from ..history_manager import add_lookup_record
+from ..clipboard_utils import safe_copy_to_clipboard
 from .theme import make_stat_card, make_engine_row, make_loading_card
 
 _NO_WINDOW = subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0
@@ -302,6 +303,15 @@ class IntelligenceView:
                 
             web_url = f"https://www.virustotal.com/gui/file/{sha256}"
             
+            def copy_intel_link(e, url=web_url):
+                self.page.run_task(safe_copy_to_clipboard, self.page, url)
+                self.page.show_dialog(
+                    ft.SnackBar(
+                        content=ft.Text(STRINGS[self.current_lang]["link_copied"], color="#FFFFFF"),
+                        bgcolor="#10B981"
+                    )
+                )
+
             item_card = ft.Container(
                 content=ft.Column(
                     [
@@ -323,6 +333,13 @@ class IntelligenceView:
                         ),
                         ft.Row(
                             [
+                                ft.IconButton(
+                                    icon=ft.Icons.COPY_ROUNDED,
+                                    icon_color="#00F0FF",
+                                    icon_size=18,
+                                    tooltip=STRINGS[self.current_lang]["copy_link_tooltip"],
+                                    on_click=copy_intel_link
+                                ),
                                 ft.TextButton(
                                     STRINGS[self.current_lang]["btn_download_sample"],
                                     icon=ft.Icons.DOWNLOAD_ROUNDED,

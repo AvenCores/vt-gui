@@ -4,6 +4,7 @@ import urllib.request
 import json
 import asyncio
 from ..config import STRINGS
+from ..clipboard_utils import safe_copy_to_clipboard
 
 APP_VERSION = "V1.0.6"
 GITHUB_REPO = "AvenCores/vt-gui"
@@ -124,7 +125,7 @@ def build_footer(lang="en", page=None):
             e.control.page.services.append(clipboard)
 
         def copy_card(_):
-            e.control.page.run_task(clipboard.set, card_number)
+            e.control.page.run_task(safe_copy_to_clipboard, e.control.page, card_number, clipboard)
             e.control.page.show_dialog(
                 ft.SnackBar(
                     content=ft.Text(copied_text, color="#FFFFFF"),
