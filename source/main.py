@@ -131,6 +131,10 @@ def main(page: ft.Page):
     active_scans = []
     scan_service = None
     current_tab_index = 0
+    _build_lock = threading.Lock()
+
+    # Persistent root container — populated before first page.add()
+    page_root = ft.Column(expand=True, spacing=0)
     
     # State for lookup tabs
     active_scanner_tab_index = 0
@@ -182,13 +186,20 @@ def main(page: ft.Page):
 
     def build_ui():
         nonlocal app_state
+        if not _build_lock.acquire(blocking=False):
+            return
+        try:
+            _do_build_ui()
+        finally:
+            _build_lock.release()
+
+    def _do_build_ui():
+        nonlocal app_state
         cli_status, cli_hash, cli_source = check_installed_binary()
         
         # Enforce install view if missing vt CLI
         if cli_status == 'missing':
             app_state = "install_cli"
-            
-        page.controls.clear()
         
         # Header Language Switcher
         def change_language(lang_code):
@@ -436,8 +447,10 @@ def main(page: ft.Page):
                 
             def on_tab_change(e):
                 nonlocal current_tab_index
-                current_tab_index = int(e.control.selected_index)
-                build_ui()
+                new_index = int(e.control.selected_index)
+                if new_index != current_tab_index:
+                    current_tab_index = new_index
+                    build_ui()
 
             add_tab_btn = ft.IconButton(
                 icon=ft.Icons.ADD_ROUNDED,
@@ -768,19 +781,14 @@ def main(page: ft.Page):
 
             tab_views_map = {idx: v for idx, _, _, v in tab_definitions}
 
-            animated_tab_content = ft.AnimatedSwitcher(
+            animated_tab_content = ft.Container(
                 content=ft.Container(
-                    key=f"tab_view_container_{active_scanner_tab_index}",
                     content=tab_views_map[active_scanner_tab_index],
                     padding=10,
                     expand=True
                 ),
-                transition=ft.AnimatedSwitcherTransition.FADE,
-                duration=250,
-                reverse_duration=200,
-                switch_in_curve=ft.AnimationCurve.EASE_OUT,
-                switch_out_curve=ft.AnimationCurve.EASE_IN,
-                expand=True
+                expand=True,
+                animate_opacity=ft.Animation(200, ft.AnimationCurve.EASE_OUT),
             )
 
             tab_buttons = []
@@ -810,7 +818,6 @@ def main(page: ft.Page):
                 update_tab_buttons()
 
                 animated_tab_content.content = ft.Container(
-                    key=f"tab_view_container_{idx}",
                     content=tab_views_map[idx],
                     padding=10,
                     expand=True
@@ -883,19 +890,11 @@ def main(page: ft.Page):
             )
             current_view_body = landing_tabs
             
-        active_scan_sha = active_scans[0].get('sha256', '') if active_scans else ''
-        main_content = ft.AnimatedSwitcher(
-            content=ft.Container(
-                key=f"main_content_state_{app_state}_{active_scanner_tab_index}_{active_scan_sha}",
-                content=current_view_body,
-                expand=True
-            ),
-            transition=ft.AnimatedSwitcherTransition.FADE,
-            duration=250,
-            reverse_duration=200,
-            switch_in_curve=ft.AnimationCurve.EASE_OUT,
-            switch_out_curve=ft.AnimationCurve.EASE_IN,
-            expand=True
+        main_content = ft.Container(
+            content=current_view_body,
+            expand=True,
+            animate_opacity=ft.Animation(150, ft.AnimationCurve.EASE_OUT),
+            animate_offset=ft.Animation(150, ft.AnimationCurve.EASE_OUT),
         )
             
         # Build footer with social links
@@ -920,8 +919,14 @@ def main(page: ft.Page):
             )
         )
         
-        page.add(outer_container)
-        page.update()
+        page_root.controls = [outer_container]
+        if not page.controls:
+            # First render: add root with content already set — single render
+            page.controls.append(page_root)
+            page.update()
+        else:
+            # Subsequent renders: just update content — single render
+            page_root.update()
 
     import asyncio
     try:
