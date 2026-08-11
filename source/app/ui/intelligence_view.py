@@ -423,16 +423,57 @@ class IntelligenceView:
                 )
                 close_btn_text = lang_dict.get("btn_got_it", "Got it")
 
-                dlg = ft.AlertDialog(
-                    title=ft.Row([
-                        ft.Icon(ft.Icons.INFO_ROUNDED, color="#00F0FF", size=22),
-                        ft.Text(title_str, color="#FFFFFF", weight=ft.FontWeight.BOLD, size=15)
-                    ], spacing=8),
-                    content=ft.Container(
-                        content=ft.Text(desc_str, color="#E2E8F0", size=13),
-                        width=440,
-                        padding=ft.Padding(top=5, bottom=5, left=0, right=0)
+                modal_header = ft.Container(
+                    content=ft.Column(
+                        [
+                            ft.Container(
+                                content=ft.Icon(ft.Icons.MANAGE_SEARCH_ROUNDED, color="#00F0FF", size=36),
+                                padding=12,
+                                bgcolor="#1E2A47",
+                                border=ft.Border.all(1.5, "#00F0FF"),
+                                shape=ft.BoxShape.CIRCLE
+                            ),
+                            ft.Text(
+                                title_str,
+                                color="#FFFFFF",
+                                size=18,
+                                weight=ft.FontWeight.BOLD,
+                                text_align=ft.TextAlign.CENTER
+                            ),
+                        ],
+                        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                        spacing=8
                     ),
+                    padding=ft.Padding(top=10, bottom=10, left=10, right=10),
+                    alignment=ft.Alignment.CENTER
+                )
+
+                info_box = ft.Container(
+                    content=ft.Text(
+                        desc_str,
+                        color="#CBD5E1",
+                        size=13,
+                        text_align=ft.TextAlign.LEFT
+                    ),
+                    padding=ft.Padding(left=16, right=16, top=14, bottom=14),
+                    bgcolor="#1E293B",
+                    border=ft.Border.all(1, "#2E3C56"),
+                    border_radius=12
+                )
+
+                dialog_content = ft.Container(
+                    width=420,
+                    content=ft.Column(
+                        [modal_header, info_box],
+                        spacing=14,
+                        tight=True,
+                        horizontal_alignment=ft.CrossAxisAlignment.CENTER
+                    )
+                )
+
+                dlg = ft.AlertDialog(
+                    content=dialog_content,
+                    content_padding=ft.Padding(left=20, right=20, top=16, bottom=16),
                     actions=[
                         ft.ElevatedButton(
                             close_btn_text,
@@ -442,7 +483,7 @@ class IntelligenceView:
                             style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8))
                         )
                     ],
-                    actions_alignment=ft.MainAxisAlignment.END,
+                    actions_alignment=ft.MainAxisAlignment.CENTER,
                     bgcolor="#151E33"
                 )
                 self.page.show_dialog(dlg)
@@ -456,16 +497,57 @@ class IntelligenceView:
                 )
                 close_btn_text = lang_dict.get("btn_got_it", "Got it")
 
-                dlg = ft.AlertDialog(
-                    title=ft.Row([
-                        ft.Icon(ft.Icons.INFO_ROUNDED, color="#00F0FF", size=22),
-                        ft.Text(title_str, color="#FFFFFF", weight=ft.FontWeight.BOLD, size=15)
-                    ], spacing=8),
-                    content=ft.Container(
-                        content=ft.Text(desc_str, color="#E2E8F0", size=13),
-                        width=440,
-                        padding=ft.Padding(top=5, bottom=5, left=0, right=0)
+                modal_header = ft.Container(
+                    content=ft.Column(
+                        [
+                            ft.Container(
+                                content=ft.Icon(ft.Icons.WIFI_TETHERING_ROUNDED, color="#00F0FF", size=36),
+                                padding=12,
+                                bgcolor="#1E2A47",
+                                border=ft.Border.all(1.5, "#00F0FF"),
+                                shape=ft.BoxShape.CIRCLE
+                            ),
+                            ft.Text(
+                                title_str,
+                                color="#FFFFFF",
+                                size=18,
+                                weight=ft.FontWeight.BOLD,
+                                text_align=ft.TextAlign.CENTER
+                            ),
+                        ],
+                        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                        spacing=8
                     ),
+                    padding=ft.Padding(top=10, bottom=10, left=10, right=10),
+                    alignment=ft.Alignment.CENTER
+                )
+
+                info_box = ft.Container(
+                    content=ft.Text(
+                        desc_str,
+                        color="#CBD5E1",
+                        size=13,
+                        text_align=ft.TextAlign.LEFT
+                    ),
+                    padding=ft.Padding(left=16, right=16, top=14, bottom=14),
+                    bgcolor="#1E293B",
+                    border=ft.Border.all(1, "#2E3C56"),
+                    border_radius=12
+                )
+
+                dialog_content = ft.Container(
+                    width=420,
+                    content=ft.Column(
+                        [modal_header, info_box],
+                        spacing=14,
+                        tight=True,
+                        horizontal_alignment=ft.CrossAxisAlignment.CENTER
+                    )
+                )
+
+                dlg = ft.AlertDialog(
+                    content=dialog_content,
+                    content_padding=ft.Padding(left=20, right=20, top=16, bottom=16),
                     actions=[
                         ft.ElevatedButton(
                             close_btn_text,
@@ -475,7 +557,7 @@ class IntelligenceView:
                             style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8))
                         )
                     ],
-                    actions_alignment=ft.MainAxisAlignment.END,
+                    actions_alignment=ft.MainAxisAlignment.CENTER,
                     bgcolor="#151E33"
                 )
                 self.page.show_dialog(dlg)
