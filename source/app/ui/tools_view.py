@@ -139,7 +139,7 @@ class ToolsView:
             [
                 ft.Container(
                     content=subtab_header_row,
-                    padding=ft.Padding(left=4, right=4, top=4, bottom=6),
+                    padding=ft.Padding(left=4, right=4, top=0, bottom=20),
                     border=ft.Border(bottom=ft.BorderSide(1, "#1E293B"))
                 ),
                 animated_subtab_content
