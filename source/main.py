@@ -880,7 +880,7 @@ def main(page: ft.Page):
                 [
                     ft.Container(
                         content=tab_header_row,
-                        padding=ft.Padding(left=4, right=4, top=4, bottom=6),
+                        padding=ft.Padding(left=4, right=4, top=5, bottom=15),
                         border=ft.Border(bottom=ft.BorderSide(1, "#1E293B"))
                     ),
                     animated_tab_content
@@ -911,7 +911,6 @@ def main(page: ft.Page):
             content=ft.Column(
                 [
                     header,
-                    ft.Container(height=10),
                     main_content,
                     footer
                 ],
