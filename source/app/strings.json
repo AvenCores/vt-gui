@@ -232,7 +232,12 @@
         "cache_search_info_desc": "Instant lookup of existing scan reports from VirusTotal's global database.\n\n• Key Features:\n– Returns cached analysis results if this URL, domain, IP, or file hash was previously checked.\n– Instant results without waiting for VirusTotal servers to re-scan the web page.\n\nRecommended for quick checks of known URLs and network addresses.",
         "app_desc": "Modern GUI application for fast scanning of files, URLs, domains, IP addresses, and YARA rules via official VirusTotal API & CLI.",
         "donate_desc": "Your support helps develop the project and add new features!",
-        "donate_thank_you": "❤️ Thank you for using and supporting the app!"
+        "donate_thank_you": "❤️ Thank you for using and supporting the app!",
+        "error_title": "Error",
+        "download_failed_premium": "Download failed (requires premium API key): {ex}",
+        "compare_hashes_prompt": "Please enter both SHA-256 hashes to compare.",
+        "yara_premium_required": "YARA Livehunt rulesets require a VirusTotal Premium API key.",
+        "yara_no_rules": "No YARA rulesets available."
     },
     "ru": {
         "app_title": "Сканер файлов VirusTotal",
@@ -467,7 +472,12 @@
         "cache_search_info_desc": "Мгновенный поиск готового отчёта в глобальной базе данных VirusTotal.\n\n• Особенности:\n– Возвращает существующие результаты анализа, если этот URL, домен, IP или хэш ранее уже проверялся кем-либо в мире.\n– Результат выдаётся мгновенно без необходимости ждать повторной проверки сайта серверным сканером.\n\nРекомендуется использовать для быстрой проверки известных ссылок и сетевых адресов.",
         "app_desc": "Современный графический интерфейс для быстрой мульти-проверки файлов, ссылок, доменов, IP-адресов и YARA-правил через официальные API и CLI VirusTotal.",
         "donate_desc": "Ваша поддержка помогает развивать проект и добавлять новые функции!",
-        "donate_thank_you": "❤️ Спасибо за использование и поддержку приложения!"
+        "donate_thank_you": "❤️ Спасибо за использование и поддержку приложения!",
+        "error_title": "Ошибка",
+        "download_failed_premium": "Ошибка скачивания (требуется Premium API-ключ): {ex}",
+        "compare_hashes_prompt": "Пожалуйста, введите оба SHA-256 хэша для сравнения.",
+        "yara_premium_required": "Для работы с YARA Livehunt требуется Premium API-ключ VirusTotal.",
+        "yara_no_rules": "Нет доступных правил YARA."
     },
     "es": {
         "app_title": "Escáner de Archivos VirusTotal",
@@ -702,7 +712,12 @@
         "cache_search_info_desc": "Búsqueda instantánea de informes en la base de datos global de VirusTotal.\n\n• Características:\n– Devuelve análisis anteriores si esta URL, dominio o IP ya fue verificado.\n– Resultados instantáneos sin esperar un nuevo escaneo.\n\nRecomendado para comprobaciones rápidas de enlaces conocidos.",
         "app_desc": "Moderna aplicación GUI para el escaneo rápido de archivos, URL, dominios, direcciones IP y reglas YARA a través de la API y CLI oficiales de VirusTotal.",
         "donate_desc": "¡Tu apoyo ayuda a desarrollar el proyecto y agregar nuevas funciones!",
-        "donate_thank_you": "❤️ ¡Gracias por usar y apoyar la aplicación!"
+        "donate_thank_you": "❤️ ¡Gracias por usar y apoyar la aplicación!",
+        "error_title": "Error",
+        "download_failed_premium": "Fallo de descarga (requiere clave API premium): {ex}",
+        "compare_hashes_prompt": "Por favor, ingrese ambos hashes SHA-256 para comparar.",
+        "yara_premium_required": "Los conjuntos de reglas de YARA Livehunt requieren una clave API Premium de VirusTotal.",
+        "yara_no_rules": "No hay conjuntos de reglas de YARA disponibles."
     },
     "de": {
         "app_title": "VirusTotal Dateiscanner",
@@ -937,7 +952,12 @@
         "cache_search_info_desc": "Sofortige Suche nach vorhandenen Berichten in der VirusTotal-Datenbank.\n\n• Merkmale:\n– Liefert gespeicherte Ergebnisse, falls diese URL oder IP bereits geprüft wurde.\n– Sofortiges Ergebnis ohne Wartezeit.\n\nEmpfohlen für schnelle Prüfungen bekannter Links.",
         "app_desc": "Moderne GUI-Anwendung zum schnellen Scannen von Dateien, URLs, Domänen, IP-Adressen und YARA-Regeln über die offizielle VirusTotal-API und CLI.",
         "donate_desc": "Ihre Unterstützung hilft, das Projekt zu entwickeln und neue Funktionen hinzuzufügen!",
-        "donate_thank_you": "❤️ Danke, dass Sie die App nutzen und unterstützen!"
+        "donate_thank_you": "❤️ Danke, dass Sie die App nutzen und unterstützen!",
+        "error_title": "Fehler",
+        "download_failed_premium": "Download fehlgeschlagen (Premium-API-Schlüssel erforderlich): {ex}",
+        "compare_hashes_prompt": "Bitte geben Sie beide SHA-256-Hashes zum Vergleichen ein.",
+        "yara_premium_required": "YARA Livehunt-Regelsätze erfordern einen VirusTotal Premium-API-Schlüssel.",
+        "yara_no_rules": "Keine YARA-Regelsätze verfügbar."
     },
     "fr": {
         "app_title": "Scanner de Fichiers VirusTotal",
@@ -1172,7 +1192,12 @@
         "cache_search_info_desc": "Recherche instantanée de rapports dans la base VirusTotal.\n\n• Caractéristiques :\n– Renvoie les résultats existants si l'URL ou l'IP a déjà été vérifiée.\n– Résultats instantanés sans délai d'attente.\n\nRecommandé pour les vérifications rapides de liens connus.",
         "app_desc": "Application GUI moderne pour l'analyse rapide des fichiers, URL, domaines, adresses IP et règles YARA via l'API et la CLI officielles de VirusTotal.",
         "donate_desc": "Votre soutien aide à développer le projet et à ajouter de nouvelles fonctionnalités !",
-        "donate_thank_you": "❤️ Merci d'utiliser et de soutenir l'application !"
+        "donate_thank_you": "❤️ Merci d'utiliser et de soutenir l'application !",
+        "error_title": "Erreur",
+        "download_failed_premium": "Échec du téléchargement (nécessite une clé API premium) : {ex}",
+        "compare_hashes_prompt": "Veuillez entrer les deux hachages SHA-256 à comparer.",
+        "yara_premium_required": "Les ensembles de règles YARA Livehunt nécessitent une clé API Premium VirusTotal.",
+        "yara_no_rules": "Aucun ensemble de règles YARA disponible."
     },
     "pt": {
         "app_title": "Scanner de Arquivos VirusTotal",
@@ -1407,7 +1432,12 @@
         "cache_search_info_desc": "Busca instantânea de relatórios no banco global do VirusTotal.\n\n• Recursos:\n– Retorna análises salvas se este URL ou IP já foi verificado.\n– Resultados instantâneos sem espera.\n\nRecomendado para verificações rápidas de links conhecidos.",
         "app_desc": "Aplicativo GUI moderno para verificação rápida de arquivos, URLs, domínios, endereços IP e regras YARA por meio da API e CLI oficiais do VirusTotal.",
         "donate_desc": "Seu apoio ajuda a desenvolver o projeto e adicionar novos recursos!",
-        "donate_thank_you": "❤️ Obrigado por usar e apoiar o aplicativo!"
+        "donate_thank_you": "❤️ Obrigado por usar e apoiar o aplicativo!",
+        "error_title": "Erro",
+        "download_failed_premium": "Falha no download (requer chave API premium): {ex}",
+        "compare_hashes_prompt": "Por favor, insira ambos os hashes SHA-256 para comparar.",
+        "yara_premium_required": "Os conjuntos de regras YARA Livehunt requerem uma chave API Premium do VirusTotal.",
+        "yara_no_rules": "Nenhum conjunto de regras YARA disponível."
     },
     "tr": {
         "app_title": "VirusTotal Dosya Tarayıcı",
@@ -1642,7 +1672,12 @@
         "cache_search_info_desc": "VirusTotal veritabanındaki mevcut raporları anında arar.\n\n• Özellikler:\n– URL veya IP daha önce kontrol edildiyse kayıtlı sonuçları döndürür.\n– Yeniden tarama beklemeden anında sonuç verir.\n\nBilinen bağlantıların hızlı kontrolü için önerilir.",
         "app_desc": "Resmi VirusTotal API ve CLI aracılığıyla dosyaların, URL'lerin, alan adlarının, IP adreslerinin ve YARA kurallarının hızlı taranması için modern GUI uygulaması.",
         "donate_desc": "Desteğiniz projeyi geliştirmeye ve yeni özellikler eklemeye yardımcı oluyor!",
-        "donate_thank_you": "❤️ Uygulamayı kullandığınız ve desteklediğiniz için teşekkür ederiz!"
+        "donate_thank_you": "❤️ Uygulamayı kullandığınız ve desteklediğiniz için teşekkür ederiz!",
+        "error_title": "Hata",
+        "download_failed_premium": "İndirme başarısız (premium API anahtarı gerektirir): {ex}",
+        "compare_hashes_prompt": "Karşılaştırmak için lütfen her iki SHA-256 özetini de girin.",
+        "yara_premium_required": "YARA Livehunt kural setleri bir VirusTotal Premium API anahtarı gerektirir.",
+        "yara_no_rules": "Kullanılabilir YARA kural seti yok."
     },
     "uk": {
         "app_title": "Сканер файлів VirusTotal",
@@ -1877,7 +1912,12 @@
         "cache_search_info_desc": "Миттєвий пошук готового звіту в глобальній базі даних VirusTotal.\n\n• Особливості:\n– Повертає існуючі результати аналізу, якщо цей URL, домен або IP раніше вже перевірявся.\n– Результат видається миттєво без очікування повторного сканування.\n\nРекомендовано для швидкої перевірки відомих посилань.",
         "app_desc": "Сучасний графічний інтерфейс для швидкої перевірки файлів, URL-адрес, доменів, IP-адрес та YARA-правил через офіційні API та CLI VirusTotal.",
         "donate_desc": "Ваша підтримка допомагає розвивати проект та додавати нові функції!",
-        "donate_thank_you": "❤️ Дякуємо за використання та підтримку програми!"
+        "donate_thank_you": "❤️ Дякуємо за використання та підтримку програми!",
+        "error_title": "Помилка",
+        "download_failed_premium": "Помилка завантаження (потрібен Premium API-ключ): {ex}",
+        "compare_hashes_prompt": "Будь ласка, введіть обидва SHA-256 хеші для порівняння.",
+        "yara_premium_required": "Для YARA Livehunt потрібен Premium API-ключ VirusTotal.",
+        "yara_no_rules": "Немає доступних наборів правил YARA."
     },
     "zh": {
         "app_title": "VirusTotal 文件扫描器",
@@ -2112,7 +2152,12 @@
         "cache_search_info_desc": "在 VirusTotal 全球数据库中即时查找已有报告。\n\n• 特性：\n– 如果此前分析过该 URL 或 IP，则返回现有结果。\n– 无需等待重新扫描，即时获取结果。\n\n建议用于快速检查已知链接。",
         "app_desc": "现代化的 GUI 应用程序，可通过官方 VirusTotal API 和 CLI 快速扫描文件、URL、域名、IP 地址和 YARA 规则。",
         "donate_desc": "您的支持有助于开发项目并添加新功能！",
-        "donate_thank_you": "❤️ 感谢您使用和支持此应用程序！"
+        "donate_thank_you": "❤️ 感谢您使用和支持此应用程序！",
+        "error_title": "错误",
+        "download_failed_premium": "下载失败（需要高级 API 密钥）：{ex}",
+        "compare_hashes_prompt": "请输入两个 SHA-256 哈希值进行比较。",
+        "yara_premium_required": "YARA Livehunt 规则集需要 VirusTotal 高级 API 密钥。",
+        "yara_no_rules": "没有可用的 YARA 规则集。"
     },
     "ja": {
         "app_title": "VirusTotal ファイルスキャナー",
@@ -2347,7 +2392,12 @@
         "cache_search_info_desc": "VirusTotal のデータベースから既存のレポートを即座に検索します。\n\n• 特徴：\n– URLやIPが過去に検査されている場合、保存された結果を返します。\n– 再スキャンを待たずに即座に結果を取得できます。\n\n既知のリンクのクイックチェックに推奨されます。",
         "app_desc": "公式の VirusTotal API および CLI を介して、ファイル、URL、ドメイン、IP アドレス、YARA ルールを高速スキャンするためのモダンな GUI アプリケーション。",
         "donate_desc": "あなたのサポートは、プロジェクトの開発と新機能の追加に役立ちます！",
-        "donate_thank_you": "❤️ アプリをご利用いただき、サポートしていただきありがとうございます！"
+        "donate_thank_you": "❤️ アプリをご利用いただき、サポートしていただきありがとうございます！",
+        "error_title": "エラー",
+        "download_failed_premium": "ダウンロードに失敗しました (プレミアム API キーが必要です): {ex}",
+        "compare_hashes_prompt": "比較する両方の SHA-256 ハッシュを入力してください。",
+        "yara_premium_required": "YARA Livehunt ルールセットには VirusTotal プレミアム API キーが必要です。",
+        "yara_no_rules": "利用可能な YARA ルールセットはありません。"
     },
     "ko": {
         "app_title": "VirusTotal 파일 스캐너",
@@ -2582,7 +2632,12 @@
         "cache_search_info_desc": "VirusTotal 데이터베이스에서 기존 보고서를 즉시 검색합니다.\n\n• 특징:\n– URL 또는 IP가 이전에 검사된 경우 저장된 결과를 반환합니다.\n– 대기 시간 없이 즉시 결과를 얻을 수 있습니다.\n\n알려진 링크의 빠른 확인에 권장됩니다.",
         "app_desc": "공식 VirusTotal API 및 CLI를 통해 파일, URL, 도메인, IP 주소 및 YARA 규칙을 빠르게 스캔하기 위한 최신 GUI 애플리케이션입니다.",
         "donate_desc": "여러분의 지원은 프로젝트를 개발하고 새로운 기능을 추가하는 데 도움이 됩니다!",
-        "donate_thank_you": "❤️ 앱을 사용하고 지원해 주셔서 감사합니다!"
+        "donate_thank_you": "❤️ 앱을 사용하고 지원해 주셔서 감사합니다!",
+        "error_title": "오류",
+        "download_failed_premium": "다운로드 실패 (프리미엄 API 키 필요): {ex}",
+        "compare_hashes_prompt": "비교할 두 SHA-256 해시를 모두 입력하십시오.",
+        "yara_premium_required": "YARA Livehunt 규칙 세트에는 VirusTotal 프리미엄 API 키가 필요합니다.",
+        "yara_no_rules": "사용 가능한 YARA 규칙 세트가 없습니다."
     },
     "ar": {
         "app_title": "ماسح ملفات VirusTotal",
@@ -2817,6 +2872,11 @@
         "cache_search_info_desc": "البحث الفوري عن التقارير الموجودة في قاعدة بيانات VirusTotal.\n\n• الميزات:\n– يعيد النتائج المحفوظة إذا تم فحص الرابط سابقًا.\n– نتائج فورية دون انتظار فحص جديد.\n\nيوصى به للتحقق السريع من الروابط المعروفة.",
         "app_desc": "تطبيق واجهة مستخدم رسومية حديث للفحص السريع للملفات وعناوين URL والنطاقات وعناوين IP وقواعد YARA عبر واجهة برمجة التطبيقات و CLI الرسمية لـ VirusTotal.",
         "donate_desc": "دعمك يساعد في تطوير المشروع وإضافة ميزات جديدة!",
-        "donate_thank_you": "❤️ شكرا لاستخدامك ودعمك للتطبيق!"
+        "donate_thank_you": "❤️ شكرا لاستخدامك ودعمك للتطبيق!",
+        "error_title": "خطأ",
+        "download_failed_premium": "فشل التنزيل (يتطلب مفتاح API مميز): {ex}",
+        "compare_hashes_prompt": "الرجاء إدخال كلا تجزئتي SHA-256 للمقارنة.",
+        "yara_premium_required": "تتطلب مجموعات قواعد YARA Livehunt مفتاح API مميز من VirusTotal.",
+        "yara_no_rules": "لا تتوفر مجموعات قواعد YARA."
     }
 }

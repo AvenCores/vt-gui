@@ -298,8 +298,9 @@ class ToolsView:
         
         def run_diff(e):
             if not self.diff_hash1 or not self.diff_hash2:
-                err_msg = "Please enter both SHA-256 hashes to compare." if self.lang == "en" else "Пожалуйста, введите оба SHA-256 хэша для сравнения."
-                self.show_alert_fn("Error / Ошибка", err_msg)
+                err_msg = STRINGS[self.lang].get("compare_hashes_prompt", "Please enter both SHA-256 hashes to compare.")
+                err_title = STRINGS[self.lang].get("error_title", "Error")
+                self.show_alert_fn(err_title, err_msg)
                 return
                 
             self.diff_status = "loading"
@@ -402,7 +403,7 @@ class ToolsView:
                             return
                     except Exception as ex:
                         if "Premium" in str(ex) or "403" in str(ex):
-                            msg = "Для работы с YARA Livehunt требуется Premium API-ключ VirusTotal." if self.lang == "ru" else "YARA Livehunt rulesets require a VirusTotal Premium API key."
+                            msg = STRINGS[self.lang].get("yara_premium_required", "YARA Livehunt rulesets require a VirusTotal Premium API key.")
                             self.yara_status = "error"
                             self.yara_error = msg
                             update_yara_ui()
@@ -422,9 +423,9 @@ class ToolsView:
                         else:
                             err = proc.stderr or proc.stdout
                             if "You are not authorized" in err or "403" in err:
-                                err = "Для работы с YARA Livehunt требуется Premium API-ключ VirusTotal." if self.lang == "ru" else "YARA Livehunt requires a VirusTotal Premium API key."
+                                err = STRINGS[self.lang].get("yara_premium_required", "YARA Livehunt rulesets require a VirusTotal Premium API key.")
                             self.yara_status = "error"
-                            self.yara_error = err or ("Нет доступных правил YARA" if self.lang == "ru" else "No YARA rulesets available.")
+                            self.yara_error = err or STRINGS[self.lang].get("yara_no_rules", "No YARA rulesets available.")
                             update_yara_ui()
                             return
                     except Exception as ex:

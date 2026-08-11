@@ -296,8 +296,9 @@ class IntelligenceView:
                             else:
                                 raise ValueError(proc.stderr or proc.stdout)
                         except Exception as ex:
-                            err_title = "Error" if self.current_lang == "en" else "Ошибка"
-                            self.show_alert_fn(err_title, f"Download failed (requires premium API key): {str(ex)}")
+                            err_title = STRINGS[self.current_lang].get("error_title", "Error")
+                            err_msg = STRINGS[self.current_lang].get("download_failed_premium", "Download failed (requires premium API key): {ex}").replace("{ex}", str(ex))
+                            self.show_alert_fn(err_title, err_msg)
                     threading.Thread(target=run_download_thread, daemon=True).start()
                 return download_sample
                 
