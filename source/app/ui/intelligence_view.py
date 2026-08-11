@@ -414,6 +414,72 @@ class IntelligenceView:
                         self.thread_safe_build_fn()
                 threading.Thread(target=worker, daemon=True).start()
 
+            def show_cache_search_info(e):
+                lang_dict = STRINGS.get(self.current_lang, STRINGS.get("en", {}))
+                title_str = lang_dict.get("cache_search_info_title", "About 'Search VT Database'")
+                desc_str = lang_dict.get(
+                    "cache_search_info_desc",
+                    "Instant lookup of existing scan reports from VirusTotal's global database."
+                )
+                close_btn_text = lang_dict.get("btn_got_it", "Got it")
+
+                dlg = ft.AlertDialog(
+                    title=ft.Row([
+                        ft.Icon(ft.Icons.INFO_ROUNDED, color="#00F0FF", size=22),
+                        ft.Text(title_str, color="#FFFFFF", weight=ft.FontWeight.BOLD, size=15)
+                    ], spacing=8),
+                    content=ft.Container(
+                        content=ft.Text(desc_str, color="#E2E8F0", size=13),
+                        width=440,
+                        padding=ft.Padding(top=5, bottom=5, left=0, right=0)
+                    ),
+                    actions=[
+                        ft.ElevatedButton(
+                            close_btn_text,
+                            on_click=lambda _: self.page.pop_dialog(),
+                            bgcolor="#008DDA",
+                            color="#FFFFFF",
+                            style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8))
+                        )
+                    ],
+                    actions_alignment=ft.MainAxisAlignment.END,
+                    bgcolor="#151E33"
+                )
+                self.page.show_dialog(dlg)
+
+            def show_live_scan_info(e):
+                lang_dict = STRINGS.get(self.current_lang, STRINGS.get("en", {}))
+                title_str = lang_dict.get("live_scan_info_title", "About 'Live URL Scan'")
+                desc_str = lang_dict.get(
+                    "live_scan_info_desc",
+                    "Submits the URL directly to VirusTotal API for a fresh real-time analysis."
+                )
+                close_btn_text = lang_dict.get("btn_got_it", "Got it")
+
+                dlg = ft.AlertDialog(
+                    title=ft.Row([
+                        ft.Icon(ft.Icons.INFO_ROUNDED, color="#00F0FF", size=22),
+                        ft.Text(title_str, color="#FFFFFF", weight=ft.FontWeight.BOLD, size=15)
+                    ], spacing=8),
+                    content=ft.Container(
+                        content=ft.Text(desc_str, color="#E2E8F0", size=13),
+                        width=440,
+                        padding=ft.Padding(top=5, bottom=5, left=0, right=0)
+                    ),
+                    actions=[
+                        ft.ElevatedButton(
+                            close_btn_text,
+                            on_click=lambda _: self.page.pop_dialog(),
+                            bgcolor="#008DDA",
+                            color="#FFFFFF",
+                            style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8))
+                        )
+                    ],
+                    actions_alignment=ft.MainAxisAlignment.END,
+                    bgcolor="#151E33"
+                )
+                self.page.show_dialog(dlg)
+
             search_btn = ft.PopupMenuButton(
                 content=ft.Container(
                     content=ft.Row(
@@ -434,20 +500,46 @@ class IntelligenceView:
                     ft.PopupMenuItem(
                         content=ft.Row(
                             [
-                                ft.Icon(ft.Icons.SEARCH_ROUNDED, color="#00F0FF", size=18),
-                                ft.Text(STRINGS[self.current_lang].get("btn_search_cache", "Поиск в базе VT"), color="#E2E8F0", size=13)
+                                ft.Row(
+                                    [
+                                        ft.Icon(ft.Icons.SEARCH_ROUNDED, color="#00F0FF", size=18),
+                                        ft.Text(STRINGS[self.current_lang].get("btn_search_cache", "Поиск в базе VT"), color="#E2E8F0", size=13),
+                                    ],
+                                    spacing=8
+                                ),
+                                ft.IconButton(
+                                    icon=ft.Icons.HELP_OUTLINE_ROUNDED,
+                                    icon_color="#00F0FF",
+                                    icon_size=18,
+                                    tooltip=STRINGS[self.current_lang].get("info_tooltip", "Информация о функции"),
+                                    on_click=show_cache_search_info
+                                )
                             ],
-                            spacing=10
+                            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                            spacing=16
                         ),
                         on_click=lambda e: self.run_lookup_query(tab_key)
                     ),
                     ft.PopupMenuItem(
                         content=ft.Row(
                             [
-                                ft.Icon(ft.Icons.TRAVEL_EXPLORE_ROUNDED, color="#008DDA", size=18),
-                                ft.Text(STRINGS[self.current_lang].get("btn_live_scan_url", "Живое сканирование URL"), color="#E2E8F0", size=13)
+                                ft.Row(
+                                    [
+                                        ft.Icon(ft.Icons.TRAVEL_EXPLORE_ROUNDED, color="#008DDA", size=18),
+                                        ft.Text(STRINGS[self.current_lang].get("btn_live_scan_url", "Живое сканирование URL"), color="#E2E8F0", size=13),
+                                    ],
+                                    spacing=8
+                                ),
+                                ft.IconButton(
+                                    icon=ft.Icons.HELP_OUTLINE_ROUNDED,
+                                    icon_color="#00F0FF",
+                                    icon_size=18,
+                                    tooltip=STRINGS[self.current_lang].get("info_tooltip", "Информация о функции"),
+                                    on_click=show_live_scan_info
+                                )
                             ],
-                            spacing=10
+                            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                            spacing=16
                         ),
                         on_click=trigger_live_scan
                     )

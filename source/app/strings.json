@@ -224,7 +224,12 @@
         "deleting_comment": "Deleting comment...",
         "toast_importing": "Importing report...",
         "max_file_size": "Max size: 650 MB per file",
-        "vote_sha_missing": "SHA-256 is missing for voting."
+        "vote_sha_missing": "SHA-256 is missing for voting.",
+        "live_scan_info_title": "About 'Live URL Scan'",
+        "live_scan_info_desc": "Submits the URL directly to VirusTotal API for a fresh real-time analysis.\n\n• Key Features:\n– VirusTotal servers visit the site, scan it with all security engines, and generate an up-to-date report.\n– Allows you to verify the current live status of any URL.\n\nRecommended if the link is new, unanalyzed, or may have changed recently.",
+        "btn_got_it": "Got it",
+        "cache_search_info_title": "About 'Search VT Database'",
+        "cache_search_info_desc": "Instant lookup of existing scan reports from VirusTotal's global database.\n\n• Key Features:\n– Returns cached analysis results if this URL, domain, IP, or file hash was previously checked.\n– Instant results without waiting for VirusTotal servers to re-scan the web page.\n\nRecommended for quick checks of known URLs and network addresses."
     },
     "ru": {
         "app_title": "Сканер файлов VirusTotal",
@@ -451,7 +456,12 @@
         "deleting_comment": "Удаление комментария...",
         "toast_importing": "Импорт отчета...",
         "max_file_size": "Макс. размер: 650 МБ на файл",
-        "vote_sha_missing": "SHA-256 отсутствует для голосования."
+        "vote_sha_missing": "SHA-256 отсутствует для голосования.",
+        "live_scan_info_title": "О функции «Живое сканирование URL»",
+        "live_scan_info_desc": "Отправка ссылки напрямую в VirusTotal API на новое сканирование в реальном времени.\n\n• Особенности:\n– Серверы VirusTotal заново заходят по указанному URL-адресу, сканируют его всеми подключёнными антивирусными движками и генерируют свежий отчёт.\n– Позволяет узнать самый актуальный статус безопасного или вредоносного ресурса прямо сейчас.\n\nРекомендуется использовать, если ссылка новая, ранее не проверялась или могла изменить своё содержимое.",
+        "btn_got_it": "Понятно",
+        "cache_search_info_title": "О функции «Поиск в базе VT»",
+        "cache_search_info_desc": "Мгновенный поиск готового отчёта в глобальной базе данных VirusTotal.\n\n• Особенности:\n– Возвращает существующие результаты анализа, если этот URL, домен, IP или хэш ранее уже проверялся кем-либо в мире.\n– Результат выдаётся мгновенно без необходимости ждать повторной проверки сайта серверным сканером.\n\nРекомендуется использовать для быстрой проверки известных ссылок и сетевых адресов."
     },
     "es": {
         "app_title": "Escáner de Archivos VirusTotal",
@@ -678,7 +688,12 @@
         "toast_import_fail": "Error al importar el informe: {e}",
         "toast_importing": "Importando informe...",
         "max_file_size": "Tamaño máx.: 650 MB por archivo",
-        "vote_sha_missing": "Falta SHA-256 para votar."
+        "vote_sha_missing": "Falta SHA-256 para votar.",
+        "live_scan_info_title": "Sobre 'Escaneo de URL en vivo'",
+        "live_scan_info_desc": "Envía la URL a la API de VirusTotal para un análisis en tiempo real.\n\n• Características:\n– Los servidores de VirusTotal visitan el sitio y lo analizan con todos los motores.\n– Muestra el estado más actualizado de cualquier recurso.\n\nRecomendado si el enlace es nuevo o puede haber cambiado.",
+        "btn_got_it": "Entendido",
+        "cache_search_info_title": "Sobre 'Buscar en base de datos VT'",
+        "cache_search_info_desc": "Búsqueda instantánea de informes en la base de datos global de VirusTotal.\n\n• Características:\n– Devuelve análisis anteriores si esta URL, dominio o IP ya fue verificado.\n– Resultados instantáneos sin esperar un nuevo escaneo.\n\nRecomendado para comprobaciones rápidas de enlaces conocidos."
     },
     "de": {
         "app_title": "VirusTotal Dateiscanner",
@@ -905,7 +920,12 @@
         "toast_import_fail": "Fehler beim Importieren des Berichts: {e}",
         "toast_importing": "Bericht wird importiert...",
         "max_file_size": "Max. Größe: 650 MB pro Datei",
-        "vote_sha_missing": "SHA-256 fehlt für die Abstimmung."
+        "vote_sha_missing": "SHA-256 fehlt für die Abstimmung.",
+        "live_scan_info_title": "Über 'Live-URL-Scan'",
+        "live_scan_info_desc": "Sendet die URL für einen Echtzeit-Scan an die VirusTotal-API.\n\n• Merkmale:\n– VirusTotal-Server rufen die Seite auf und prüfen sie mit allen Engines neu.\n– Erzeugt einen aktuellen Echtzeit-Bericht.\n\nEmpfohlen für neue oder veränderte Links.",
+        "btn_got_it": "Verstanden",
+        "cache_search_info_title": "Über 'VT-Datenbank durchsuchen'",
+        "cache_search_info_desc": "Sofortige Suche nach vorhandenen Berichten in der VirusTotal-Datenbank.\n\n• Merkmale:\n– Liefert gespeicherte Ergebnisse, falls diese URL oder IP bereits geprüft wurde.\n– Sofortiges Ergebnis ohne Wartezeit.\n\nEmpfohlen für schnelle Prüfungen bekannter Links."
     },
     "fr": {
         "app_title": "Scanner de Fichiers VirusTotal",
@@ -1132,7 +1152,12 @@
         "toast_import_fail": "Échec de l'importation du rapport : {e}",
         "toast_importing": "Importation du rapport...",
         "max_file_size": "Taille max. : 650 Mo par fichier",
-        "vote_sha_missing": "Le SHA-256 est manquant pour le vote."
+        "vote_sha_missing": "Le SHA-256 est manquant pour le vote.",
+        "live_scan_info_title": "À propos de 'Analyse d'URL en direct'",
+        "live_scan_info_desc": "Soumet l'URL à l'API VirusTotal pour une analyse en temps réel.\n\n• Caractéristiques :\n– Les serveurs VirusTotal visitent le site et l'analysent avec tous les moteurs.\n– Génère le rapport le plus récent.\n\nRecommandé si le lien est nouveau ou a changé.",
+        "btn_got_it": "Compris",
+        "cache_search_info_title": "À propos de 'Rechercher dans la base VT'",
+        "cache_search_info_desc": "Recherche instantanée de rapports dans la base VirusTotal.\n\n• Caractéristiques :\n– Renvoie les résultats existants si l'URL ou l'IP a déjà été vérifiée.\n– Résultats instantanés sans délai d'attente.\n\nRecommandé pour les vérifications rapides de liens connus."
     },
     "pt": {
         "app_title": "Scanner de Arquivos VirusTotal",
@@ -1359,7 +1384,12 @@
         "toast_import_fail": "Falha ao importar relatório: {e}",
         "toast_importing": "Importando relatório...",
         "max_file_size": "Tamanho máx.: 650 MB por arquivo",
-        "vote_sha_missing": "Falta SHA-256 para votar."
+        "vote_sha_missing": "Falta SHA-256 para votar.",
+        "live_scan_info_title": "Sobre 'Verificação de URL em Tempo Real'",
+        "live_scan_info_desc": "Envia o URL para a API do VirusTotal para uma análise em tempo real.\n\n• Recursos:\n– Servidores do VirusTotal visitam o site e analisam com todos os motores.\n– Gera o relatório mais atualizado.\n\nRecomendado se o link for novo ou tiver mudado.",
+        "btn_got_it": "Entendido",
+        "cache_search_info_title": "Sobre 'Pesquisar no banco VT'",
+        "cache_search_info_desc": "Busca instantânea de relatórios no banco global do VirusTotal.\n\n• Recursos:\n– Retorna análises salvas se este URL ou IP já foi verificado.\n– Resultados instantâneos sem espera.\n\nRecomendado para verificações rápidas de links conhecidos."
     },
     "tr": {
         "app_title": "VirusTotal Dosya Tarayıcı",
@@ -1586,7 +1616,12 @@
         "toast_import_fail": "Rapor içe aktarılamadı: {e}",
         "toast_importing": "Rapor içe aktarılıyor...",
         "max_file_size": "Dosya başına maks. boyut: 650 MB",
-        "vote_sha_missing": "Oylama için SHA-256 eksik."
+        "vote_sha_missing": "Oylama için SHA-256 eksik.",
+        "live_scan_info_title": "'Canlı URL Taraması' Hakkında",
+        "live_scan_info_desc": "URL'yi gerçek zamanlı analiz için VirusTotal API'sine gönderir.\n\n• Özellikler:\n– VirusTotal sunucuları siteyi ziyaret eder ve tüm motorlarla tarar.\n– En güncel raporu oluşturur.\n\nBağlantı yeniyse veya değişmişse önerilir.",
+        "btn_got_it": "Anlaşıldı",
+        "cache_search_info_title": "'VT Veritabanında Ara' Hakkında",
+        "cache_search_info_desc": "VirusTotal veritabanındaki mevcut raporları anında arar.\n\n• Özellikler:\n– URL veya IP daha önce kontrol edildiyse kayıtlı sonuçları döndürür.\n– Yeniden tarama beklemeden anında sonuç verir.\n\nBilinen bağlantıların hızlı kontrolü için önerilir."
     },
     "uk": {
         "app_title": "Сканер файлів VirusTotal",
@@ -1813,7 +1848,12 @@
         "toast_import_fail": "Помилка імпорту звіту: {e}",
         "toast_importing": "Імпорт звіту...",
         "max_file_size": "Макс. розмір: 650 МБ на файл",
-        "vote_sha_missing": "SHA-256 відсутній для голосування."
+        "vote_sha_missing": "SHA-256 відсутній для голосування.",
+        "live_scan_info_title": "Про функцію «Живе сканування URL»",
+        "live_scan_info_desc": "Надсилання посилання у VirusTotal API на нове сканування в реальному часі.\n\n• Особливості:\n– Сервери VirusTotal наново заходять за вказаною URL-адресою та перевіряють її усіма антивірусами.\n– Видає найновіший актуальний результат.\n\nРекомендовано, якщо посилання нове або могло змінитися.",
+        "btn_got_it": "Зрозуміло",
+        "cache_search_info_title": "Про функцію «Пошук у базі VT»",
+        "cache_search_info_desc": "Миттєвий пошук готового звіту в глобальній базі даних VirusTotal.\n\n• Особливості:\n– Повертає існуючі результати аналізу, якщо цей URL, домен або IP раніше вже перевірявся.\n– Результат видається миттєво без очікування повторного сканування.\n\nРекомендовано для швидкої перевірки відомих посилань."
     },
     "zh": {
         "app_title": "VirusTotal 文件扫描器",
@@ -2040,7 +2080,12 @@
         "toast_import_fail": "导入报告失败：{e}",
         "toast_importing": "正在导入报告...",
         "max_file_size": "每个文件最大 650 MB",
-        "vote_sha_missing": "缺少用于投票的 SHA-256。"
+        "vote_sha_missing": "缺少用于投票的 SHA-256。",
+        "live_scan_info_title": "关于“实时 URL 扫描”",
+        "live_scan_info_desc": "将 URL 直接提交给 VirusTotal API 进行全新的实时分析。\n\n• 特性：\n– VirusTotal 服务器重新访问该网站并使用所有引擎检测。\n– 生成最新的实时报告。\n\n如果链接是新的或可能已更改，建议使用实时扫描。",
+        "btn_got_it": "明白了",
+        "cache_search_info_title": "关于“搜索 VT 数据库”",
+        "cache_search_info_desc": "在 VirusTotal 全球数据库中即时查找已有报告。\n\n• 特性：\n– 如果此前分析过该 URL 或 IP，则返回现有结果。\n– 无需等待重新扫描，即时获取结果。\n\n建议用于快速检查已知链接。"
     },
     "ja": {
         "app_title": "VirusTotal ファイルスキャナー",
@@ -2267,7 +2312,12 @@
         "toast_import_fail": "レポートのインポートに失敗しました: {e}",
         "toast_importing": "レポートをインポート中...",
         "max_file_size": "ファイルあたりの最大サイズ: 650 MB",
-        "vote_sha_missing": "投票用の SHA-256 がありません。"
+        "vote_sha_missing": "投票用の SHA-256 がありません。",
+        "live_scan_info_title": "「ライブ URL スキャン」について",
+        "live_scan_info_desc": "URL を VirusTotal API に送信してリアルタイムで新規スキャンを実行します。\n\n• 特徴：\n– VirusTotal サーバーがサイトにアクセスし、全エンジンで再検査します。\n– 最新のレポートを生成します。\n\n新しいリンクや変更された可能性がある場合に推奨されます。",
+        "btn_got_it": "了解",
+        "cache_search_info_title": "「VT データベース検索」について",
+        "cache_search_info_desc": "VirusTotal のデータベースから既存のレポートを即座に検索します。\n\n• 特徴：\n– URLやIPが過去に検査されている場合、保存された結果を返します。\n– 再スキャンを待たずに即座に結果を取得できます。\n\n既知のリンクのクイックチェックに推奨されます。"
     },
     "ko": {
         "app_title": "VirusTotal 파일 스캐너",
@@ -2494,7 +2544,12 @@
         "toast_import_fail": "보고서 가져오기 실패: {e}",
         "toast_importing": "보고서 가져오는 중...",
         "max_file_size": "파일당 최대 크기: 650MB",
-        "vote_sha_missing": "투표용 SHA-256이 없습니다."
+        "vote_sha_missing": "투표용 SHA-256이 없습니다.",
+        "live_scan_info_title": "'실시간 URL 검사' 정보",
+        "live_scan_info_desc": "URL을 VirusTotal API에 전송하여 실시간 새 검사를 수행합니다.\n\n• 특징:\n– VirusTotal 서버가 사이트에 접속하여 모든 엔진으로 다시 검사합니다.\n– 최신 보고서를 생성합니다.\n\n새 링크이거나 변경되었을 가능성이 있는 경우 권장됩니다.",
+        "btn_got_it": "확인",
+        "cache_search_info_title": "'VT 데이터베이스 검색' 정보",
+        "cache_search_info_desc": "VirusTotal 데이터베이스에서 기존 보고서를 즉시 검색합니다.\n\n• 특징:\n– URL 또는 IP가 이전에 검사된 경우 저장된 결과를 반환합니다.\n– 대기 시간 없이 즉시 결과를 얻을 수 있습니다.\n\n알려진 링크의 빠른 확인에 권장됩니다."
     },
     "ar": {
         "app_title": "ماسح ملفات VirusTotal",
@@ -2721,6 +2776,11 @@
         "toast_import_fail": "فشل استيراد التقرير: {e}",
         "toast_importing": "جاري استيراد التقرير...",
         "max_file_size": "الحد الأقصى للحجم: 650 ميجابايت لكل ملف",
-        "vote_sha_missing": "SHA-256 مفقود للتصويت."
+        "vote_sha_missing": "SHA-256 مفقود للتصويت.",
+        "live_scan_info_title": "حول 'فحص URL المباشر'",
+        "live_scan_info_desc": "إرسال الرابط إلى VirusTotal API لإجراء تحليل مباشر في الوقت الفعلي.\n\n• الميزات:\n– تزور خوادم VirusTotal الموقع وتفحصه بجميع المحركات.\n– توليد أحدث تقرير.\n\nيوصى به إذا كان الرابط جديدًا أو ربما تغير.",
+        "btn_got_it": "حسناً",
+        "cache_search_info_title": "حول 'البحث في قاعدة بيانات VT'",
+        "cache_search_info_desc": "البحث الفوري عن التقارير الموجودة في قاعدة بيانات VirusTotal.\n\n• الميزات:\n– يعيد النتائج المحفوظة إذا تم فحص الرابط سابقًا.\n– نتائج فورية دون انتظار فحص جديد.\n\nيوصى به للتحقق السريع من الروابط المعروفة."
     }
 }
