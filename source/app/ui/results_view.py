@@ -702,12 +702,13 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
             content=ft.Column(
                 [
                     ft.Icon(icon, color="#00F0FF" if is_active else "#94A3B8", size=20),
-                    ft.Text(label, color="#FFFFFF" if is_active else "#94A3B8", size=12, weight=ft.FontWeight.W_600)
+                    ft.Text(label, color="#FFFFFF" if is_active else "#94A3B8", size=12, weight=ft.FontWeight.W_600, text_align=ft.TextAlign.CENTER)
                 ],
                 alignment=ft.MainAxisAlignment.CENTER,
                 horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                 spacing=2
             ),
+            padding=ft.Padding(left=12, right=12, top=6, bottom=6),
             height=70,
             border_radius=8,
             border=ft.Border.all(1, "#00F0FF" if is_active else "transparent"),
@@ -745,8 +746,11 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
         [
             ft.Container(
                 content=res_tab_header_row,
-                padding=ft.Padding(left=4, right=4, top=4, bottom=6),
-                border=ft.Border(bottom=ft.BorderSide(1, "#1E293B"))
+                padding=ft.Padding(left=4, right=4, top=10, bottom=10),
+                border=ft.Border(
+                    top=ft.BorderSide(1, "#1E293B"),
+                    bottom=ft.BorderSide(1, "#1E293B")
+                )
             ),
             animated_res_tab_content
         ],
@@ -760,6 +764,5 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
         actions_row,
         details_card,
         stats_row,
-        ft.Divider(color="#1E293B"),
         tabs
     ], expand=True, spacing=10, scroll=ft.ScrollMode.AUTO)
