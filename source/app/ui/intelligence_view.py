@@ -376,17 +376,6 @@ class IntelligenceView:
             
         input_field.on_change = on_input_change
         
-        search_btn = ft.IconButton(
-            icon=ft.Icons.SEARCH_ROUNDED,
-            icon_color="#00F0FF",
-            bgcolor="#1E293B",
-            on_click=lambda e: self.run_lookup_query(tab_key),
-            height=48,
-            width=48
-        )
-
-        buttons_row = [input_field, search_btn]
-
         if tab_key == "url":
             def trigger_live_scan(e):
                 val = state["input"].strip()
@@ -408,14 +397,56 @@ class IntelligenceView:
                         self.thread_safe_build_fn()
                 threading.Thread(target=worker, daemon=True).start()
 
-            live_scan_btn = ft.ElevatedButton(
-                STRINGS[self.current_lang].get("btn_live_scan_url", "Scan Live URL"),
-                icon=ft.Icons.TRAVEL_EXPLORE_ROUNDED,
-                on_click=trigger_live_scan,
-                bgcolor="#008DDA",
-                color="#FFFFFF"
+            search_btn = ft.PopupMenuButton(
+                content=ft.Container(
+                    content=ft.Row(
+                        [
+                            ft.Icon(ft.Icons.SEARCH_ROUNDED, color="#00F0FF", size=22),
+                            ft.Icon(ft.Icons.ARROW_DROP_DOWN_ROUNDED, color="#00F0FF", size=18),
+                        ],
+                        alignment=ft.MainAxisAlignment.CENTER,
+                        spacing=0
+                    ),
+                    bgcolor="#1E293B",
+                    border_radius=8,
+                    height=48,
+                    padding=ft.Padding(left=10, right=6, top=0, bottom=0)
+                ),
+                tooltip=STRINGS[self.current_lang].get("search_options", "Поиск"),
+                items=[
+                    ft.PopupMenuItem(
+                        content=ft.Row(
+                            [
+                                ft.Icon(ft.Icons.SEARCH_ROUNDED, color="#00F0FF", size=18),
+                                ft.Text(STRINGS[self.current_lang].get("btn_search_cache", "Поиск в базе VT"), color="#E2E8F0", size=13)
+                            ],
+                            spacing=10
+                        ),
+                        on_click=lambda e: self.run_lookup_query(tab_key)
+                    ),
+                    ft.PopupMenuItem(
+                        content=ft.Row(
+                            [
+                                ft.Icon(ft.Icons.TRAVEL_EXPLORE_ROUNDED, color="#008DDA", size=18),
+                                ft.Text(STRINGS[self.current_lang].get("btn_live_scan_url", "Живое сканирование URL"), color="#E2E8F0", size=13)
+                            ],
+                            spacing=10
+                        ),
+                        on_click=trigger_live_scan
+                    )
+                ]
             )
-            buttons_row.append(live_scan_btn)
+        else:
+            search_btn = ft.IconButton(
+                icon=ft.Icons.SEARCH_ROUNDED,
+                icon_color="#00F0FF",
+                bgcolor="#1E293B",
+                on_click=lambda e: self.run_lookup_query(tab_key),
+                height=48,
+                width=48
+            )
+
+        buttons_row = [input_field, search_btn]
         
         results_area = ft.Container(expand=True, alignment=ft.Alignment.CENTER)
         

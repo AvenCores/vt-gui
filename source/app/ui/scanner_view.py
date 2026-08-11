@@ -106,7 +106,10 @@ def build_scanner_view(cli_status, cli_hash, cli_source, lang, file_picker_scan,
             ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
             ft.Container(height=5),
             dashed_area,
-            ft.Row(action_buttons, alignment=ft.MainAxisAlignment.CENTER, spacing=10)
+            ft.Container(
+                content=ft.Column(action_buttons, horizontal_alignment=ft.CrossAxisAlignment.CENTER, spacing=10),
+                alignment=ft.Alignment.CENTER
+            )
         ],
         spacing=12,
         expand=True
