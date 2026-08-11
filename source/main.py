@@ -749,39 +749,130 @@ def main(page: ft.Page):
                 else:
                     app_state = "scanner"
 
-            landing_tabs = ft.Tabs(
-                selected_index=active_scanner_tab_index,
-                on_change=on_active_tab_change,
-                length=7,
-                expand=True,
-                content=ft.Column(
-                    expand=True,
-                    controls=[
-                        ft.TabBar(
-                            tabs=[
-                                ft.Tab(label=STRINGS[current_lang]["tab_files"], icon=ft.Icons.ATTACH_FILE_ROUNDED),
-                                ft.Tab(label=STRINGS[current_lang]["tab_urls"], icon=ft.Icons.LINK_ROUNDED),
-                                ft.Tab(label=STRINGS[current_lang]["tab_domains"], icon=ft.Icons.LANGUAGE_ROUNDED),
-                                ft.Tab(label=STRINGS[current_lang]["tab_ips"], icon=ft.Icons.CELL_TOWER_ROUNDED),
-                                ft.Tab(label=STRINGS[current_lang]["tab_search"], icon=ft.Icons.SEARCH_ROUNDED),
-                                ft.Tab(label=STRINGS[current_lang]["tab_tools"], icon=ft.Icons.BUILD_ROUNDED),
-                                ft.Tab(label=STRINGS[current_lang]["tab_history"], icon=ft.Icons.HISTORY_ROUNDED),
-                            ]
-                        ),
-                        ft.TabBarView(
-                            expand=True,
-                            controls=[
-                                ft.Container(content=files_view, padding=10),
-                                ft.Container(content=url_view, padding=10),
-                                ft.Container(content=domain_view, padding=10),
-                                ft.Container(content=ip_view, padding=10),
-                                ft.Container(content=search_view, padding=10),
-                                ft.Container(content=tools_view, padding=10),
-                                ft.Container(content=history_view, padding=10),
-                            ]
-                        )
-                    ]
+            tab_definitions = [
+                (0, STRINGS[current_lang]["tab_files"], ft.Icons.ATTACH_FILE_ROUNDED, files_view),
+                (1, STRINGS[current_lang]["tab_urls"], ft.Icons.LINK_ROUNDED, url_view),
+                (2, STRINGS[current_lang]["tab_domains"], ft.Icons.LANGUAGE_ROUNDED, domain_view),
+                (3, STRINGS[current_lang]["tab_ips"], ft.Icons.CELL_TOWER_ROUNDED, ip_view),
+                (4, STRINGS[current_lang]["tab_search"], ft.Icons.SEARCH_ROUNDED, search_view),
+                (5, STRINGS[current_lang]["tab_tools"], ft.Icons.BUILD_ROUNDED, tools_view),
+                (6, STRINGS[current_lang]["tab_history"], ft.Icons.HISTORY_ROUNDED, history_view),
+            ]
+
+            tab_views_map = {idx: v for idx, _, _, v in tab_definitions}
+
+            animated_tab_content = ft.AnimatedSwitcher(
+                content=ft.Container(
+                    key=f"tab_view_container_{active_scanner_tab_index}",
+                    content=tab_views_map[active_scanner_tab_index],
+                    padding=10,
+                    expand=True
+                ),
+                transition=ft.AnimatedSwitcherTransition.FADE,
+                duration=250,
+                reverse_duration=200,
+                switch_in_curve=ft.AnimationCurve.EASE_OUT,
+                switch_out_curve=ft.AnimationCurve.EASE_IN,
+                expand=True
+            )
+
+            tab_buttons = []
+            tab_buttons_map = {}
+
+            def update_tab_buttons():
+                for idx, btn in tab_buttons_map.items():
+                    is_active = (active_scanner_tab_index == idx)
+                    btn.border = ft.Border.all(1, "#00F0FF" if is_active else "transparent")
+                    btn.bgcolor = "#1E293B" if is_active else "transparent"
+                    col = btn.content
+                    col.controls[0].color = "#00F0FF" if is_active else "#94A3B8"
+                    col.controls[1].color = "#FFFFFF" if is_active else "#94A3B8"
+                    try:
+                        btn.update()
+                    except Exception:
+                        pass
+
+            def select_tab(idx):
+                nonlocal active_scanner_tab_index, app_state
+                if active_scanner_tab_index == idx:
+                    return
+                active_scanner_tab_index = idx
+                if idx == 6:
+                    app_state = "history"
+                else:
+                    app_state = "scanner"
+
+                update_tab_buttons()
+
+                animated_tab_content.content = ft.Container(
+                    key=f"tab_view_container_{idx}",
+                    content=tab_views_map[idx],
+                    padding=10,
+                    expand=True
                 )
+                try:
+                    animated_tab_content.update()
+                except Exception:
+                    build_ui()
+
+            for idx, label, icon, _ in tab_definitions:
+                is_active = (active_scanner_tab_index == idx)
+                
+                tab_btn = ft.Container(
+                    content=ft.Column(
+                        [
+                            ft.Icon(icon, color="#00F0FF" if is_active else "#94A3B8", size=20),
+                            ft.Text(label, color="#FFFFFF" if is_active else "#94A3B8", size=12, weight=ft.FontWeight.W_600)
+                        ],
+                        alignment=ft.MainAxisAlignment.CENTER,
+                        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                        spacing=2
+                    ),
+                    padding=ft.Padding(left=12, right=12, top=6, bottom=6),
+                    height=70,
+                    border_radius=8,
+                    border=ft.Border.all(1, "#00F0FF" if is_active else "transparent"),
+                    bgcolor="#1E293B" if is_active else "transparent",
+                    animate=ft.Animation(150, ft.AnimationCurve.EASE_OUT),
+                    on_click=lambda _, i=idx: select_tab(i)
+                )
+
+                def make_hover_handler(btn, tab_idx):
+                    def on_tab_hover(e):
+                        if active_scanner_tab_index != tab_idx:
+                            if e.data == "true":
+                                btn.border = ft.Border.all(1, "#00F0FF")
+                                btn.bgcolor = "#152035"
+                            else:
+                                btn.border = ft.Border.all(1, "transparent")
+                                btn.bgcolor = "transparent"
+                            try:
+                                btn.update()
+                            except Exception:
+                                pass
+                    return on_tab_hover
+
+                tab_btn.on_hover = make_hover_handler(tab_btn, idx)
+                tab_buttons.append(tab_btn)
+                tab_buttons_map[idx] = tab_btn
+
+            tab_header_row = ft.Row(
+                tab_buttons,
+                spacing=2,
+                alignment=ft.MainAxisAlignment.START
+            )
+
+            landing_tabs = ft.Column(
+                [
+                    ft.Container(
+                        content=tab_header_row,
+                        padding=ft.Padding(left=4, right=4, top=4, bottom=6),
+                        border=ft.Border(bottom=ft.BorderSide(1, "#1E293B"))
+                    ),
+                    animated_tab_content
+                ],
+                expand=True,
+                spacing=10
             )
             main_content.content = landing_tabs
             

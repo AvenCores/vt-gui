@@ -637,29 +637,122 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
         comments_container
     ], expand=True)
 
-    tabs = ft.Tabs(
-        length=3,
-        height=480,
-        content=ft.Column(
-            expand=True,
-            controls=[
-                ft.TabBar(
-                    tabs=[
-                        ft.Tab(label=STRINGS[lang].get("tab_detections", "Detections"), icon=ft.Icons.SECURITY_ROUNDED),
-                        ft.Tab(label=STRINGS[lang].get("tab_behavior", "Behavior / Sandbox"), icon=ft.Icons.MISCELLANEOUS_SERVICES_ROUNDED),
-                        ft.Tab(label=STRINGS[lang].get("tab_comments", "Comments"), icon=ft.Icons.COMMENT_ROUNDED)
-                    ]
-                ),
-                ft.TabBarView(
-                    expand=True,
-                    controls=[
-                        ft.Container(content=detections_tab_view, padding=5),
-                        ft.Container(content=behavior_container, padding=5, on_hover=load_behavior),
-                        ft.Container(content=comments_tab_view, padding=5)
-                    ]
-                )
-            ]
+    res_tab_defs = [
+        (0, STRINGS[lang].get("tab_detections", "Detections"), ft.Icons.SECURITY_ROUNDED, detections_tab_view),
+        (1, STRINGS[lang].get("tab_behavior", "Behavior / Sandbox"), ft.Icons.MISCELLANEOUS_SERVICES_ROUNDED, behavior_container),
+        (2, STRINGS[lang].get("tab_comments", "Comments"), ft.Icons.COMMENT_ROUNDED, comments_tab_view),
+    ]
+
+    active_res_tab = [0]
+    res_tab_views_map = {idx: v for idx, _, _, v in res_tab_defs}
+
+    animated_res_tab_content = ft.AnimatedSwitcher(
+        content=ft.Container(
+            key=f"res_tab_container_{active_res_tab[0]}",
+            content=res_tab_views_map[active_res_tab[0]],
+            padding=5,
+            expand=True
+        ),
+        transition=ft.AnimatedSwitcherTransition.FADE,
+        duration=250,
+        reverse_duration=200,
+        switch_in_curve=ft.AnimationCurve.EASE_OUT,
+        switch_out_curve=ft.AnimationCurve.EASE_IN,
+        expand=True
+    )
+
+    res_tab_buttons = []
+    res_tab_buttons_map = {}
+
+    def update_res_tab_buttons():
+        for idx, btn in res_tab_buttons_map.items():
+            is_active = (active_res_tab[0] == idx)
+            btn.border = ft.Border.all(1, "#00F0FF" if is_active else "transparent")
+            btn.bgcolor = "#1E293B" if is_active else "transparent"
+            col = btn.content
+            col.controls[0].color = "#00F0FF" if is_active else "#94A3B8"
+            col.controls[1].color = "#FFFFFF" if is_active else "#94A3B8"
+            try:
+                btn.update()
+            except Exception:
+                pass
+
+    def select_res_tab(idx):
+        if active_res_tab[0] == idx:
+            return
+        active_res_tab[0] = idx
+        if idx == 1:
+            load_behavior(None)
+        update_res_tab_buttons()
+        animated_res_tab_content.content = ft.Container(
+            key=f"res_tab_container_{idx}",
+            content=res_tab_views_map[idx],
+            padding=5,
+            expand=True
         )
+        try:
+            animated_res_tab_content.update()
+        except Exception:
+            pass
+
+    for idx, label, icon, _ in res_tab_defs:
+        is_active = (active_res_tab[0] == idx)
+        
+        tab_btn = ft.Container(
+            content=ft.Column(
+                [
+                    ft.Icon(icon, color="#00F0FF" if is_active else "#94A3B8", size=20),
+                    ft.Text(label, color="#FFFFFF" if is_active else "#94A3B8", size=12, weight=ft.FontWeight.W_600)
+                ],
+                alignment=ft.MainAxisAlignment.CENTER,
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                spacing=2
+            ),
+            height=70,
+            border_radius=8,
+            border=ft.Border.all(1, "#00F0FF" if is_active else "transparent"),
+            bgcolor="#1E293B" if is_active else "transparent",
+            animate=ft.Animation(150, ft.AnimationCurve.EASE_OUT),
+            on_click=lambda _, i=idx: select_res_tab(i)
+        )
+
+        def make_res_hover_handler(btn, tab_idx):
+            def on_tab_hover(e):
+                if active_res_tab[0] != tab_idx:
+                    if e.data == "true":
+                        btn.border = ft.Border.all(1, "#00F0FF")
+                        btn.bgcolor = "#152035"
+                    else:
+                        btn.border = ft.Border.all(1, "transparent")
+                        btn.bgcolor = "transparent"
+                    try:
+                        btn.update()
+                    except Exception:
+                        pass
+            return on_tab_hover
+
+        tab_btn.on_hover = make_res_hover_handler(tab_btn, idx)
+        res_tab_buttons.append(tab_btn)
+        res_tab_buttons_map[idx] = tab_btn
+
+    res_tab_header_row = ft.Row(
+        res_tab_buttons,
+        spacing=2,
+        alignment=ft.MainAxisAlignment.START
+    )
+
+    tabs = ft.Column(
+        [
+            ft.Container(
+                content=res_tab_header_row,
+                padding=ft.Padding(left=4, right=4, top=4, bottom=6),
+                border=ft.Border(bottom=ft.BorderSide(1, "#1E293B"))
+            ),
+            animated_res_tab_content
+        ],
+        expand=True,
+        height=480,
+        spacing=10
     )
     
     return ft.Column([

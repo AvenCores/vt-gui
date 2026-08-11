@@ -16,6 +16,7 @@ class ToolsView:
         self.lang = lang
         self.show_alert_fn = show_alert_fn
         self.page = page
+        self.active_subtab_index = 0
         
         # State for File Diff
         self.diff_hash1 = ""
@@ -33,29 +34,119 @@ class ToolsView:
         diff_card = self._build_diff_card()
         yara_card = self._build_yara_card()
         
-        tabs = ft.Tabs(
-            length=2,
-            expand=True,
-            content=ft.Column(
-                expand=True,
-                controls=[
-                    ft.TabBar(
-                        tabs=[
-                            ft.Tab(label=STRINGS[self.lang].get("tab_diff", "File Comparison (vt diff)"), icon=ft.Icons.COMPARE_ARROWS_ROUNDED),
-                            ft.Tab(label=STRINGS[self.lang].get("tab_yara", "YARA Rulesets (Livehunt)"), icon=ft.Icons.BUG_REPORT_ROUNDED)
-                        ]
-                    ),
-                    ft.TabBarView(
-                        expand=True,
-                        controls=[
-                            ft.Container(content=diff_card, padding=10),
-                            ft.Container(content=yara_card, padding=10)
-                        ]
-                    )
-                ]
-            )
+        subtab_definitions = [
+            (0, STRINGS[self.lang].get("tab_diff", "File Comparison (vt diff)"), ft.Icons.COMPARE_ARROWS_ROUNDED, diff_card),
+            (1, STRINGS[self.lang].get("tab_yara", "YARA Rulesets (Livehunt)"), ft.Icons.BUG_REPORT_ROUNDED, yara_card),
+        ]
+
+        subtab_views_map = {idx: v for idx, _, _, v in subtab_definitions}
+
+        animated_subtab_content = ft.AnimatedSwitcher(
+            content=ft.Container(
+                key=f"subtab_container_{self.active_subtab_index}",
+                content=subtab_views_map[self.active_subtab_index],
+                padding=10,
+                expand=True
+            ),
+            transition=ft.AnimatedSwitcherTransition.FADE,
+            duration=250,
+            reverse_duration=200,
+            switch_in_curve=ft.AnimationCurve.EASE_OUT,
+            switch_out_curve=ft.AnimationCurve.EASE_IN,
+            expand=True
         )
-        return tabs
+
+        subtab_buttons = []
+        subtab_buttons_map = {}
+
+        def update_subtab_buttons():
+            for idx, btn in subtab_buttons_map.items():
+                is_active = (self.active_subtab_index == idx)
+                btn.border = ft.Border.all(1, "#00F0FF" if is_active else "transparent")
+                btn.bgcolor = "#1E293B" if is_active else "transparent"
+                col = btn.content
+                col.controls[0].color = "#00F0FF" if is_active else "#94A3B8"
+                col.controls[1].color = "#FFFFFF" if is_active else "#94A3B8"
+                try:
+                    btn.update()
+                except Exception:
+                    pass
+
+        def select_subtab(idx):
+            if self.active_subtab_index == idx:
+                return
+            self.active_subtab_index = idx
+            update_subtab_buttons()
+            animated_subtab_content.content = ft.Container(
+                key=f"subtab_container_{idx}",
+                content=subtab_views_map[idx],
+                padding=10,
+                expand=True
+            )
+            try:
+                animated_subtab_content.update()
+            except Exception:
+                pass
+
+        for idx, label, icon, _ in subtab_definitions:
+            is_active = (self.active_subtab_index == idx)
+            
+            subtab_btn = ft.Container(
+                content=ft.Column(
+                    [
+                        ft.Icon(icon, color="#00F0FF" if is_active else "#94A3B8", size=20),
+                        ft.Text(label, color="#FFFFFF" if is_active else "#94A3B8", size=12, weight=ft.FontWeight.W_600)
+                    ],
+                    alignment=ft.MainAxisAlignment.CENTER,
+                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                    spacing=2
+                ),
+                padding=ft.Padding(left=12, right=12, top=6, bottom=6),
+                height=70,
+                border_radius=8,
+                border=ft.Border.all(1, "#00F0FF" if is_active else "transparent"),
+                bgcolor="#1E293B" if is_active else "transparent",
+                animate=ft.Animation(150, ft.AnimationCurve.EASE_OUT),
+                on_click=lambda _, i=idx: select_subtab(i)
+            )
+
+            def make_hover_handler(btn, tab_idx):
+                def on_tab_hover(e):
+                    if self.active_subtab_index != tab_idx:
+                        if e.data == "true":
+                            btn.border = ft.Border.all(1, "#00F0FF")
+                            btn.bgcolor = "#152035"
+                        else:
+                            btn.border = ft.Border.all(1, "transparent")
+                            btn.bgcolor = "transparent"
+                        try:
+                            btn.update()
+                        except Exception:
+                            pass
+                return on_tab_hover
+
+            subtab_btn.on_hover = make_hover_handler(subtab_btn, idx)
+            subtab_buttons.append(subtab_btn)
+            subtab_buttons_map[idx] = subtab_btn
+
+        subtab_header_row = ft.Row(
+            subtab_buttons,
+            spacing=2,
+            alignment=ft.MainAxisAlignment.START
+        )
+
+        return ft.Column(
+            [
+                ft.Container(
+                    content=subtab_header_row,
+                    padding=ft.Padding(left=4, right=4, top=4, bottom=6),
+                    border=ft.Border(bottom=ft.BorderSide(1, "#1E293B"))
+                ),
+                animated_subtab_content
+            ],
+            expand=True,
+            spacing=10
+        )
 
     def _build_diff_card(self):
         hash1_field = ft.TextField(
