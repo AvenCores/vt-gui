@@ -231,62 +231,178 @@ def build_history_view(lang, page, on_back, on_rescan, on_open_in_app=None, on_i
                 )
 
 
-            panel = ft.Container(
-                width=420,
-                bgcolor="#151E33",
-                border_radius=12,
-                padding=ft.Padding(left=24, right=24, top=20, bottom=20),
-                content=ft.Column([
-                    ft.Row([
-                        ft.Icon(ft.Icons.ASSESSMENT_ROUNDED, color="#00F0FF", size=22),
+            target_name = rec.get("filename") or rec.get("query") or rec.get("sha256", "Report")
+            if len(target_name) > 36:
+                target_name = target_name[:33] + "..."
+
+            # Accurately parse malicious detection count from record results
+            results_data = rec.get("results")
+            malicious_count = 0
+            if results_data:
+                stats = None
+                if rec.get("type") == "lookup" and isinstance(results_data, dict):
+                    stats = results_data.get("last_analysis_stats")
+                elif isinstance(results_data, dict):
+                    stats = results_data.get("data", {}).get("attributes", {}).get("last_analysis_stats")
+                    if not stats:
+                        stats = results_data.get("last_analysis_stats")
+                elif isinstance(results_data, list) and len(results_data) > 0:
+                    stats = results_data[0].get("last_analysis_stats")
+
+                if isinstance(stats, dict):
+                    malicious_count = stats.get("malicious", 0)
+            elif rec.get("positives") is not None:
+                malicious_count = rec.get("positives", 0)
+            elif rec.get("detections") is not None:
+                malicious_count = rec.get("detections", 0)
+
+            # Format timestamp
+            raw_ts = rec.get("timestamp", 0)
+            if isinstance(raw_ts, (int, float)) and raw_ts > 0:
+                scan_time_str = datetime.fromtimestamp(raw_ts).strftime("%d.%m.%Y %H:%M")
+            else:
+                scan_time_str = str(raw_ts) if raw_ts else ""
+
+            # Format SHA-256 / Query hash label
+            raw_sha = rec.get("sha256", "")
+            raw_query = rec.get("query", "")
+            if raw_sha:
+                hash_text = f"SHA-256: {raw_sha[:16]}..." if len(raw_sha) > 16 else f"SHA-256: {raw_sha}"
+            elif raw_query and rec.get("type") == "lookup":
+                hash_text = f"{rec.get('lookup_type', 'Lookup')}: {raw_query[:20]}"
+            else:
+                hash_text = ""
+
+            detections_label = STRINGS[lang].get("history_detections", "Обнаружений: {count}").format(count=malicious_count)
+
+            item_info_card = ft.Container(
+                content=ft.Row(
+                    [
+                        ft.Icon(ft.Icons.INSERT_DRIVE_FILE_ROUNDED, color="#00F0FF", size=22),
+                        ft.Column(
+                            [
+                                ft.Text(target_name, color="#FFFFFF", size=13, weight=ft.FontWeight.BOLD, overflow=ft.TextOverflow.ELLIPSIS),
+                                ft.Text(hash_text, color="#94A3B8", size=11) if hash_text else ft.Container(),
+                                ft.Row(
+                                    [
+                                        ft.Text(
+                                            detections_label,
+                                            color="#EF4444" if malicious_count > 0 else "#10B981",
+                                            size=11,
+                                            weight=ft.FontWeight.W_600
+                                        ),
+                                        ft.Text(f"• {scan_time_str}" if scan_time_str else "", color="#94A3B8", size=11)
+                                    ],
+                                    spacing=6
+                                )
+                            ],
+                            spacing=3,
+                            expand=True
+                        )
+                    ],
+                    spacing=12
+                ),
+                padding=ft.Padding(left=14, right=14, top=10, bottom=10),
+                bgcolor="#0F172A",
+                border=ft.Border.all(1, "#1E293B"),
+                border_radius=10
+            )
+
+            modal_header = ft.Container(
+                content=ft.Column(
+                    [
+                        ft.Container(
+                            content=ft.Icon(ft.Icons.ASSESSMENT_ROUNDED, color="#00F0FF", size=36),
+                            padding=12,
+                            bgcolor="#1E2A47",
+                            border=ft.Border.all(1.5, "#00F0FF"),
+                            shape=ft.BoxShape.CIRCLE
+                        ),
                         ft.Text(
                             STRINGS[lang].get("history_open_report_title", "Открыть отчет"),
                             color="#FFFFFF",
-                            weight=ft.FontWeight.BOLD
-                        )
-                    ], spacing=8),
-                    ft.Container(height=8),
-                    ft.Text(
-                        STRINGS[lang].get("history_open_report_desc", "Выберите, где вы хотите открыть отчет:"),
-                        color="#E2E8F0",
-                        size=13
-                    ),
-                    ft.Container(height=14),
-                    ft.Row([
-                        ft.ElevatedButton(
-                            content=ft.Row([
-                                ft.Icon(ft.Icons.DESKTOP_WINDOWS_ROUNDED, size=18),
-                                ft.Text(STRINGS[lang].get("btn_open_in_app", "В программе"), weight=ft.FontWeight.W_600)
-                            ], spacing=6, alignment=ft.MainAxisAlignment.CENTER),
-                            on_click=open_in_app,
-                            bgcolor="#008DDA",
-                            color="#FFFFFF",
-                            style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8)),
-                            expand=True
+                            size=18,
+                            weight=ft.FontWeight.BOLD,
+                            text_align=ft.TextAlign.CENTER
                         ),
-                        ft.ElevatedButton(
-                            content=ft.Row([
-                                ft.Icon(ft.Icons.LANGUAGE_ROUNDED, size=18),
-                                ft.Text(STRINGS[lang].get("btn_open_in_browser", "В браузере"), weight=ft.FontWeight.W_600)
-                            ], spacing=6, alignment=ft.MainAxisAlignment.CENTER),
-                            on_click=open_in_browser,
-                            bgcolor="#1E293B",
-                            color="#00F0FF",
-                            style=ft.ButtonStyle(
-                                shape=ft.RoundedRectangleBorder(radius=8),
-                                side=ft.BorderSide(1, "#00F0FF")
+                        ft.Text(
+                            STRINGS[lang].get("history_open_report_desc", "Выберите, где вы хотите открыть отчет:"),
+                            color="#94A3B8",
+                            size=12,
+                            text_align=ft.TextAlign.CENTER
+                        )
+                    ],
+                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                    spacing=8
+                ),
+                padding=ft.Padding(top=6, bottom=6, left=6, right=6),
+                alignment=ft.Alignment.CENTER
+            )
+
+            open_app_btn = ft.ElevatedButton(
+                content=ft.Row(
+                    [
+                        ft.Icon(ft.Icons.DESKTOP_WINDOWS_ROUNDED, size=18, color="#FFFFFF"),
+                        ft.Text(STRINGS[lang].get("btn_open_in_app", "В программе"), weight=ft.FontWeight.W_600, color="#FFFFFF")
+                    ],
+                    spacing=8,
+                    alignment=ft.MainAxisAlignment.CENTER
+                ),
+                on_click=open_in_app,
+                bgcolor="#008DDA",
+                color="#FFFFFF",
+                style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8)),
+                expand=True,
+                height=44
+            )
+
+            open_browser_btn = ft.ElevatedButton(
+                content=ft.Row(
+                    [
+                        ft.Icon(ft.Icons.LANGUAGE_ROUNDED, size=18, color="#00F0FF"),
+                        ft.Text(STRINGS[lang].get("btn_open_in_browser", "В браузере"), weight=ft.FontWeight.W_600, color="#00F0FF")
+                    ],
+                    spacing=8,
+                    alignment=ft.MainAxisAlignment.CENTER
+                ),
+                on_click=open_in_browser,
+                bgcolor="#1E293B",
+                color="#00F0FF",
+                style=ft.ButtonStyle(
+                    shape=ft.RoundedRectangleBorder(radius=8),
+                    side=ft.BorderSide(1, "#00F0FF")
+                ),
+                expand=True,
+                height=44
+            )
+
+            panel = ft.Container(
+                width=440,
+                bgcolor="#151E33",
+                border_radius=14,
+                padding=ft.Padding(left=20, right=20, top=20, bottom=16),
+                content=ft.Column(
+                    [
+                        modal_header,
+                        item_info_card,
+                        ft.Row([open_app_btn, open_browser_btn], spacing=10),
+                        ft.Container(
+                            content=ft.Row(
+                                [
+                                    ft.TextButton(
+                                        STRINGS[lang].get("btn_cancel", "Отмена"),
+                                        on_click=lambda _: close_overlay()
+                                    )
+                                ],
+                                alignment=ft.MainAxisAlignment.END
                             ),
-                            expand=True
+                            padding=ft.Padding(top=4)
                         )
-                    ], spacing=10),
-                    ft.Container(height=4),
-                    ft.Row([
-                        ft.TextButton(
-                            STRINGS[lang].get("btn_cancel", "Отмена"),
-                            on_click=lambda _: close_overlay()
-                        )
-                    ], alignment=ft.MainAxisAlignment.END)
-                ], tight=True)
+                    ],
+                    spacing=14,
+                    tight=True,
+                    horizontal_alignment=ft.CrossAxisAlignment.CENTER
+                )
             )
 
             report_overlay = ft.Container(
