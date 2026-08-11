@@ -72,11 +72,7 @@ def build_footer(lang="en", page=None):
         def open_repo(_):
             webbrowser.open("https://github.com/AvenCores/vt-gui")
 
-        app_desc_text = (
-            "Современный графический интерфейс для быстрой мульти-проверки файлов, ссылок, доменов, IP-адресов и YARA-правил через официальные API и CLI VirusTotal."
-            if lang == "ru"
-            else "Modern GUI application for fast scanning of files, URLs, domains, IP addresses, and YARA rules via official VirusTotal API & CLI."
-        )
+        app_desc_text = S.get("app_desc", "Modern GUI application for fast scanning of files, URLs, domains, IP addresses, and YARA rules via official VirusTotal API & CLI.")
 
         def make_tag_pill(text, icon):
             return ft.Container(
@@ -247,9 +243,7 @@ def build_footer(lang="en", page=None):
                         text_align=ft.TextAlign.CENTER
                     ),
                     ft.Text(
-                        "Ваша поддержка помогает развивать проект и добавлять новые функции!"
-                        if lang == "ru"
-                        else "Your support helps develop the project and add new features!",
+                        S.get("donate_desc", "Your support helps develop the project and add new features!"),
                         color="#94A3B8",
                         size=12,
                         text_align=ft.TextAlign.CENTER
@@ -327,9 +321,7 @@ def build_footer(lang="en", page=None):
         )
 
         thank_you_box = ft.Text(
-            "❤️ Спасибо за использование и поддержку приложения!"
-            if lang == "ru"
-            else "❤️ Thank you for using and supporting the app!",
+            S.get("donate_thank_you", "❤️ Thank you for using and supporting the app!"),
             color="#94A3B8",
             size=11,
             text_align=ft.TextAlign.CENTER
