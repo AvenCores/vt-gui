@@ -182,6 +182,7 @@ def prompt_import_report(page, lang, on_report_imported):
     """Opens native OS file dialog allowing user to select an exported JSON report to open."""
     from .config import STRINGS
     from .history_manager import save_history, load_history
+    import time
 
     def worker():
         try:
@@ -199,6 +200,19 @@ def prompt_import_report(page, lang, on_report_imported):
             root.destroy()
 
             if chosen_path and os.path.exists(chosen_path):
+                # Show animated import progress indicator immediately
+                importing_msg = STRINGS[lang].get("toast_importing", "Importing report...")
+                importing_snack = ft.SnackBar(
+                    content=ft.Row([
+                        ft.ProgressRing(width=18, height=18, stroke_width=2.5, color="#00F0FF"),
+                        ft.Text(importing_msg, color="#FFFFFF", size=13, weight=ft.FontWeight.W_600)
+                    ], spacing=10),
+                    bgcolor="#1E293B",
+                    duration=4000
+                )
+                page.show_dialog(importing_snack)
+
+                time.sleep(0.05)
                 with open(chosen_path, "r", encoding="utf-8") as f:
                     data_dict = json.load(f)
 
@@ -208,11 +222,11 @@ def prompt_import_report(page, lang, on_report_imported):
                 records.insert(0, record)
                 save_history(records)
 
-                msg = STRINGS[lang].get("toast_import_success", "Report imported successfully!")
-                page.show_dialog(ft.SnackBar(content=ft.Text(msg), bgcolor="#10B981"))
-
                 if on_report_imported:
                     on_report_imported(record)
+
+                msg = STRINGS[lang].get("toast_import_success", "Report imported successfully!")
+                page.show_dialog(ft.SnackBar(content=ft.Text(msg), bgcolor="#10B981"))
 
         except Exception as ex:
             msg = STRINGS[lang].get("toast_import_fail", "Import failed: {e}").format(e=str(ex))
