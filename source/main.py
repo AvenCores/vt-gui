@@ -1205,8 +1205,96 @@ def main(page: ft.Page):
                     self.path = path
             on_scan_file_selected([PseudoFile(init_file_path)])
 
+def _setup_flet_environment():
+    """
+    Configures environment variables for Flet to locate bundled runtime binaries
+    when running as a frozen PyInstaller application, preventing runtime downloads.
+    """
+    if not getattr(sys, 'frozen', False):
+        return
+
+    bundle_dir = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+    os.chdir(bundle_dir)
+
+    # If FLET_VIEW_PATH is already valid, nothing to do
+    existing_view_path = os.environ.get("FLET_VIEW_PATH")
+    if existing_view_path and os.path.exists(existing_view_path):
+        return
+
+    if sys.platform == "win32":
+        candidates = [
+            os.path.join(bundle_dir, "flet_desktop", "app", "flet"),
+            os.path.join(bundle_dir, "flet_desktop", "app"),
+            os.path.join(bundle_dir, "flet"),
+            os.path.join(bundle_dir, "flet_desktop"),
+            bundle_dir,
+        ]
+        for path in candidates:
+            if os.path.isfile(os.path.join(path, "flet.exe")):
+                os.environ["FLET_VIEW_PATH"] = path
+                break
+    elif sys.platform == "darwin":
+        candidates = [
+            os.path.join(bundle_dir, "flet_desktop", "app"),
+            os.path.join(bundle_dir, "flet_desktop"),
+            bundle_dir,
+        ]
+        for path in candidates:
+            if os.path.isdir(path):
+                try:
+                    for item in os.listdir(path):
+                        if item.endswith(".app"):
+                            os.environ["FLET_VIEW_PATH"] = path
+                            break
+                except Exception:
+                    pass
+                if "FLET_VIEW_PATH" in os.environ:
+                    break
+    else:  # Linux / Unix
+        import stat
+        candidates = [
+            os.path.join(bundle_dir, "flet_desktop", "app", "flet"),
+            os.path.join(bundle_dir, "flet_desktop", "app"),
+            os.path.join(bundle_dir, "flet"),
+            os.path.join(bundle_dir, "flet_desktop"),
+            bundle_dir,
+        ]
+        for path in candidates:
+            exe_path = os.path.join(path, "flet")
+            if os.path.isfile(exe_path):
+                try:
+                    st = os.stat(exe_path)
+                    os.chmod(exe_path, st.st_mode | stat.S_IEXEC | stat.S_IXGRP | stat.S_IXOTH)
+                except Exception:
+                    pass
+                os.environ["FLET_VIEW_PATH"] = path
+                break
+
+
 if __name__ == '__main__':
-    # When frozen by PyInstaller, set CWD to the bundle dir so assets/ is found
-    if getattr(sys, 'frozen', False):
-        os.chdir(sys._MEIPASS)
-    ft.run(main, assets_dir="assets")
+    _setup_flet_environment()
+
+    try:
+        ft.run(main, assets_dir="assets")
+    except Exception as e:
+        error_msg = (
+            f"Failed to start VT GUI / Ошибка запуска VT GUI:\n\n{e}\n\n"
+            "If this is your first launch, please ensure Internet access is allowed in Windows Firewall, "
+            "or verify that all required system libraries are installed."
+        )
+        if sys.platform == "win32":
+            try:
+                import ctypes
+                ctypes.windll.user32.MessageBoxW(0, error_msg, "VT GUI - Startup Error", 0x10)
+            except Exception:
+                print(error_msg, file=sys.stderr)
+        else:
+            try:
+                import tkinter as tk
+                from tkinter import messagebox
+                root = tk.Tk()
+                root.withdraw()
+                messagebox.showerror("VT GUI - Startup Error", error_msg)
+            except Exception:
+                print(error_msg, file=sys.stderr)
+        sys.exit(1)

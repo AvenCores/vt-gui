@@ -10,7 +10,11 @@ a = Analysis(
         ('assets', 'assets'),
         ('app/strings.json', 'app'),
     ],
-    hiddenimports=[],
+    hiddenimports=[
+        'flet',
+        'flet_desktop',
+        'flet_cli',
+    ],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],

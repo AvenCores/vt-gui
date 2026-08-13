@@ -32,8 +32,10 @@ jobs:
           python-version: '3.x'
           architecture: ${{ matrix.python-arch }}
 
-      - name: Install dependencies
-        run: pip install -r requirements.txt
+      - name: Install dependencies & pre-cache runtime
+        run: |
+          pip install -r requirements.txt
+          python -m app.bundle_runtime
         working-directory: source
 
       - name: Build with PyInstaller
@@ -43,6 +45,8 @@ jobs:
           --icon=assets/icon.ico
           --add-data="assets;assets"
           --add-data="app/strings.json;app"
+          --collect-all flet
+          --collect-all flet_desktop
           --name="VirusTotal_File_Scanner_Windows_x64"
           --noupx
           --clean
@@ -73,8 +77,10 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: Install dependencies
-        run: pip install -r requirements.txt
+      - name: Install dependencies & pre-cache runtime
+        run: |
+          pip install -r requirements.txt
+          python -m app.bundle_runtime
         working-directory: source
 
       - name: Build with PyInstaller
@@ -84,6 +90,8 @@ jobs:
           --icon=assets/icon.ico
           --add-data="assets;assets"
           --add-data="app/strings.json;app"
+          --collect-all flet
+          --collect-all flet_desktop
           --name="VirusTotal_File_Scanner_Windows_arm64"
           --noupx
           --clean
@@ -114,8 +122,10 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: Install dependencies
-        run: pip install -r requirements.txt
+      - name: Install dependencies & pre-cache runtime
+        run: |
+          pip install -r requirements.txt
+          python -m app.bundle_runtime
         working-directory: source
 
       - name: Build with PyInstaller
@@ -124,6 +134,8 @@ jobs:
           --icon=assets/icon.ico
           --add-data="assets:assets"
           --add-data="app/strings.json:app"
+          --collect-all flet
+          --collect-all flet_desktop
           --name="VirusTotal_File_Scanner_Linux_x64"
           --clean
           main.py
@@ -152,8 +164,10 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: Install dependencies
-        run: pip install -r requirements.txt
+      - name: Install dependencies & pre-cache runtime
+        run: |
+          pip install -r requirements.txt
+          python -m app.bundle_runtime
         working-directory: source
 
       - name: Build with PyInstaller
@@ -162,6 +176,8 @@ jobs:
           --icon=assets/icon.ico
           --add-data="assets:assets"
           --add-data="app/strings.json:app"
+          --collect-all flet
+          --collect-all flet_desktop
           --name="VirusTotal_File_Scanner_Linux_arm64"
           --clean
           main.py
@@ -191,8 +207,10 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: Install dependencies
-        run: pip install -r requirements.txt
+      - name: Install dependencies & pre-cache runtime
+        run: |
+          pip install -r requirements.txt
+          python -m app.bundle_runtime
         working-directory: source
 
       - name: Build with PyInstaller
