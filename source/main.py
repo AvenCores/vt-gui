@@ -407,7 +407,7 @@ def main(page: ft.Page):
                                 ft.Container(height=10),
                                 ft.Row(
                                     [
-                                        ft.ElevatedButton(
+                                        ft.Button(
                                             content=ft.Text("Retry / Повторить"),
                                             icon=ft.Icons.REFRESH_ROUNDED,
                                             on_click=make_retry_callback(idx, scan["file_path"]),
@@ -1137,7 +1137,7 @@ def main(page: ft.Page):
                     content=ft.Text(STRINGS[current_lang]["hash_warning_text"].format(hash=exe_hash)),
                     actions=[
                         ft.TextButton(STRINGS[current_lang]["btn_no"], on_click=reject_custom_binary),
-                        ft.ElevatedButton(STRINGS[current_lang]["btn_yes"], on_click=approve_custom_binary, bgcolor="#008DDA", color="#FFFFFF")
+                        ft.Button(STRINGS[current_lang]["btn_yes"], on_click=approve_custom_binary, bgcolor="#008DDA", color="#FFFFFF")
                     ],
                     bgcolor="#151E33"
                 )

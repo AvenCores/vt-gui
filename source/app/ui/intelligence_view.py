@@ -109,8 +109,8 @@ class IntelligenceView:
             threading.Thread(target=worker, daemon=True).start()
 
         action_buttons = ft.Row([
-            ft.ElevatedButton(STRINGS[self.current_lang].get("btn_reanalyze", "Re-analyze"), icon=ft.Icons.REFRESH_ROUNDED, on_click=handle_reanalyze, bgcolor="#1E293B", color="#00F0FF"),
-            ft.ElevatedButton(STRINGS[self.current_lang].get("btn_export_report", "Export Report"), icon=ft.Icons.DOWNLOAD_ROUNDED, on_click=handle_export, bgcolor="#1E293B", color="#FFFFFF")
+            ft.Button(STRINGS[self.current_lang].get("btn_reanalyze", "Re-analyze"), icon=ft.Icons.REFRESH_ROUNDED, on_click=handle_reanalyze, bgcolor="#1E293B", color="#00F0FF"),
+            ft.Button(STRINGS[self.current_lang].get("btn_export_report", "Export Report"), icon=ft.Icons.DOWNLOAD_ROUNDED, on_click=handle_export, bgcolor="#1E293B", color="#FFFFFF")
         ], alignment=ft.MainAxisAlignment.START, spacing=8)
         
         details_items = [
@@ -182,7 +182,7 @@ class IntelligenceView:
         else:
             web_url = f"https://www.virustotal.com/gui/search/{item_id}"
             
-        web_btn = ft.ElevatedButton(
+        web_btn = ft.Button(
             content=ft.Text(STRINGS[self.current_lang]["btn_open_web"]),
             icon=ft.Icons.OPEN_IN_BROWSER_ROUNDED,
             on_click=lambda _: webbrowser.open(web_url),
@@ -476,7 +476,7 @@ class IntelligenceView:
                     content=dialog_content,
                     content_padding=ft.Padding(left=20, right=20, top=16, bottom=16),
                     actions=[
-                        ft.ElevatedButton(
+                        ft.Button(
                             close_btn_text,
                             on_click=lambda _: self.page.pop_dialog(),
                             bgcolor="#008DDA",
@@ -550,7 +550,7 @@ class IntelligenceView:
                     content=dialog_content,
                     content_padding=ft.Padding(left=20, right=20, top=16, bottom=16),
                     actions=[
-                        ft.ElevatedButton(
+                        ft.Button(
                             close_btn_text,
                             on_click=lambda _: self.page.pop_dialog(),
                             bgcolor="#008DDA",
@@ -656,7 +656,7 @@ class IntelligenceView:
             error_items = [
                 ft.Icon(ft.Icons.ERROR_OUTLINE_ROUNDED, color="#EF4444", size=32),
                 ft.Text(state["error"], color="#EF4444", size=13, text_align=ft.TextAlign.CENTER),
-                ft.ElevatedButton(
+                ft.Button(
                     content=ft.Text(STRINGS[self.current_lang]["btn_upgrade_premium"], color="#FFFFFF", size=13),
                     icon=ft.Icons.OPEN_IN_BROWSER_ROUNDED,
                     on_click=lambda _: webbrowser.open("https://www.virustotal.com/gui/contact-us/premium-services"),

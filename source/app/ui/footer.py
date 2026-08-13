@@ -195,7 +195,7 @@ def build_footer(lang="en", page=None):
             content=dialog_content,
             content_padding=ft.Padding(left=20, right=20, top=16, bottom=16),
             actions=[
-                ft.ElevatedButton(
+                ft.Button(
                     close_text,
                     on_click=lambda _: e.control.page.pop_dialog(),
                     bgcolor="#008DDA",
@@ -296,7 +296,7 @@ def build_footer(lang="en", page=None):
                         border=ft.Border.all(1, "#00F0FF"),
                         border_radius=8
                     ),
-                    ft.ElevatedButton(
+                    ft.Button(
                         content=ft.Row(
                             [
                                 ft.Icon(ft.Icons.COPY_ROUNDED, color="#FFFFFF", size=16),
@@ -345,7 +345,7 @@ def build_footer(lang="en", page=None):
             content=dialog_content,
             content_padding=ft.Padding(left=20, right=20, top=16, bottom=16),
             actions=[
-                ft.ElevatedButton(
+                ft.Button(
                     close_text,
                     on_click=lambda _: e.control.page.pop_dialog(),
                     bgcolor="#2E3C56",
@@ -446,7 +446,7 @@ def build_footer(lang="en", page=None):
                             weight=ft.FontWeight.W_500,
                             text_align=ft.TextAlign.CENTER
                         ),
-                        ft.ElevatedButton(
+                        ft.Button(
                             content=ft.Row(
                                 [
                                     ft.Icon(ft.Icons.KEY_ROUNDED, size=16, color="#FFFFFF"),
@@ -489,7 +489,7 @@ def build_footer(lang="en", page=None):
                 content=dialog_content,
                 content_padding=ft.Padding(left=20, right=20, top=16, bottom=16),
                 actions=[
-                    ft.ElevatedButton(
+                    ft.Button(
                         close_text,
                         on_click=lambda _: target_page.pop_dialog(),
                         bgcolor="#2E3C56",

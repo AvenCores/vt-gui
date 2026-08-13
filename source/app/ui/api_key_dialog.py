@@ -18,7 +18,7 @@ def open_api_key_dialog(page, lang, on_saved, cli_source=None):
         text_style=ft.TextStyle(color="#E2E8F0"),
     )
 
-    save_btn = ft.ElevatedButton(
+    save_btn = ft.Button(
         STRINGS[lang]["btn_save"],
         on_click=lambda _: None,
         bgcolor="#008DDA",

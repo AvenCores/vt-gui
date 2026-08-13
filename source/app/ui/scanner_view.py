@@ -72,7 +72,7 @@ def build_scanner_view(cli_status, cli_hash, cli_source, lang, file_picker_scan,
         
     dashed_area.on_hover = on_hover_dashed
 
-    folder_btn = ft.ElevatedButton(
+    folder_btn = ft.Button(
         STRINGS[lang].get("btn_scan_folder", "Scan Folder (Directory)"),
         icon=ft.Icons.FOLDER_OPEN_ROUNDED,
         on_click=on_folder_click,
@@ -81,7 +81,7 @@ def build_scanner_view(cli_status, cli_hash, cli_source, lang, file_picker_scan,
         style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=10))
     )
 
-    import_btn = ft.ElevatedButton(
+    import_btn = ft.Button(
         STRINGS[lang].get("btn_import_report", "Import Report"),
         icon=ft.Icons.UPLOAD_FILE_ROUNDED,
         on_click=on_import_click,

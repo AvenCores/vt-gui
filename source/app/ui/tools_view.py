@@ -335,7 +335,7 @@ class ToolsView:
 
             threading.Thread(target=worker, daemon=True).start()
 
-        diff_btn = ft.ElevatedButton(
+        diff_btn = ft.Button(
             STRINGS[self.lang].get("btn_compare_hashes", "Compare Hashes"),
             icon=ft.Icons.COMPARE_ARROWS_ROUNDED,
             on_click=run_diff,

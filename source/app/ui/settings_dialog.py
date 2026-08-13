@@ -262,7 +262,7 @@ def open_settings(page, lang, on_settings_saved, on_reinstall_cli=None, cli_sour
         content=settings_content,
         actions=[
             ft.TextButton(STRINGS[lang]["btn_no"], on_click=lambda _: page.pop_dialog()),
-            ft.ElevatedButton(
+            ft.Button(
                 STRINGS[lang]["btn_save"],
                 on_click=save_settings,
                 bgcolor="#008DDA",

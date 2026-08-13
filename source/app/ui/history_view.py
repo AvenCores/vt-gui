@@ -43,7 +43,7 @@ def build_history_view(lang, page, on_back, on_rescan, on_open_in_app=None, on_i
             content=ft.Text(STRINGS[lang]["history_clear_confirm"], color="#E2E8F0"),
             actions=[
                 ft.TextButton(STRINGS[lang]["btn_no"], on_click=lambda _: page.pop_dialog()),
-                ft.ElevatedButton(STRINGS[lang]["history_clear"], on_click=confirm_clear, bgcolor="#EF4444", color="#FFFFFF"),
+                ft.Button(STRINGS[lang]["history_clear"], on_click=confirm_clear, bgcolor="#EF4444", color="#FFFFFF"),
             ],
             bgcolor="#151E33"
         )
@@ -125,7 +125,7 @@ def build_history_view(lang, page, on_back, on_rescan, on_open_in_app=None, on_i
                 btn_controls = []
                 if rec.get("results") or rec.get("sha256"):
                     btn_controls.append(
-                        ft.ElevatedButton(
+                        ft.Button(
                             content=ft.Row([
                                 ft.Icon(ft.Icons.ASSESSMENT_ROUNDED, size=18),
                                 ft.Text(STRINGS[lang].get("history_open_report_title", "Открыть отчет"), weight=ft.FontWeight.W_600)
@@ -339,7 +339,7 @@ def build_history_view(lang, page, on_back, on_rescan, on_open_in_app=None, on_i
                 alignment=ft.Alignment.CENTER
             )
 
-            open_app_btn = ft.ElevatedButton(
+            open_app_btn = ft.Button(
                 content=ft.Row(
                     [
                         ft.Icon(ft.Icons.DESKTOP_WINDOWS_ROUNDED, size=18, color="#FFFFFF"),
@@ -356,7 +356,7 @@ def build_history_view(lang, page, on_back, on_rescan, on_open_in_app=None, on_i
                 height=44
             )
 
-            open_browser_btn = ft.ElevatedButton(
+            open_browser_btn = ft.Button(
                 content=ft.Row(
                     [
                         ft.Icon(ft.Icons.LANGUAGE_ROUNDED, size=18, color="#00F0FF"),
@@ -494,7 +494,7 @@ def build_history_view(lang, page, on_back, on_rescan, on_open_in_app=None, on_i
         ink=True
     )
 
-    import_btn = ft.ElevatedButton(
+    import_btn = ft.Button(
         content=ft.Row([
             ft.Icon(ft.Icons.UPLOAD_FILE_ROUNDED, size=16),
             ft.Text(STRINGS[lang].get("btn_import_report", "Import Report"), size=12, weight=ft.FontWeight.W_600)

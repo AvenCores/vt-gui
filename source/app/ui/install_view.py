@@ -5,7 +5,7 @@ def build_install_view(cli_status, cli_hash, lang, install_status_text, install_
     """Builds the Flet container for the vt CLI automatic and manual installation screen."""
     
     # Auto install primary action
-    auto_install_btn = ft.ElevatedButton(
+    auto_install_btn = ft.Button(
         content=ft.Text(STRINGS[lang]["btn_auto_install"], weight=ft.FontWeight.BOLD),
         icon=ft.Icons.DOWNLOAD_ROUNDED,
         icon_color="#FFFFFF",

@@ -245,8 +245,8 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
     update_vote_ui()
 
     actions_row = ft.Row([
-        ft.ElevatedButton(STRINGS[lang].get("btn_reanalyze", "Re-analyze"), icon=ft.Icons.REFRESH_ROUNDED, on_click=handle_reanalyze, bgcolor="#1E293B", color="#00F0FF"),
-        ft.ElevatedButton(STRINGS[lang].get("btn_export_report", "Export Report"), icon=ft.Icons.DOWNLOAD_ROUNDED, on_click=handle_export, bgcolor="#1E293B", color="#FFFFFF"),
+        ft.Button(STRINGS[lang].get("btn_reanalyze", "Re-analyze"), icon=ft.Icons.REFRESH_ROUNDED, on_click=handle_reanalyze, bgcolor="#1E293B", color="#00F0FF"),
+        ft.Button(STRINGS[lang].get("btn_export_report", "Export Report"), icon=ft.Icons.DOWNLOAD_ROUNDED, on_click=handle_export, bgcolor="#1E293B", color="#FFFFFF"),
         vote_buttons_container
     ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN)
 
@@ -469,7 +469,7 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
             on_click=lambda _: close_overlay()
         )
 
-        delete_btn = ft.ElevatedButton(
+        delete_btn = ft.Button(
             content=ft.Text(STRINGS[lang].get("btn_delete", "Delete"), weight=ft.FontWeight.W_600),
             on_click=lambda e: start_deletion(),
             bgcolor="#EF4444",
