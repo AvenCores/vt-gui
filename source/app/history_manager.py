@@ -109,3 +109,7 @@ def clear_history():
     """Clear all scan history."""
     save_history([])
 
+
+# Alias for backward compatibility
+get_history = load_history
+

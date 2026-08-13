@@ -19,6 +19,7 @@ from app.cli_manager import (
     process_selected_binary,
     download_and_install_cli
 )
+from app.ui.header import build_header
 from app.ui.install_view import build_install_view
 from app.ui.scanner_view import build_scanner_view
 from app.ui.scanning_view import build_scanning_view
@@ -215,44 +216,7 @@ def main(page: ft.Page):
                 scan_service.current_lang = lang_code
             build_ui()
 
-        available_langs = get_available_langs()
-        active_lang_name = dict([(c, n) for c, n, f in available_langs]).get(current_lang, current_lang.upper())
-        active_lang_flag = get_lang_flag(current_lang)
-
-        language_menu = ft.PopupMenuButton(
-            content=ft.Container(
-                content=ft.Row(
-                    [
-                        ft.Image(src=active_lang_flag, width=20, height=14, fit=ft.BoxFit.CONTAIN, border_radius=2),
-                        ft.Text(active_lang_name, color="#FFFFFF", size=13, weight=ft.FontWeight.W_600),
-                        ft.Icon(ft.Icons.ARROW_DROP_DOWN_ROUNDED, color="#94A3B8", size=16),
-                    ],
-                    spacing=6,
-                    alignment=ft.MainAxisAlignment.CENTER
-                ),
-                padding=ft.Padding(left=10, right=8, top=6, bottom=6),
-                border=ft.Border.all(1, "#2E3C56"),
-                border_radius=8,
-                bgcolor="#151E33"
-            ),
-            tooltip="Select Language / Выбрать язык",
-            items=[
-                ft.PopupMenuItem(
-                    content=ft.Row(
-                        [
-                            ft.Icon(ft.Icons.CHECK_ROUNDED, color="#00F0FF" if current_lang == code else "transparent", size=16),
-                            ft.Image(src=flag, width=20, height=14, fit=ft.BoxFit.CONTAIN, border_radius=2),
-                            ft.Text(name, color="#E2E8F0", size=13),
-                        ],
-                        spacing=8
-                    ),
-                    on_click=lambda _, c=code: change_language(c)
-                )
-                for code, name, flag in available_langs
-            ]
-        )
-        
-        # Settings Icon
+        # Settings CLI Reinstall callback
         def on_reinstall_cli(status_text_widget, status_icon, set_button_disabled):
             def run_reinstall():
                 def progress_cb(status_text, progress_val):
@@ -277,33 +241,11 @@ def main(page: ft.Page):
                     thread_safe_update()
 
             threading.Thread(target=run_reinstall, daemon=True).start()
-        
-        settings_button = ft.IconButton(
-            icon=ft.Icons.SETTINGS,
-            icon_color="#94A3B8",
-            on_click=lambda _: open_settings(page, current_lang, build_ui, on_reinstall_cli, cli_source)
-        )
-        
-        # Header Layout
-        header = ft.Container(
-            content=ft.Row(
-                [
-                    ft.Row([
-                        ft.Icon(ft.Icons.SECURITY_ROUNDED, color="#00F0FF", size=30),
-                        ft.Column([
-                            ft.Text(STRINGS[current_lang]["app_title"], size=20, weight=ft.FontWeight.BOLD, color="#FFFFFF"),
-                            ft.Text("Powered by VirusTotal V3 API", size=11, color="#94A3B8")
-                        ], spacing=1)
-                    ]),
-                    ft.Row([
-                        language_menu,
-                        settings_button
-                    ], spacing=5)
-                ],
-                alignment=ft.MainAxisAlignment.SPACE_BETWEEN
-            ),
-            padding=ft.Padding(bottom=15),
-            border=ft.Border.only(bottom=ft.BorderSide(1, "#1E293B"))
+
+        header = build_header(
+            current_lang=current_lang,
+            on_language_change=change_language,
+            on_settings_click=lambda _: open_settings(page, current_lang, build_ui, on_reinstall_cli, cli_source)
         )
         
         # Central view content switcher with fast fade & slide transitions

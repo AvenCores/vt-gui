@@ -107,10 +107,12 @@
   * [source/app/vt_api.py](source/app/vt_api.py) — Взаимодействие с VirusTotal v3 REST API (поиск хэшей, сканирование URL, домены, IP, поиск, субдомены, DNS, diff файлов).
   * [source/app/exporter.py](source/app/exporter.py) — Экспорт отчетов сканирований и аналитики в файлы JSON через нативный системный диалог файла или в папку «Загрузки».
   * [source/app/history_manager.py](source/app/history_manager.py) — Менеджер истории сканирований и поисковых запросов (`history.json`).
+  * [source/app/bundle_runtime.py](source/app/bundle_runtime.py) — Скрипт подготовки и автономной упаковки рантайма Flet Desktop для сборки с PyInstaller.
   * [source/app/strings.json](source/app/strings.json) — Файл локализации со всеми текстовыми строками интерфейса.
   * **`services/`** — Сервисный слой бизнес-логики:
     * [source/app/services/scan_service.py](source/app/services/scan_service.py) — Пайплайн многопоточного сканирования файлов (хэширование -> VT API -> отправка CLI -> отслеживание).
   * **`ui/`** — Графический интерфейс и компоненты:
+    * [source/app/ui/header.py](source/app/ui/header.py) — Верхняя панель приложения (логотип, переключатель языков, кнопка настроек).
     * [source/app/ui/theme.py](source/app/ui/theme.py) — Дизайн-система (стили, карточки статистики, список антивирусных вердиктов).
     * [source/app/ui/scanner_view.py](source/app/ui/scanner_view.py) — Стартовый экран выбора файла/папки и зоны Drag-and-Drop.
     * [source/app/ui/scanning_view.py](source/app/ui/scanning_view.py) — Экран прогресса сканирования.
