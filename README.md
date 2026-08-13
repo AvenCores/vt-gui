@@ -1,3 +1,5 @@
+
+
 <div align="center">
     <a href="https://www.youtube.com/@avencores/" target="_blank">
       <img src="https://github.com/user-attachments/assets/338bcd74-e3c3-4700-87ab-7985058bd17e" alt="YouTube" height="40">
@@ -101,6 +103,7 @@
 * **`source/app/`** — Основной модуль логики приложения:
   * [source/app/config.py](source/app/config.py) — Настройки окружения (синхронизация `.env` и `~/.vt.toml`), автоопределение языка, база хэшей `vt-cli` и строки локализации.
   * [source/app/cli_manager.py](source/app/cli_manager.py) — Менеджер работы с бинарником `vt` (проверка, вычисление SHA-256, скачивание и распаковка релизов GitHub в изолированный каталог).
+  * [source/app/clipboard_utils.py](source/app/clipboard_utils.py) — Утилиты для безопасной работы с буфером обмена (включая Win32 fallback для стабильности).
   * [source/app/vt_api.py](source/app/vt_api.py) — Взаимодействие с VirusTotal v3 REST API (поиск хэшей, сканирование URL, домены, IP, поиск, субдомены, DNS, diff файлов).
   * [source/app/exporter.py](source/app/exporter.py) — Экспорт отчетов сканирований и аналитики в файлы JSON через нативный системный диалог файла или в папку «Загрузки».
   * [source/app/history_manager.py](source/app/history_manager.py) — Менеджер истории сканирований и поисковых запросов (`history.json`).
