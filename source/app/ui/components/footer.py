@@ -6,6 +6,7 @@ import asyncio
 
 from ...core.config import STRINGS
 from ...utils.clipboard import safe_copy_to_clipboard
+from .theme import get_theme_palette
 
 APP_VERSION = "V1.0.7"
 GITHUB_REPO = "AvenCores/vt-gui"
@@ -38,20 +39,22 @@ def _check_for_update():
         return None
 
 
-def build_footer(lang="en", page=None):
-    """Builds a sticky, premium footer containing social links with hover animations."""
+def build_footer(lang="en", page=None, theme_mode="dark"):
+    """Builds a sticky, premium footer containing social links with hover animations and theming support."""
     S = STRINGS.get(lang, STRINGS.get("en", {}))
+    palette = get_theme_palette(theme_mode)
+    is_dark = (theme_mode == "dark")
 
     def make_social_link(icon_name, dest_url, tooltip):
         img = ft.Image(
             src=icon_name,
             width=24,
             height=24,
-            color="#94A3B8"
+            color=palette["text_muted"]
         )
 
         def on_hover(e):
-            img.color = "#00F0FF" if e.data == "true" else "#94A3B8"
+            img.color = palette["accent"] if e.data == "true" else palette["text_muted"]
             img.update()
 
         return ft.Container(
@@ -82,15 +85,15 @@ def build_footer(lang="en", page=None):
             return ft.Container(
                 content=ft.Row(
                     [
-                        ft.Icon(icon, color="#00F0FF", size=13),
-                        ft.Text(text, color="#E2E8F0", size=11, weight=ft.FontWeight.W_600)
+                        ft.Icon(icon, color=palette["accent"], size=13),
+                        ft.Text(text, color=palette["text_secondary"], size=11, weight=ft.FontWeight.W_600)
                     ],
                     spacing=4,
                     tight=True
                 ),
                 padding=ft.Padding(left=8, right=8, top=4, bottom=4),
-                bgcolor="#1E2A47",
-                border=ft.Border.all(1, "#2E3C56"),
+                bgcolor=palette["accent_bg"] if not is_dark else "#1E2A47",
+                border=ft.Border.all(1, palette["card_border"]),
                 border_radius=12
             )
 
@@ -110,16 +113,16 @@ def build_footer(lang="en", page=None):
         repo_button = ft.Container(
             content=ft.Row(
                 [
-                    ft.Icon(ft.Icons.CODE_ROUNDED, color="#00F0FF", size=16),
-                    ft.Text("github.com/AvenCores/vt-gui", color="#FFFFFF", size=12, weight=ft.FontWeight.W_600),
-                    ft.Icon(ft.Icons.OPEN_IN_NEW_ROUNDED, color="#94A3B8", size=14)
+                    ft.Icon(ft.Icons.CODE_ROUNDED, color=palette["accent"], size=16),
+                    ft.Text("github.com/AvenCores/vt-gui", color=palette["text_primary"], size=12, weight=ft.FontWeight.W_600),
+                    ft.Icon(ft.Icons.OPEN_IN_NEW_ROUNDED, color=palette["text_muted"], size=14)
                 ],
                 alignment=ft.MainAxisAlignment.CENTER,
                 spacing=8
             ),
             padding=ft.Padding(left=14, right=14, top=10, bottom=10),
-            bgcolor="#1E293B",
-            border=ft.Border.all(1, "#00F0FF"),
+            bgcolor=palette["card_bg_secondary"],
+            border=ft.Border.all(1, palette["accent"]),
             border_radius=10,
             on_click=open_repo,
             alignment=ft.Alignment.CENTER
@@ -128,16 +131,16 @@ def build_footer(lang="en", page=None):
         info_box = ft.Container(
             content=ft.Column(
                 [
-                    ft.Text(f"{author_text} AvenCores", color="#E2E8F0", size=12, weight=ft.FontWeight.W_600),
-                    ft.Text(powered_by_text, color="#94A3B8", size=11),
-                    ft.Text("License: GNU GPL v3", color="#94A3B8", size=11)
+                    ft.Text(f"{author_text} AvenCores", color=palette["text_secondary"], size=12, weight=ft.FontWeight.W_600),
+                    ft.Text(powered_by_text, color=palette["text_muted"], size=11),
+                    ft.Text("License: GNU GPL v3", color=palette["text_muted"], size=11)
                 ],
                 spacing=4,
                 horizontal_alignment=ft.CrossAxisAlignment.CENTER
             ),
             padding=ft.Padding(left=14, right=14, top=10, bottom=10),
-            bgcolor="#0F172A",
-            border=ft.Border.all(1, "#1E293B"),
+            bgcolor=palette["card_bg_secondary"],
+            border=ft.Border.all(1, palette["card_border_subtle"]),
             border_radius=10,
             alignment=ft.Alignment.CENTER
         )
@@ -146,24 +149,24 @@ def build_footer(lang="en", page=None):
             content=ft.Column(
                 [
                     ft.Container(
-                        content=ft.Icon(ft.Icons.SECURITY_ROUNDED, color="#00F0FF", size=36),
+                        content=ft.Icon(ft.Icons.SECURITY_ROUNDED, color=palette["accent"], size=36),
                         padding=12,
-                        bgcolor="#1E2A47",
-                        border=ft.Border.all(1.5, "#00F0FF"),
+                        bgcolor=palette["dialog_header_bg"],
+                        border=ft.Border.all(1.5, palette["accent"]),
                         shape=ft.BoxShape.CIRCLE
                     ),
                     ft.Text(
                         S.get("app_title", "VirusTotal File Scanner"),
-                        color="#FFFFFF",
+                        color=palette["text_primary"],
                         size=18,
                         weight=ft.FontWeight.BOLD,
                         text_align=ft.TextAlign.CENTER
                     ),
                     ft.Container(
-                        content=ft.Text(f"{APP_VERSION}", color="#00F0FF", size=12, weight=ft.FontWeight.BOLD),
+                        content=ft.Text(f"{APP_VERSION}", color=palette["accent"], size=12, weight=ft.FontWeight.BOLD),
                         padding=ft.Padding(left=10, right=10, top=3, bottom=3),
-                        bgcolor="#1E293B",
-                        border=ft.Border.all(1, "#00F0FF"),
+                        bgcolor=palette["card_bg_secondary"],
+                        border=ft.Border.all(1, palette["accent"]),
                         border_radius=12
                     )
                 ],
@@ -182,7 +185,7 @@ def build_footer(lang="en", page=None):
                     tags_row,
                     ft.Text(
                         app_desc_text,
-                        color="#94A3B8",
+                        color=palette["text_muted"],
                         size=12,
                         text_align=ft.TextAlign.CENTER
                     ),
@@ -202,13 +205,13 @@ def build_footer(lang="en", page=None):
                 ft.Button(
                     close_text,
                     on_click=lambda _: e.control.page.pop_dialog(),
-                    bgcolor="#008DDA",
-                    color="#FFFFFF",
+                    bgcolor=palette["button_primary_bg"],
+                    color=palette["button_primary_text"],
                     style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8))
                 )
             ],
             actions_alignment=ft.MainAxisAlignment.CENTER,
-            bgcolor="#151E33"
+            bgcolor=palette["dialog_bg"]
         )
         e.control.page.show_dialog(dlg)
 
@@ -235,20 +238,20 @@ def build_footer(lang="en", page=None):
                     ft.Container(
                         content=ft.Icon(ft.Icons.FAVORITE_ROUNDED, color="#EC4899", size=36),
                         padding=12,
-                        bgcolor="#3B1527",
+                        bgcolor="#FDF2F8" if not is_dark else "#3B1527",
                         border=ft.Border.all(1.5, "#EC4899"),
                         shape=ft.BoxShape.CIRCLE
                     ),
                     ft.Text(
                         donate_text,
-                        color="#FFFFFF",
+                        color=palette["text_primary"],
                         size=18,
                         weight=ft.FontWeight.BOLD,
                         text_align=ft.TextAlign.CENTER
                     ),
                     ft.Text(
                         S.get("donate_desc", "Your support helps develop the project and add new features!"),
-                        color="#94A3B8",
+                        color=palette["text_muted"],
                         size=12,
                         text_align=ft.TextAlign.CENTER
                     )
@@ -268,14 +271,14 @@ def build_footer(lang="en", page=None):
                             ft.Row(
                                 [
                                     ft.Image(src="sber.svg", width=22, height=22),
-                                    ft.Text("Сбербанк / SBER", color="#E2E8F0", size=13, weight=ft.FontWeight.BOLD)
+                                    ft.Text("Сбербанк / SBER", color=palette["text_secondary"], size=13, weight=ft.FontWeight.BOLD)
                                 ],
                                 spacing=8
                             ),
                             ft.Container(
                                 content=ft.Text("MIR", color="#10B981", size=10, weight=ft.FontWeight.BOLD),
                                 padding=ft.Padding(left=6, right=6, top=2, bottom=2),
-                                bgcolor="#064E3B",
+                                bgcolor="#ECFDF5" if not is_dark else "#064E3B",
                                 border_radius=4
                             )
                         ],
@@ -284,10 +287,10 @@ def build_footer(lang="en", page=None):
                     ft.Container(
                         content=ft.Row(
                             [
-                                ft.Text(card_number, color="#00F0FF", size=16, weight=ft.FontWeight.BOLD),
+                                ft.Text(card_number, color=palette["accent"], size=16, weight=ft.FontWeight.BOLD),
                                 ft.IconButton(
                                     icon=ft.Icons.CONTENT_COPY_ROUNDED,
-                                    icon_color="#00F0FF",
+                                    icon_color=palette["accent"],
                                     icon_size=18,
                                     tooltip=copy_text,
                                     on_click=copy_card
@@ -296,8 +299,8 @@ def build_footer(lang="en", page=None):
                             alignment=ft.MainAxisAlignment.SPACE_BETWEEN
                         ),
                         padding=ft.Padding(left=12, right=8, top=6, bottom=6),
-                        bgcolor="#0F172A",
-                        border=ft.Border.all(1, "#00F0FF"),
+                        bgcolor=palette["card_bg_secondary"],
+                        border=ft.Border.all(1, palette["accent"]),
                         border_radius=8
                     ),
                     ft.Button(
@@ -310,7 +313,7 @@ def build_footer(lang="en", page=None):
                             spacing=8
                         ),
                         on_click=copy_card,
-                        bgcolor="#008DDA",
+                        bgcolor=palette["button_primary_bg"],
                         color="#FFFFFF",
                         style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8))
                     )
@@ -319,14 +322,14 @@ def build_footer(lang="en", page=None):
                 horizontal_alignment=ft.CrossAxisAlignment.CENTER
             ),
             padding=ft.Padding(left=16, right=16, top=14, bottom=14),
-            bgcolor="#1E293B",
-            border=ft.Border.all(1, "#2E3C56"),
+            bgcolor=palette["card_bg_secondary"],
+            border=ft.Border.all(1, palette["card_border"]),
             border_radius=12
         )
 
         thank_you_box = ft.Text(
             S.get("donate_thank_you", "❤️ Thank you for using and supporting the app!"),
-            color="#94A3B8",
+            color=palette["text_muted"],
             size=11,
             text_align=ft.TextAlign.CENTER
         )
@@ -352,13 +355,13 @@ def build_footer(lang="en", page=None):
                 ft.Button(
                     close_text,
                     on_click=lambda _: e.control.page.pop_dialog(),
-                    bgcolor="#2E3C56",
-                    color="#FFFFFF",
+                    bgcolor=palette["button_secondary_bg"],
+                    color=palette["button_secondary_text"],
                     style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8))
                 )
             ],
             actions_alignment=ft.MainAxisAlignment.CENTER,
-            bgcolor="#151E33"
+            bgcolor=palette["dialog_bg"]
         )
         e.control.page.show_dialog(dlg)
 
@@ -369,13 +372,13 @@ def build_footer(lang="en", page=None):
     checking_text = S.get("footer_checking", "Checking...")
 
     version_label = ft.Container(
-        content=ft.Text(APP_VERSION, color="#E2E8F0", size=12, weight=ft.FontWeight.W_600),
+        content=ft.Text(APP_VERSION, color=palette["text_secondary"], size=12, weight=ft.FontWeight.W_600),
         padding=ft.Padding(left=5, right=0, top=0, bottom=0),
         tooltip=APP_VERSION
     )
 
-    update_btn_icon = ft.Icon(ft.Icons.UPDATE_ROUNDED, size=14, color="#94A3B8")
-    update_btn_label = ft.Text(update_text, color="#94A3B8", size=11)
+    update_btn_icon = ft.Icon(ft.Icons.UPDATE_ROUNDED, size=14, color=palette["text_muted"])
+    update_btn_label = ft.Text(update_text, color=palette["text_muted"], size=11)
     update_btn = ft.Container(
         content=ft.Row([update_btn_icon, update_btn_label], spacing=4),
         padding=ft.Padding(left=4, right=4, top=2, bottom=2),
@@ -386,14 +389,14 @@ def build_footer(lang="en", page=None):
 
     def _on_update_hover(e):
         if update_btn.data != "checking" and update_btn.data != "update":
-            update_btn.bgcolor = "#1E293B" if e.data == "true" else None
+            update_btn.bgcolor = palette["card_bg_hover"] if e.data == "true" else None
             update_btn.update()
 
     def on_update_click(e):
         update_btn.data = "checking"
         update_btn_label.value = checking_text
-        update_btn_label.color = "#FACC15"
-        update_btn_icon.color = "#FACC15"
+        update_btn_label.color = "#F59E0B"
+        update_btn_icon.color = "#F59E0B"
         update_btn.update()
 
         def _show_vpn_dialog(e_event=None):
@@ -415,20 +418,20 @@ def build_footer(lang="en", page=None):
                         ft.Container(
                             content=ft.Icon(ft.Icons.VPN_LOCK_ROUNDED, color="#F59E0B", size=36),
                             padding=12,
-                            bgcolor="#2D1F07",
+                            bgcolor="#FEF3C7" if not is_dark else "#2D1F07",
                             border=ft.Border.all(1.5, "#F59E0B"),
                             shape=ft.BoxShape.CIRCLE
                         ),
                         ft.Text(
                             vpn_title_text,
-                            color="#FFFFFF",
+                            color=palette["text_primary"],
                             size=18,
                             weight=ft.FontWeight.BOLD,
                             text_align=ft.TextAlign.CENTER
                         ),
                         ft.Text(
                             vpn_msg_text,
-                            color="#94A3B8",
+                            color=palette["text_muted"],
                             size=12,
                             text_align=ft.TextAlign.CENTER
                         ),
@@ -445,7 +448,7 @@ def build_footer(lang="en", page=None):
                     [
                         ft.Text(
                             vpn_promo_text,
-                            color="#94A3B8",
+                            color=palette["text_muted"],
                             size=12,
                             weight=ft.FontWeight.W_500,
                             text_align=ft.TextAlign.CENTER
@@ -462,7 +465,7 @@ def build_footer(lang="en", page=None):
                                 tight=True,
                             ),
                             on_click=open_vpn,
-                            bgcolor="#008DDA",
+                            bgcolor=palette["button_primary_bg"],
                             color="#FFFFFF",
                             style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8)),
                         ),
@@ -471,8 +474,8 @@ def build_footer(lang="en", page=None):
                     horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                 ),
                 padding=ft.Padding(left=16, right=16, top=14, bottom=14),
-                bgcolor="#1E293B",
-                border=ft.Border.all(1, "#2E3C56"),
+                bgcolor=palette["card_bg_secondary"],
+                border=ft.Border.all(1, palette["card_border"]),
                 border_radius=12
             )
 
@@ -496,14 +499,14 @@ def build_footer(lang="en", page=None):
                     ft.Button(
                         close_text,
                         on_click=lambda _: target_page.pop_dialog(),
-                        bgcolor="#2E3C56",
-                        color="#FFFFFF",
+                        bgcolor=palette["button_secondary_bg"],
+                        color=palette["button_secondary_text"],
                         style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8))
                     )
                 ],
                 actions_alignment=ft.MainAxisAlignment.CENTER,
                 on_dismiss=lambda _: _reset_btn(None),
-                bgcolor="#151E33",
+                bgcolor=palette["dialog_bg"],
             )
             target_page.show_dialog(dlg)
 
@@ -543,8 +546,8 @@ def build_footer(lang="en", page=None):
 
         def _reset_btn(_=None):
             update_btn_label.value = update_text
-            update_btn_label.color = "#94A3B8"
-            update_btn_icon.color = "#94A3B8"
+            update_btn_label.color = palette["text_muted"]
+            update_btn_icon.color = palette["text_muted"]
             update_btn_icon.name = ft.Icons.UPDATE_ROUNDED
             update_btn.data = None
             update_btn.on_click = on_update_click

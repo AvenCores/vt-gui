@@ -305,3 +305,18 @@ def get_app_lang():
     if saved_lang and saved_lang in STRINGS:
         return saved_lang
     return _detect_system_lang()
+
+
+def get_app_theme():
+    """Determines application theme mode ('dark' or 'light') from saved settings."""
+    env_vars = load_env_vars()
+    saved_theme = (env_vars.get("THEME_MODE") or os.environ.get("THEME_MODE", "dark")).lower().strip()
+    return "light" if saved_theme == "light" else "dark"
+
+
+def set_app_theme(theme_mode):
+    """Sets and persists application theme mode ('dark' or 'light')."""
+    mode = "light" if str(theme_mode).lower().strip() == "light" else "dark"
+    write_env_var("THEME_MODE", mode)
+    return mode
+

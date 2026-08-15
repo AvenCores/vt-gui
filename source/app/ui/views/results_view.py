@@ -5,12 +5,41 @@ import threading
 from ...core.config import STRINGS, get_api_key
 from ...api.vt_api import reanalyze_item, get_file_behaviours, get_comments, add_comment, delete_comment, vote_item, get_user_vote
 from ...services.export_service import prompt_export_report
-from ..components.theme import make_stat_card, make_file_details_card, make_engine_row, make_loading_card
+from ..components.theme import make_stat_card, make_file_details_card, make_engine_row, make_loading_card, get_theme_palette
+
+# Module-level state caches to preserve UI state across theme toggles and rerenders
+_VOTE_CACHE = {}
+_ACTIVE_RES_TAB = {}
+_ENGINES_EXPANDED = {}
+_BEHAVIORS_CACHE = {}
+_COMMENTS_CACHE = {}
 
 
-def build_results_view(current_scan_results, selected_target_file, last_completed_sha256, lang, page):
-    """Builds the enhanced results dashboard, showing detections, behaviors, comments, voting, and export options."""
+def build_results_view(current_scan_results, selected_target_file, last_completed_sha256, lang, page, theme_mode="dark"):
+    """Builds the enhanced results dashboard, showing detections, behaviors, comments, voting, and export options with theme support."""
+    palette = get_theme_palette(theme_mode)
     
+    def safe_update_control(control=None):
+        def _apply():
+            try:
+                if control is not None and getattr(control, "page", None) is not None:
+                    control.update()
+                else:
+                    page.update()
+            except Exception:
+                try:
+                    page.update()
+                except Exception:
+                    pass
+
+        if hasattr(page, "loop") and page.loop and page.loop.is_running():
+            try:
+                page.loop.call_soon_threadsafe(_apply)
+                return
+            except Exception:
+                pass
+        _apply()
+
     def get_stats_and_results(data_dict):
         if not isinstance(data_dict, dict):
             if isinstance(data_dict, list) and len(data_dict) > 0 and isinstance(data_dict[0], dict):
@@ -74,7 +103,7 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
         banner_icon = ft.Icons.GPP_BAD_ROUNDED
     elif suspicious > 0:
         banner_text = STRINGS[lang]["verdict_suspicious"].format(suspicious=suspicious)
-        banner_color = "#FFD700"
+        banner_color = "#FFD700" if theme_mode == "dark" else "#D97706"
         banner_icon = ft.Icons.WARNING_ROUNDED
     else:
         banner_text = STRINGS[lang]["verdict_safe"]
@@ -89,7 +118,7 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
         bgcolor=banner_color,
         padding=15,
         border_radius=12,
-        shadow=ft.BoxShadow(blur_radius=8, color="#000000", offset=ft.Offset(0, 2))
+        shadow=ft.BoxShadow(blur_radius=8, color=palette["shadow_color"], offset=ft.Offset(0, 2))
     )
     
     # 2. Action Bar (Re-analyze, Export, Vote)
@@ -122,7 +151,8 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
         elif not target_sha256 and isinstance(data_val, str) and len(data_val) == 64:
             target_sha256 = data_val
 
-    user_vote_state = [None]  # "harmless", "malicious", or None
+    # Persistent user vote state from cache
+    user_vote_state = [_VOTE_CACHE.get(target_sha256)]
     is_voting_state = [False]
 
     vote_buttons_container = ft.Row(spacing=6)
@@ -142,7 +172,7 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
             if user_vote_state[0] == verdict:
                 verdict_word = STRINGS[lang].get(f"verdict_{verdict}_word", verdict)
                 msg = STRINGS[lang].get("already_voted", "Already voted '{verdict}' for this file.").format(verdict=verdict_word)
-                page.show_dialog(ft.SnackBar(content=ft.Text(msg), bgcolor="#008DDA"))
+                page.show_dialog(ft.SnackBar(content=ft.Text(msg), bgcolor=palette["button_primary_bg"]))
                 return
 
             is_voting_state[0] = True
@@ -152,6 +182,7 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
                 try:
                     vote_item("files", target_sha256, verdict, api_key)
                     user_vote_state[0] = verdict
+                    _VOTE_CACHE[target_sha256] = verdict
                     is_voting_state[0] = False
                     update_vote_ui()
                     verdict_word = STRINGS[lang].get(f"verdict_{verdict}_word", verdict)
@@ -171,13 +202,13 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
             controls.append(
                 ft.Container(
                     content=ft.Row([
-                        ft.ProgressRing(width=14, height=14, stroke_width=2, color="#00F0FF"),
-                        ft.Text(STRINGS[lang].get("voting_progress", "Sending vote..."), color="#94A3B8", size=11)
+                        ft.ProgressRing(width=14, height=14, stroke_width=2, color=palette["accent"]),
+                        ft.Text(STRINGS[lang].get("voting_progress", "Sending vote..."), color=palette["text_muted"], size=11)
                     ], spacing=6),
                     padding=ft.Padding(left=8, right=8, top=4, bottom=4),
-                    bgcolor="#151E33",
+                    bgcolor=palette["card_bg"],
                     border_radius=8,
-                    border=ft.Border.all(1, "#00F0FF")
+                    border=ft.Border.all(1, palette["accent"])
                 )
             )
         else:
@@ -189,13 +220,13 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
 
             harmless_btn = ft.Container(
                 content=ft.Row([
-                    ft.Icon(ft.Icons.THUMBS_UP_DOWN_ROUNDED, color="#10B981" if is_harmless else "#39FF14", size=18),
-                    ft.Text(harmless_label, color="#10B981" if is_harmless else "#E2E8F0", size=11, weight=ft.FontWeight.BOLD if is_harmless else ft.FontWeight.NORMAL)
+                    ft.Icon(ft.Icons.THUMBS_UP_DOWN_ROUNDED, color="#10B981" if is_harmless else ("#39FF14" if theme_mode == "dark" else "#16A34A"), size=18),
+                    ft.Text(harmless_label, color="#10B981" if is_harmless else palette["text_secondary"], size=11, weight=ft.FontWeight.BOLD if is_harmless else ft.FontWeight.NORMAL)
                 ], spacing=4),
                 padding=ft.Padding(left=10, right=10, top=6, bottom=6),
                 border_radius=8,
-                bgcolor="#10B98122" if is_harmless else "#1E293B",
-                border=ft.Border.all(1, "#10B981" if is_harmless else "#2E3C56"),
+                bgcolor="#10B98122" if is_harmless else palette["button_secondary_bg"],
+                border=ft.Border.all(1, "#10B981" if is_harmless else palette["card_border"]),
                 on_click=handle_vote("harmless"),
                 tooltip=STRINGS[lang].get("vote_harmless", "Vote Harmless")
             )
@@ -203,12 +234,12 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
             malicious_btn = ft.Container(
                 content=ft.Row([
                     ft.Icon(ft.Icons.THUMB_DOWN_ALT_ROUNDED, color="#EF4444", size=18),
-                    ft.Text(malicious_label, color="#EF4444" if is_malicious else "#E2E8F0", size=11, weight=ft.FontWeight.BOLD if is_malicious else ft.FontWeight.NORMAL)
+                    ft.Text(malicious_label, color="#EF4444" if is_malicious else palette["text_secondary"], size=11, weight=ft.FontWeight.BOLD if is_malicious else ft.FontWeight.NORMAL)
                 ], spacing=4),
                 padding=ft.Padding(left=10, right=10, top=6, bottom=6),
                 border_radius=8,
-                bgcolor="#EF444422" if is_malicious else "#1E293B",
-                border=ft.Border.all(1, "#EF4444" if is_malicious else "#2E3C56"),
+                bgcolor="#EF444422" if is_malicious else palette["button_secondary_bg"],
+                border=ft.Border.all(1, "#EF4444" if is_malicious else palette["card_border"]),
                 on_click=handle_vote("malicious"),
                 tooltip=STRINGS[lang].get("vote_malicious", "Vote Malicious")
             )
@@ -216,50 +247,46 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
             controls.extend([harmless_btn, malicious_btn])
 
         vote_buttons_container.controls = controls
-        def _do_update():
-            try:
-                page.update()
-            except Exception:
-                pass
-
-        try:
-            import asyncio
-            loop = asyncio.get_event_loop()
-            if loop.is_running():
-                loop.call_soon_threadsafe(_do_update)
-            else:
-                _do_update()
-        except Exception:
-            _do_update()
+        safe_update_control(vote_buttons_container)
 
     def load_user_vote():
+        cached_val = _VOTE_CACHE.get(target_sha256)
+        if cached_val is not None:
+            user_vote_state[0] = cached_val
+            update_vote_ui()
+            return
+
         api_key = get_api_key()
         if not api_key or not target_sha256:
             return
         def worker():
-            v = get_user_vote("files", target_sha256, api_key)
-            if v:
-                user_vote_state[0] = v
-                update_vote_ui()
+            try:
+                v = get_user_vote("files", target_sha256, api_key)
+                if v:
+                    _VOTE_CACHE[target_sha256] = v
+                    user_vote_state[0] = v
+                    update_vote_ui()
+            except Exception:
+                pass
         threading.Thread(target=worker, daemon=True).start()
 
     load_user_vote()
     update_vote_ui()
 
     actions_row = ft.Row([
-        ft.Button(STRINGS[lang].get("btn_reanalyze", "Re-analyze"), icon=ft.Icons.REFRESH_ROUNDED, on_click=handle_reanalyze, bgcolor="#1E293B", color="#00F0FF"),
-        ft.Button(STRINGS[lang].get("btn_export_report", "Export Report"), icon=ft.Icons.DOWNLOAD_ROUNDED, on_click=handle_export, bgcolor="#1E293B", color="#FFFFFF"),
+        ft.Button(STRINGS[lang].get("btn_reanalyze", "Re-analyze"), icon=ft.Icons.REFRESH_ROUNDED, on_click=handle_reanalyze, bgcolor=palette["button_secondary_bg"], color=palette["accent"]),
+        ft.Button(STRINGS[lang].get("btn_export_report", "Export Report"), icon=ft.Icons.DOWNLOAD_ROUNDED, on_click=handle_export, bgcolor=palette["button_secondary_bg"], color=palette["button_secondary_text"]),
         vote_buttons_container
     ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN)
 
-    details_card = make_file_details_card(filename, size, last_completed_sha256, STRINGS, lang)
+    details_card = make_file_details_card(filename, size, last_completed_sha256, STRINGS, lang, theme_mode=theme_mode)
     
     stats_row = ft.Row(
         [
-            make_stat_card(STRINGS[lang]["stats_malicious"], malicious, "#FF3131", ft.Icons.REPORT_PROBLEM_ROUNDED),
-            make_stat_card(STRINGS[lang]["stats_suspicious"], suspicious, "#FFD700", ft.Icons.WARNING_AMBER_ROUNDED),
-            make_stat_card(STRINGS[lang]["stats_harmless"], harmless, "#39FF14", ft.Icons.CHECK_CIRCLE_ROUNDED),
-            make_stat_card(STRINGS[lang]["stats_undetected"], undetected, "#94A3B8", ft.Icons.HELP_OUTLINE_ROUNDED)
+            make_stat_card(STRINGS[lang]["stats_malicious"], malicious, "#FF3131", ft.Icons.REPORT_PROBLEM_ROUNDED, theme_mode=theme_mode),
+            make_stat_card(STRINGS[lang]["stats_suspicious"], suspicious, "#FFD700" if theme_mode == "dark" else "#D97706", ft.Icons.WARNING_AMBER_ROUNDED, theme_mode=theme_mode),
+            make_stat_card(STRINGS[lang]["stats_harmless"], harmless, "#39FF14" if theme_mode == "dark" else "#16A34A", ft.Icons.CHECK_CIRCLE_ROUNDED, theme_mode=theme_mode),
+            make_stat_card(STRINGS[lang]["stats_undetected"], undetected, palette["text_muted"], ft.Icons.HELP_OUTLINE_ROUNDED, theme_mode=theme_mode)
         ],
         spacing=10,
         alignment=ft.MainAxisAlignment.SPACE_EVENLY
@@ -291,38 +318,40 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
                 
     if mal_susp_list:
         detections_list.controls.append(
-            ft.Text(f"{STRINGS[lang]['detections_title']} ({len(mal_susp_list)})", size=16, weight=ft.FontWeight.BOLD, color="#FFFFFF")
+            ft.Text(f"{STRINGS[lang]['detections_title']} ({len(mal_susp_list)})", size=16, weight=ft.FontWeight.BOLD, color=palette["text_primary"])
         )
         for engine, category, res, method in mal_susp_list:
-            detections_list.controls.append(make_engine_row(engine, category, res, method))
+            detections_list.controls.append(make_engine_row(engine, category, res, method, theme_mode=theme_mode))
     else:
         detections_list.controls.append(
-            ft.Text(STRINGS[lang]["verdict_safe"], size=14, color="#94A3B8")
+            ft.Text(STRINGS[lang]["verdict_safe"], size=14, color=palette["text_muted"])
         )
         
-    full_list_column = ft.Column(spacing=5, visible=False)
+    is_engines_expanded = _ENGINES_EXPANDED.get(target_sha256, False)
+    full_list_column = ft.Column(spacing=5, visible=is_engines_expanded)
     for engine, category, res, method in sorted(clean_list + mal_susp_list, key=lambda x: x[0].lower()):
-        full_list_column.controls.append(make_engine_row(engine, category, res, method))
+        full_list_column.controls.append(make_engine_row(engine, category, res, method, theme_mode=theme_mode))
         
     toggle_button = ft.Ref[ft.TextButton]()
     
     def toggle_full_list(e):
         full_list_column.visible = not full_list_column.visible
+        _ENGINES_EXPANDED[target_sha256] = full_list_column.visible
         if full_list_column.visible:
             toggle_button.current.content = STRINGS[lang]["hide_all_engines"]
             toggle_button.current.icon = ft.Icons.KEYBOARD_ARROW_UP_ROUNDED
         else:
             toggle_button.current.content = STRINGS[lang]["show_all_engines"].format(count=len(clean_list) + len(mal_susp_list))
             toggle_button.current.icon = ft.Icons.KEYBOARD_ARROW_DOWN_ROUNDED
-        page.update()
+        safe_update_control()
         
     total_engines_count = len(clean_list) + len(mal_susp_list)
     show_all_btn = ft.TextButton(
         ref=toggle_button,
-        content=STRINGS[lang]["show_all_engines"].format(count=total_engines_count),
-        icon=ft.Icons.KEYBOARD_ARROW_DOWN_ROUNDED,
-        icon_color="#00F0FF",
-        style=ft.ButtonStyle(color="#00F0FF"),
+        content=STRINGS[lang]["hide_all_engines"] if is_engines_expanded else STRINGS[lang]["show_all_engines"].format(count=total_engines_count),
+        icon=ft.Icons.KEYBOARD_ARROW_UP_ROUNDED if is_engines_expanded else ft.Icons.KEYBOARD_ARROW_DOWN_ROUNDED,
+        icon_color=palette["accent"],
+        style=ft.ButtonStyle(color=palette["accent"]),
         on_click=toggle_full_list
     )
     
@@ -334,81 +363,78 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
     ], scroll=ft.ScrollMode.ALWAYS, expand=True)
 
     # Tab 2: Behavior & Sandbox Reports
-    behavior_loading_card = make_loading_card(STRINGS[lang].get("behavior_loading", "Loading sandbox execution reports..."))
+    behavior_loading_card = make_loading_card(STRINGS[lang].get("behavior_loading", "Loading sandbox execution reports..."), theme_mode=theme_mode)
     behavior_container = ft.Column(controls=[behavior_loading_card], spacing=8, scroll=ft.ScrollMode.ALWAYS, expand=True)
-    behavior_loaded = False
+
+    def render_behaviours(behaviours):
+        behavior_container.controls.clear()
+        if not behaviours:
+            behavior_container.controls.append(ft.Text(STRINGS[lang].get("behavior_empty", "No sandbox execution reports available for this file."), color=palette["text_muted"]))
+        else:
+            for idx, b in enumerate(behaviours):
+                attrs = b.get("attributes", {})
+                sandbox_name = attrs.get("sandbox_name", f"Sandbox #{idx+1}")
+                tags = attrs.get("tags", [])
+                mitre = attrs.get("mitre_attack_techniques", [])
+                
+                details = [
+                    ft.Text(f"Sandbox: {sandbox_name.upper()}", weight=ft.FontWeight.BOLD, color=palette["accent"], size=14),
+                    ft.Text(f"Tags: {', '.join(tags) if tags else 'None'}", color=palette["text_muted"], size=11)
+                ]
+                
+                if mitre:
+                    details.append(ft.Text(f"MITRE ATT&CK Techniques: {len(mitre)} detected", weight=ft.FontWeight.W_600, color="#FFD700" if theme_mode == "dark" else "#D97706", size=12))
+                    for m in mitre[:5]:
+                        tech_id = m.get("signature_description", m.get("id", ""))
+                        details.append(ft.Text(f" • {tech_id}", color=palette["text_secondary"], size=11))
+
+                behavior_container.controls.append(ft.Container(
+                    content=ft.Column(details, spacing=4),
+                    padding=12, border_radius=10, bgcolor=palette["card_bg"], border=ft.Border.all(1, palette["card_border"])
+                ))
+        safe_update_control(behavior_container)
 
     def load_behavior(e=None):
-        if behavior_loaded:
+        if target_sha256 in _BEHAVIORS_CACHE:
+            render_behaviours(_BEHAVIORS_CACHE[target_sha256])
             return
+
         behavior_container.controls = [behavior_loading_card]
-        try:
-            page.update()
-        except Exception:
-            pass
+        safe_update_control(behavior_container)
         
         def worker():
-            nonlocal behavior_loaded
             api_key = get_api_key()
             if not api_key:
                 behavior_container.controls = [ft.Text(STRINGS[lang].get("api_key_missing", "API key required."), color="#EF4444")]
-                try:
-                    page.update()
-                except Exception:
-                    pass
+                safe_update_control(behavior_container)
                 return
             behaviours = get_file_behaviours(last_completed_sha256, api_key)
-            behavior_loaded = True
-            behavior_container.controls.clear()
-            
-            if not behaviours:
-                behavior_container.controls.append(ft.Text(STRINGS[lang].get("behavior_empty", "No sandbox execution reports available for this file."), color="#94A3B8"))
-            else:
-                for idx, b in enumerate(behaviours):
-                    attrs = b.get("attributes", {})
-                    sandbox_name = attrs.get("sandbox_name", f"Sandbox #{idx+1}")
-                    tags = attrs.get("tags", [])
-                    mitre = attrs.get("mitre_attack_techniques", [])
-                    
-                    details = [
-                        ft.Text(f"Sandbox: {sandbox_name.upper()}", weight=ft.FontWeight.BOLD, color="#00F0FF", size=14),
-                        ft.Text(f"Tags: {', '.join(tags) if tags else 'None'}", color="#94A3B8", size=11)
-                    ]
-                    
-                    if mitre:
-                        details.append(ft.Text(f"MITRE ATT&CK Techniques: {len(mitre)} detected", weight=ft.FontWeight.W_600, color="#FFD700", size=12))
-                        for m in mitre[:5]:
-                            tech_id = m.get("signature_description", m.get("id", ""))
-                            details.append(ft.Text(f" • {tech_id}", color="#E2E8F0", size=11))
+            _BEHAVIORS_CACHE[target_sha256] = behaviours
+            render_behaviours(behaviours)
 
-                    behavior_container.controls.append(ft.Container(
-                        content=ft.Column(details, spacing=4),
-                        padding=12, border_radius=10, bgcolor="#151E33", border=ft.Border.all(1, "#2E3C56")
-                    ))
-            try:
-                page.update()
-            except Exception:
-                pass
         threading.Thread(target=worker, daemon=True).start()
 
-    # Pre-trigger behavior load in background
     load_behavior()
 
     # Tab 3: Comments
-    comments_loading_card = make_loading_card(STRINGS[lang].get("comments_loading", "Loading community comments..."))
+    comments_loading_card = make_loading_card(STRINGS[lang].get("comments_loading", "Loading community comments..."), theme_mode=theme_mode)
     comments_container = ft.Column(controls=[comments_loading_card], spacing=8, scroll=ft.ScrollMode.ALWAYS, expand=True)
 
-    send_progress = ft.ProgressRing(width=20, height=20, stroke_width=2.5, color="#00F0FF", visible=False)
+    send_progress = ft.ProgressRing(width=20, height=20, stroke_width=2.5, color=palette["accent"], visible=False)
     send_button = ft.IconButton(
         icon=ft.Icons.SEND_ROUNDED,
-        icon_color="#00F0FF",
+        icon_color=palette["accent"],
         on_click=lambda e: post_comment(e),
         tooltip=STRINGS[lang].get("btn_send_comment", "Send comment")
     )
 
     comment_input = ft.TextField(
         hint_text=STRINGS[lang].get("post_comment_hint", "Write a community note or comment..."),
-        border_color="#2E3C56",
+        border_color=palette["input_border"],
+        focused_border_color=palette["accent"],
+        bgcolor=palette["input_bg"],
+        color=palette["text_primary"],
+        hint_style=ft.TextStyle(color=palette["text_muted"]),
         expand=True,
         on_submit=lambda e: post_comment(e)
     )
@@ -417,10 +443,7 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
         comment_input.disabled = is_sending
         send_button.visible = not is_sending
         send_progress.visible = is_sending
-        try:
-            page.update()
-        except Exception:
-            pass
+        safe_update_control()
 
     def post_comment(e=None):
         txt = comment_input.value.strip()
@@ -437,7 +460,7 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
             try:
                 add_comment("files", last_completed_sha256, txt, api_key)
                 comment_input.value = ""
-                load_comments()
+                load_comments(force=True)
                 page.show_dialog(ft.SnackBar(content=ft.Text(STRINGS[lang].get("toast_comment_success", "Comment posted!")), bgcolor="#10B981"))
             except Exception as ex:
                 msg = STRINGS[lang].get("toast_comment_fail", "Failed to post comment: {e}").format(e=str(ex))
@@ -455,10 +478,7 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
             ov = overlay_holder[0]
             if ov is not None and ov in page.overlay:
                 page.overlay.remove(ov)
-                try:
-                    page.update()
-                except Exception:
-                    pass
+                safe_update_control()
             overlay_holder[0] = None
 
         def on_backdrop_click(e):
@@ -466,7 +486,7 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
                 close_overlay()
 
         cancel_btn = ft.TextButton(
-            content=ft.Text(STRINGS[lang].get("btn_cancel", "Cancel"), color="#94A3B8", size=13),
+            content=ft.Text(STRINGS[lang].get("btn_cancel", "Cancel"), color=palette["text_muted"], size=13),
             on_click=lambda _: close_overlay()
         )
 
@@ -488,20 +508,20 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
             )
         ], spacing=10, alignment=ft.MainAxisAlignment.END, visible=False)
 
-        actions_row = ft.Row([cancel_btn, delete_btn], alignment=ft.MainAxisAlignment.END, spacing=10)
+        actions_row_del = ft.Row([cancel_btn, delete_btn], alignment=ft.MainAxisAlignment.END, spacing=10)
 
         panel = ft.Container(
             width=420,
-            bgcolor="#151E33",
+            bgcolor=palette["dialog_bg"],
             border_radius=12,
             padding=ft.Padding(left=24, right=24, top=20, bottom=20),
-            border=ft.Border.all(1, "#2E3C56"),
+            border=ft.Border.all(1, palette["card_border"]),
             content=ft.Column([
                 ft.Row([
                     ft.Icon(ft.Icons.DELETE_ROUNDED, color="#EF4444", size=22),
                     ft.Text(
                         STRINGS[lang].get("dlg_delete_comment_title", "Delete comment"),
-                        color="#FFFFFF",
+                        color=palette["text_primary"],
                         weight=ft.FontWeight.BOLD,
                         size=16
                     )
@@ -509,11 +529,11 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
                 ft.Container(height=8),
                 ft.Text(
                     STRINGS[lang].get("dlg_delete_comment_confirm", "Are you sure you want to delete this comment?"),
-                    color="#E2E8F0",
+                    color=palette["text_secondary"],
                     size=13
                 ),
                 ft.Container(height=16),
-                actions_row,
+                actions_row_del,
                 loading_indicator
             ], tight=True)
         )
@@ -535,18 +555,15 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
                 return
 
             is_deleting = True
-            actions_row.visible = False
+            actions_row_del.visible = False
             loading_indicator.visible = True
-            try:
-                page.update()
-            except Exception:
-                pass
+            safe_update_control()
 
             def worker():
                 try:
                     delete_comment(cid, api_key)
                     close_overlay()
-                    load_comments()
+                    load_comments(force=True)
                     page.show_dialog(ft.SnackBar(
                         content=ft.Text(STRINGS[lang].get("toast_comment_delete_success", "Comment deleted!")),
                         bgcolor="#10B981"
@@ -559,68 +576,68 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
             threading.Thread(target=worker, daemon=True).start()
 
         page.overlay.append(overlay)
-        try:
-            page.update()
-        except Exception:
-            pass
+        safe_update_control()
 
-    def load_comments(e=None):
+    def render_comments(comms):
+        comments_container.controls.clear()
+        if not comms:
+            comments_container.controls.append(ft.Text(STRINGS[lang].get("comments_empty", "No community comments yet."), color=palette["text_muted"]))
+        else:
+            for c in comms:
+                cid = c.get("id")
+                attrs = c.get("attributes", {})
+                txt = attrs.get("text", "")
+                date_val = attrs.get("date")
+                
+                date_str = ""
+                if date_val:
+                    try:
+                        from datetime import datetime
+                        date_str = datetime.fromtimestamp(date_val).strftime("%d.%m.%Y %H:%M")
+                    except Exception:
+                        pass
+
+                delete_btn = ft.IconButton(
+                    icon=ft.Icons.DELETE_OUTLINE_ROUNDED,
+                    icon_color="#EF4444",
+                    icon_size=18,
+                    tooltip=STRINGS[lang].get("btn_delete_comment", "Delete comment"),
+                    on_click=lambda e, comment_id=cid: confirm_delete_comment(comment_id)
+                ) if cid else ft.Container()
+
+                content_controls = []
+                if date_str:
+                    content_controls.append(ft.Text(date_str, color=palette["text_muted"], size=10))
+                content_controls.append(ft.Text(txt, color=palette["text_secondary"], size=12, selectable=True))
+
+                comments_container.controls.append(ft.Container(
+                    content=ft.Row([
+                        ft.Column(content_controls, spacing=2, expand=True),
+                        delete_btn
+                    ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN, vertical_alignment=ft.CrossAxisAlignment.CENTER),
+                    padding=ft.Padding(left=12, right=8, top=8, bottom=8),
+                    border_radius=8,
+                    bgcolor=palette["card_bg"],
+                    border=ft.Border.all(1, palette["card_border"])
+                ))
+        safe_update_control(comments_container)
+
+    def load_comments(e=None, force=False):
+        if not force and target_sha256 in _COMMENTS_CACHE:
+            render_comments(_COMMENTS_CACHE[target_sha256])
+            return
+
         api_key = get_api_key()
         if not api_key:
-            comments_container.controls = [ft.Text(STRINGS[lang].get("api_key_missing", "API key required."), color="#94A3B8")]
-            try:
-                page.update()
-            except Exception:
-                pass
+            comments_container.controls = [ft.Text(STRINGS[lang].get("api_key_missing", "API key required."), color=palette["text_muted"])]
+            safe_update_control(comments_container)
             return
             
         def worker():
             comms = get_comments("files", last_completed_sha256, api_key)
-            comments_container.controls.clear()
-            if not comms:
-                comments_container.controls.append(ft.Text(STRINGS[lang].get("comments_empty", "No community comments yet."), color="#94A3B8"))
-            else:
-                for c in comms:
-                    cid = c.get("id")
-                    attrs = c.get("attributes", {})
-                    txt = attrs.get("text", "")
-                    date_val = attrs.get("date")
-                    
-                    date_str = ""
-                    if date_val:
-                        try:
-                            from datetime import datetime
-                            date_str = datetime.fromtimestamp(date_val).strftime("%d.%m.%Y %H:%M")
-                        except Exception:
-                            pass
+            _COMMENTS_CACHE[target_sha256] = comms
+            render_comments(comms)
 
-                    delete_btn = ft.IconButton(
-                        icon=ft.Icons.DELETE_OUTLINE_ROUNDED,
-                        icon_color="#EF4444",
-                        icon_size=18,
-                        tooltip=STRINGS[lang].get("btn_delete_comment", "Delete comment"),
-                        on_click=lambda e, comment_id=cid: confirm_delete_comment(comment_id)
-                    ) if cid else ft.Container()
-
-                    content_controls = []
-                    if date_str:
-                        content_controls.append(ft.Text(date_str, color="#64748B", size=10))
-                    content_controls.append(ft.Text(txt, color="#E2E8F0", size=12, selectable=True))
-
-                    comments_container.controls.append(ft.Container(
-                        content=ft.Row([
-                            ft.Column(content_controls, spacing=2, expand=True),
-                            delete_btn
-                        ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN, vertical_alignment=ft.CrossAxisAlignment.CENTER),
-                        padding=ft.Padding(left=12, right=8, top=8, bottom=8),
-                        border_radius=8,
-                        bgcolor="#151E33",
-                        border=ft.Border.all(1, "#2E3C56")
-                    ))
-            try:
-                page.update()
-            except Exception:
-                pass
         threading.Thread(target=worker, daemon=True).start()
 
     load_comments()
@@ -634,7 +651,7 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
                 padding=ft.Padding(right=6, left=0, top=0, bottom=0)
             )
         ]),
-        ft.Divider(color="#2E3C56"),
+        ft.Divider(color=palette["divider"]),
         comments_container
     ], expand=True)
 
@@ -644,7 +661,7 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
         (2, STRINGS[lang].get("tab_comments", "Comments"), ft.Icons.COMMENT_ROUNDED, comments_tab_view),
     ]
 
-    active_res_tab = [0]
+    active_res_tab = [_ACTIVE_RES_TAB.get(target_sha256, 0)]
     res_tab_views_map = {idx: v for idx, _, _, v in res_tab_defs}
 
     animated_res_tab_content = ft.AnimatedSwitcher(
@@ -668,20 +685,18 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
     def update_res_tab_buttons():
         for idx, btn in res_tab_buttons_map.items():
             is_active = (active_res_tab[0] == idx)
-            btn.border = ft.Border.all(1, "#00F0FF" if is_active else "transparent")
-            btn.bgcolor = "#1E293B" if is_active else "transparent"
+            btn.border = ft.Border.all(1, palette["accent"] if is_active else "transparent")
+            btn.bgcolor = palette["tab_active_bg"] if is_active else "transparent"
             col = btn.content
-            col.controls[0].color = "#00F0FF" if is_active else "#94A3B8"
-            col.controls[1].color = "#FFFFFF" if is_active else "#94A3B8"
-            try:
-                btn.update()
-            except Exception:
-                pass
+            col.controls[0].color = palette["accent"] if is_active else palette["text_muted"]
+            col.controls[1].color = palette["text_primary"] if is_active else palette["text_muted"]
+            safe_update_control(btn)
 
     def select_res_tab(idx):
         if active_res_tab[0] == idx:
             return
         active_res_tab[0] = idx
+        _ACTIVE_RES_TAB[target_sha256] = idx
         if idx == 1:
             load_behavior(None)
         update_res_tab_buttons()
@@ -691,10 +706,7 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
             padding=5,
             expand=True
         )
-        try:
-            animated_res_tab_content.update()
-        except Exception:
-            pass
+        safe_update_control(animated_res_tab_content)
 
     for idx, label, icon, _ in res_tab_defs:
         is_active = (active_res_tab[0] == idx)
@@ -702,8 +714,8 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
         tab_btn = ft.Container(
             content=ft.Column(
                 [
-                    ft.Icon(icon, color="#00F0FF" if is_active else "#94A3B8", size=20),
-                    ft.Text(label, color="#FFFFFF" if is_active else "#94A3B8", size=12, weight=ft.FontWeight.W_600, text_align=ft.TextAlign.CENTER)
+                    ft.Icon(icon, color=palette["accent"] if is_active else palette["text_muted"], size=20),
+                    ft.Text(label, color=palette["text_primary"] if is_active else palette["text_muted"], size=12, weight=ft.FontWeight.W_600, text_align=ft.TextAlign.CENTER)
                 ],
                 alignment=ft.MainAxisAlignment.CENTER,
                 horizontal_alignment=ft.CrossAxisAlignment.CENTER,
@@ -712,8 +724,8 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
             padding=ft.Padding(left=12, right=12, top=6, bottom=6),
             height=70,
             border_radius=8,
-            border=ft.Border.all(1, "#00F0FF" if is_active else "transparent"),
-            bgcolor="#1E293B" if is_active else "transparent",
+            border=ft.Border.all(1, palette["accent"] if is_active else "transparent"),
+            bgcolor=palette["tab_active_bg"] if is_active else "transparent",
             animate=ft.Animation(150, ft.AnimationCurve.EASE_OUT),
             on_click=lambda _, i=idx: select_res_tab(i)
         )
@@ -722,15 +734,12 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
             def on_tab_hover(e):
                 if active_res_tab[0] != tab_idx:
                     if e.data == "true":
-                        btn.border = ft.Border.all(1, "#00F0FF")
-                        btn.bgcolor = "#152035"
+                        btn.border = ft.Border.all(1, palette["tab_inactive_hover_border"])
+                        btn.bgcolor = palette["tab_inactive_hover_bg"]
                     else:
                         btn.border = ft.Border.all(1, "transparent")
                         btn.bgcolor = "transparent"
-                    try:
-                        btn.update()
-                    except Exception:
-                        pass
+                    safe_update_control(btn)
             return on_tab_hover
 
         tab_btn.on_hover = make_res_hover_handler(tab_btn, idx)
@@ -749,8 +758,8 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
                 content=res_tab_header_row,
                 padding=ft.Padding(left=4, right=4, top=10, bottom=10),
                 border=ft.Border(
-                    top=ft.BorderSide(1, "#1E293B"),
-                    bottom=ft.BorderSide(1, "#1E293B")
+                    top=ft.BorderSide(1, palette["divider"]),
+                    bottom=ft.BorderSide(1, palette["divider"])
                 )
             ),
             animated_res_tab_content

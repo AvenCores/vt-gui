@@ -12,13 +12,14 @@ from ...api.vt_api import submit_url_scan, get_subdomains, get_dns_resolutions, 
 from ...services.export_service import prompt_export_report
 from ...services.history_service import add_lookup_record
 from ...utils.clipboard import safe_copy_to_clipboard
-from ..components.theme import make_stat_card, make_engine_row, make_loading_card
+from ..components.theme import make_stat_card, make_engine_row, make_loading_card, get_theme_palette
 
 _NO_WINDOW = subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0
+_RELATIONS_CACHE = {}
 
 
 class IntelligenceView:
-    def __init__(self, search_states, current_lang, show_alert_fn, get_installed_binary_path_fn, thread_safe_build_fn, build_ui_fn, page: ft.Page):
+    def __init__(self, search_states, current_lang, show_alert_fn, get_installed_binary_path_fn, thread_safe_build_fn, build_ui_fn, page: ft.Page, theme_mode: str = "dark"):
         self.search_states = search_states
         self.current_lang = current_lang
         self.show_alert_fn = show_alert_fn
@@ -26,6 +27,8 @@ class IntelligenceView:
         self.thread_safe_build_fn = thread_safe_build_fn
         self.build_ui_fn = build_ui_fn
         self.page = page
+        self.theme_mode = theme_mode
+        self.palette = get_theme_palette(theme_mode)
 
     def build_lookup_results_view(self, data_dict, item_type, item_id):
         if not isinstance(data_dict, dict):
@@ -66,7 +69,7 @@ class IntelligenceView:
             banner_icon = ft.Icons.GPP_BAD_ROUNDED
         elif suspicious > 0:
             banner_text = STRINGS[self.current_lang]["verdict_suspicious"].format(suspicious=suspicious)
-            banner_color = "#FFD700"
+            banner_color = "#FFD700" if self.theme_mode == "dark" else "#D97706"
             banner_icon = ft.Icons.WARNING_ROUNDED
         else:
             banner_text = STRINGS[self.current_lang]["verdict_safe"]
@@ -85,10 +88,10 @@ class IntelligenceView:
         
         stats_row = ft.Row(
             [
-                make_stat_card(STRINGS[self.current_lang]["stats_malicious"], malicious, "#FF3131", ft.Icons.REPORT_PROBLEM_ROUNDED),
-                make_stat_card(STRINGS[self.current_lang]["stats_suspicious"], suspicious, "#FFD700", ft.Icons.WARNING_AMBER_ROUNDED),
-                make_stat_card(STRINGS[self.current_lang]["stats_harmless"], harmless, "#39FF14", ft.Icons.CHECK_CIRCLE_ROUNDED),
-                make_stat_card(STRINGS[self.current_lang]["stats_undetected"], undetected, "#94A3B8", ft.Icons.HELP_OUTLINE_ROUNDED)
+                make_stat_card(STRINGS[self.current_lang]["stats_malicious"], malicious, "#FF3131", ft.Icons.REPORT_PROBLEM_ROUNDED, theme_mode=self.theme_mode),
+                make_stat_card(STRINGS[self.current_lang]["stats_suspicious"], suspicious, "#FFD700" if self.theme_mode == "dark" else "#D97706", ft.Icons.WARNING_AMBER_ROUNDED, theme_mode=self.theme_mode),
+                make_stat_card(STRINGS[self.current_lang]["stats_harmless"], harmless, "#39FF14" if self.theme_mode == "dark" else "#16A34A", ft.Icons.CHECK_CIRCLE_ROUNDED, theme_mode=self.theme_mode),
+                make_stat_card(STRINGS[self.current_lang]["stats_undetected"], undetected, self.palette["text_muted"], ft.Icons.HELP_OUTLINE_ROUNDED, theme_mode=self.theme_mode)
             ],
             spacing=8,
             alignment=ft.MainAxisAlignment.SPACE_EVENLY
@@ -112,33 +115,33 @@ class IntelligenceView:
             threading.Thread(target=worker, daemon=True).start()
 
         action_buttons = ft.Row([
-            ft.Button(STRINGS[self.current_lang].get("btn_reanalyze", "Re-analyze"), icon=ft.Icons.REFRESH_ROUNDED, on_click=handle_reanalyze, bgcolor="#1E293B", color="#00F0FF"),
-            ft.Button(STRINGS[self.current_lang].get("btn_export_report", "Export Report"), icon=ft.Icons.DOWNLOAD_ROUNDED, on_click=handle_export, bgcolor="#1E293B", color="#FFFFFF")
+            ft.Button(STRINGS[self.current_lang].get("btn_reanalyze", "Re-analyze"), icon=ft.Icons.REFRESH_ROUNDED, on_click=handle_reanalyze, bgcolor=self.palette["button_secondary_bg"], color=self.palette["accent"]),
+            ft.Button(STRINGS[self.current_lang].get("btn_export_report", "Export Report"), icon=ft.Icons.DOWNLOAD_ROUNDED, on_click=handle_export, bgcolor=self.palette["button_secondary_bg"], color=self.palette["button_secondary_text"])
         ], alignment=ft.MainAxisAlignment.START, spacing=8)
         
         details_items = [
-            ft.Row([ft.Text(STRINGS[self.current_lang]["lbl_type"], color="#94A3B8", size=12), ft.Text(item_type.upper(), color="#FFFFFF", size=12, weight=ft.FontWeight.BOLD)]),
-            ft.Row([ft.Text(STRINGS[self.current_lang]["lbl_target"], color="#94A3B8", size=12), ft.Text(item_id, color="#FFFFFF", size=12, weight=ft.FontWeight.BOLD)])
+            ft.Row([ft.Text(STRINGS[self.current_lang]["lbl_type"], color=self.palette["text_muted"], size=12), ft.Text(item_type.upper(), color=self.palette["text_primary"], size=12, weight=ft.FontWeight.BOLD)]),
+            ft.Row([ft.Text(STRINGS[self.current_lang]["lbl_target"], color=self.palette["text_muted"], size=12), ft.Text(item_id, color=self.palette["text_primary"], size=12, weight=ft.FontWeight.BOLD)])
         ]
         
         if item_type == "domain":
             registrar = data_dict.get("registrar")
             if registrar:
-                details_items.append(ft.Row([ft.Text(STRINGS[self.current_lang]["lbl_registrar"], color="#94A3B8", size=12), ft.Text(registrar, color="#FFFFFF", size=12)]))
+                details_items.append(ft.Row([ft.Text(STRINGS[self.current_lang]["lbl_registrar"], color=self.palette["text_muted"], size=12), ft.Text(registrar, color=self.palette["text_primary"], size=12)]))
             reputation = data_dict.get("reputation")
             if reputation is not None:
-                details_items.append(ft.Row([ft.Text(STRINGS[self.current_lang]["lbl_reputation"], color="#94A3B8", size=12), ft.Text(str(reputation), color="#FFFFFF", size=12)]))
+                details_items.append(ft.Row([ft.Text(STRINGS[self.current_lang]["lbl_reputation"], color=self.palette["text_muted"], size=12), ft.Text(str(reputation), color=self.palette["text_primary"], size=12)]))
         elif item_type == "ip":
             reputation = data_dict.get("reputation")
             if reputation is not None:
-                details_items.append(ft.Row([ft.Text(STRINGS[self.current_lang]["lbl_reputation"], color="#94A3B8", size=12), ft.Text(str(reputation), color="#FFFFFF", size=12)]))
+                details_items.append(ft.Row([ft.Text(STRINGS[self.current_lang]["lbl_reputation"], color=self.palette["text_muted"], size=12), ft.Text(str(reputation), color=self.palette["text_primary"], size=12)]))
                 
         details_card = ft.Container(
             content=ft.Column(details_items, spacing=6),
             padding=15,
-            border=ft.Border.all(1, "#2E3C56"),
+            border=ft.Border.all(1, self.palette["card_border"]),
             border_radius=12,
-            bgcolor="#151E33"
+            bgcolor=self.palette["card_bg"]
         )
         
         detections_list = ft.Column(spacing=5)
@@ -166,13 +169,13 @@ class IntelligenceView:
                     
         if mal_susp_list:
             detections_list.controls.append(
-                ft.Text(f"{STRINGS[self.current_lang]['detections_title']} ({len(mal_susp_list)})", size=15, weight=ft.FontWeight.BOLD, color="#FFFFFF")
+                ft.Text(f"{STRINGS[self.current_lang]['detections_title']} ({len(mal_susp_list)})", size=15, weight=ft.FontWeight.BOLD, color=self.palette["text_primary"])
             )
             for engine, category, res, method in mal_susp_list:
-                detections_list.controls.append(make_engine_row(engine, category, res, method))
+                detections_list.controls.append(make_engine_row(engine, category, res, method, theme_mode=self.theme_mode))
         else:
             detections_list.controls.append(
-                ft.Text(STRINGS[self.current_lang]["verdict_safe"], size=13, color="#94A3B8")
+                ft.Text(STRINGS[self.current_lang]["verdict_safe"], size=13, color=self.palette["text_muted"])
             )
             
         if item_type == "domain":
@@ -189,7 +192,7 @@ class IntelligenceView:
             content=ft.Text(STRINGS[self.current_lang]["btn_open_web"]),
             icon=ft.Icons.OPEN_IN_BROWSER_ROUNDED,
             on_click=lambda _: webbrowser.open(web_url),
-            bgcolor="#008DDA",
+            bgcolor=self.palette["button_primary_bg"],
             color="#FFFFFF",
             style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8))
         )
@@ -197,46 +200,60 @@ class IntelligenceView:
         # Extended relations view for Domain & IP
         relations_view = None
         if item_type in ("domain", "ip"):
-            loading_indicator = make_loading_card(STRINGS[self.current_lang].get("dns_loading", "Loading DNS resolutions & subdomains..."), height=90)
+            loading_indicator = make_loading_card(STRINGS[self.current_lang].get("dns_loading", "Loading DNS resolutions & subdomains..."), height=90, theme_mode=self.theme_mode)
             rel_container = ft.Column([loading_indicator], spacing=6)
+            cache_key = f"{item_type}:{item_id}"
             
+            def render_rel_items(items_data):
+                rel_container.controls.clear()
+                if not items_data:
+                    rel_container.controls = [ft.Text(STRINGS[self.current_lang].get("dns_no_data", "DNS-резолвинг и поддомены не найдены."), color=self.palette["text_muted"], size=12)]
+                else:
+                    controls = []
+                    for group_type, values in items_data:
+                        if group_type == "subdomains" and values:
+                            controls.append(ft.Text(STRINGS[self.current_lang].get("lbl_subdomains", "Subdomains:"), weight=ft.FontWeight.BOLD, color=self.palette["accent"]))
+                            for val in values:
+                                controls.append(ft.Text(f" • {val}", color=self.palette["text_secondary"], size=12))
+                        elif group_type == "dns" and values:
+                            controls.append(ft.Text(STRINGS[self.current_lang].get("lbl_dns_resolutions", "DNS Resolutions:"), weight=ft.FontWeight.BOLD, color=self.palette["accent"]))
+                            for val in values:
+                                controls.append(ft.Text(f" • {val}", color=self.palette["text_secondary"], size=12))
+                    rel_container.controls = controls if controls else [ft.Text(STRINGS[self.current_lang].get("dns_no_data", "DNS-резолвинг и поддомены не найдены."), color=self.palette["text_muted"], size=12)]
+                try:
+                    self.page.update()
+                except Exception:
+                    pass
+
             def load_relations():
+                if cache_key in _RELATIONS_CACHE:
+                    render_rel_items(_RELATIONS_CACHE[cache_key])
+                    return
+
                 api_key = get_api_key()
                 if not api_key:
                     rel_container.controls = [ft.Text(STRINGS[self.current_lang]["api_key_missing"], color="#F59E0B", size=12)]
                     return
                 def worker():
-                    items = []
+                    items_data = []
                     if item_type == "domain":
                         subs = get_subdomains(item_id, api_key)
                         if subs and isinstance(subs, list):
-                            items.append(ft.Text(STRINGS[self.current_lang].get("lbl_subdomains", "Subdomains:"), weight=ft.FontWeight.BOLD, color="#00F0FF"))
-                            for s in subs[:10]:
-                                sub_id = s.get("id", "") if isinstance(s, dict) else str(s)
-                                items.append(ft.Text(f" • {sub_id}", color="#E2E8F0", size=12))
+                            items_data.append(("subdomains", [s.get("id", "") if isinstance(s, dict) else str(s) for s in subs[:10]]))
                     res = get_dns_resolutions(item_type, item_id, api_key)
                     if res and isinstance(res, list):
-                        items.append(ft.Text(STRINGS[self.current_lang].get("lbl_dns_resolutions", "DNS Resolutions:"), weight=ft.FontWeight.BOLD, color="#00F0FF"))
+                        hosts = []
                         for r in res[:10]:
                             attrs = r.get("attributes", {}) if isinstance(r, dict) else {}
-                            if isinstance(attrs, dict):
-                                host = attrs.get("host_name") or attrs.get("ip_address") or str(r)
-                            else:
-                                host = str(r)
-                            items.append(ft.Text(f" • {host}", color="#E2E8F0", size=12))
+                            host = attrs.get("host_name") or attrs.get("ip_address") or str(r)
+                            hosts.append(host)
+                        items_data.append(("dns", hosts))
                     
-                    if items:
-                        rel_container.controls = items
-                    else:
-                        rel_container.controls = [ft.Text(STRINGS[self.current_lang].get("dns_no_data", "DNS-резолвинг и поддомены не найдены."), color="#64748B", size=12)]
-                    
-                    try:
-                        self.page.update()
-                    except Exception:
-                        pass
+                    _RELATIONS_CACHE[cache_key] = items_data
+                    render_rel_items(items_data)
                 threading.Thread(target=worker, daemon=True).start()
             load_relations()
-            relations_view = ft.Container(content=rel_container, padding=12, bgcolor="#151E33", border_radius=10, border=ft.Border.all(1, "#2E3C56"))
+            relations_view = ft.Container(content=rel_container, padding=12, bgcolor=self.palette["card_bg"], border_radius=10, border=ft.Border.all(1, self.palette["card_border"]))
 
         main_items = [
             verdict_banner,
@@ -244,12 +261,12 @@ class IntelligenceView:
             ft.Container(height=5),
             details_card,
             stats_row,
-            ft.Divider(color="#1E293B"),
+            ft.Divider(color=self.palette["divider"]),
             detections_list
         ]
         
         if relations_view:
-            main_items.append(ft.Divider(color="#1E293B"))
+            main_items.append(ft.Divider(color=self.palette["divider"]))
             main_items.append(relations_view)
         
         return ft.Column(
@@ -261,7 +278,7 @@ class IntelligenceView:
     def build_search_results_view(self, results_list):
         if not results_list:
             return ft.Container(
-                content=ft.Text(STRINGS[self.current_lang]["no_results"], color="#94A3B8", size=13),
+                content=ft.Text(STRINGS[self.current_lang]["no_results"], color=self.palette["text_muted"], size=13),
                 alignment=ft.Alignment(0, 0)
             )
             
@@ -321,16 +338,16 @@ class IntelligenceView:
                     [
                         ft.Row(
                             [
-                                ft.Icon(ft.Icons.ARTICLE_ROUNDED, color="#00F0FF", size=18),
-                                ft.Text(item_id, color="#FFFFFF", size=13, weight=ft.FontWeight.BOLD, overflow=ft.TextOverflow.ELLIPSIS),
+                                ft.Icon(ft.Icons.ARTICLE_ROUNDED, color=self.palette["accent"], size=18),
+                                ft.Text(item_id, color=self.palette["text_primary"], size=13, weight=ft.FontWeight.BOLD, overflow=ft.TextOverflow.ELLIPSIS),
                             ],
                             alignment=ft.MainAxisAlignment.START,
                             spacing=6
                         ),
-                        ft.Text(f"SHA-256: {sha256}", color="#94A3B8", size=10, selectable=True),
+                        ft.Text(f"SHA-256: {sha256}", color=self.palette["text_muted"], size=10, selectable=True),
                         ft.Row(
                             [
-                                ft.Text(f"{STRINGS[self.current_lang]['lbl_size']} {size_str}", color="#E2E8F0", size=11),
+                                ft.Text(f"{STRINGS[self.current_lang]['lbl_size']} {size_str}", color=self.palette["text_secondary"], size=11),
                                 ft.Text(f"{STRINGS[self.current_lang]['lbl_detections']} {malicious}/{total}", color="#FF3131" if malicious > 0 else "#10B981", size=11, weight=ft.FontWeight.W_600)
                             ],
                             alignment=ft.MainAxisAlignment.SPACE_BETWEEN
@@ -339,7 +356,7 @@ class IntelligenceView:
                             [
                                 ft.IconButton(
                                     icon=ft.Icons.COPY_ROUNDED,
-                                    icon_color="#00F0FF",
+                                    icon_color=self.palette["accent"],
                                     icon_size=18,
                                     tooltip=STRINGS[self.current_lang]["copy_link_tooltip"],
                                     on_click=copy_intel_link
@@ -348,13 +365,13 @@ class IntelligenceView:
                                     STRINGS[self.current_lang]["btn_download_sample"],
                                     icon=ft.Icons.DOWNLOAD_ROUNDED,
                                     on_click=make_download_handler(sha256),
-                                    style=ft.ButtonStyle(color="#00F0FF")
+                                    style=ft.ButtonStyle(color=self.palette["accent"])
                                 ),
                                 ft.TextButton(
                                     STRINGS[self.current_lang]["btn_web_report"],
                                     icon=ft.Icons.OPEN_IN_NEW_ROUNDED,
                                     on_click=lambda _, url=web_url: webbrowser.open(url),
-                                    style=ft.ButtonStyle(color="#94A3B8")
+                                    style=ft.ButtonStyle(color=self.palette["text_muted"])
                                 )
                             ],
                             alignment=ft.MainAxisAlignment.END,
@@ -364,9 +381,9 @@ class IntelligenceView:
                     spacing=6
                 ),
                 padding=12,
-                border=ft.Border.all(1, "#2E3C56"),
+                border=ft.Border.all(1, self.palette["card_border"]),
                 border_radius=10,
-                bgcolor="#151E33"
+                bgcolor=self.palette["card_bg"]
             )
             list_items.append(item_card)
             
@@ -384,10 +401,11 @@ class IntelligenceView:
             hint_text=placeholder_text,
             value=state["input"],
             on_submit=lambda e: self.run_lookup_query(tab_key),
-            border_color="#2E3C56",
-            focused_border_color="#00F0FF",
-            label_style=ft.TextStyle(color="#94A3B8"),
-            text_style=ft.TextStyle(color="#E2E8F0"),
+            border_color=self.palette["input_border"],
+            focused_border_color=self.palette["accent"],
+            label_style=ft.TextStyle(color=self.palette["text_muted"]),
+            text_style=ft.TextStyle(color=self.palette["text_primary"]),
+            bgcolor=self.palette["input_bg"],
             expand=True,
             height=48
         )
@@ -431,15 +449,15 @@ class IntelligenceView:
                     content=ft.Column(
                         [
                             ft.Container(
-                                content=ft.Icon(ft.Icons.MANAGE_SEARCH_ROUNDED, color="#00F0FF", size=36),
+                                content=ft.Icon(ft.Icons.MANAGE_SEARCH_ROUNDED, color=self.palette["accent"], size=36),
                                 padding=12,
-                                bgcolor="#1E2A47",
-                                border=ft.Border.all(1.5, "#00F0FF"),
+                                bgcolor=self.palette["dialog_header_bg"],
+                                border=ft.Border.all(1.5, self.palette["accent"]),
                                 shape=ft.BoxShape.CIRCLE
                             ),
                             ft.Text(
                                 title_str,
-                                color="#FFFFFF",
+                                color=self.palette["text_primary"],
                                 size=18,
                                 weight=ft.FontWeight.BOLD,
                                 text_align=ft.TextAlign.CENTER
@@ -455,13 +473,13 @@ class IntelligenceView:
                 info_box = ft.Container(
                     content=ft.Text(
                         desc_str,
-                        color="#CBD5E1",
+                        color=self.palette["text_secondary"],
                         size=13,
                         text_align=ft.TextAlign.LEFT
                     ),
                     padding=ft.Padding(left=16, right=16, top=14, bottom=14),
-                    bgcolor="#1E293B",
-                    border=ft.Border.all(1, "#2E3C56"),
+                    bgcolor=self.palette["card_bg_secondary"],
+                    border=ft.Border.all(1, self.palette["card_border"]),
                     border_radius=12
                 )
 
@@ -482,13 +500,13 @@ class IntelligenceView:
                         ft.Button(
                             close_btn_text,
                             on_click=lambda _: self.page.pop_dialog(),
-                            bgcolor="#008DDA",
+                            bgcolor=self.palette["button_primary_bg"],
                             color="#FFFFFF",
                             style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8))
                         )
                     ],
                     actions_alignment=ft.MainAxisAlignment.CENTER,
-                    bgcolor="#151E33"
+                    bgcolor=self.palette["dialog_bg"]
                 )
                 self.page.show_dialog(dlg)
 
@@ -505,15 +523,15 @@ class IntelligenceView:
                     content=ft.Column(
                         [
                             ft.Container(
-                                content=ft.Icon(ft.Icons.WIFI_TETHERING_ROUNDED, color="#00F0FF", size=36),
+                                content=ft.Icon(ft.Icons.WIFI_TETHERING_ROUNDED, color=self.palette["accent"], size=36),
                                 padding=12,
-                                bgcolor="#1E2A47",
-                                border=ft.Border.all(1.5, "#00F0FF"),
+                                bgcolor=self.palette["dialog_header_bg"],
+                                border=ft.Border.all(1.5, self.palette["accent"]),
                                 shape=ft.BoxShape.CIRCLE
                             ),
                             ft.Text(
                                 title_str,
-                                color="#FFFFFF",
+                                color=self.palette["text_primary"],
                                 size=18,
                                 weight=ft.FontWeight.BOLD,
                                 text_align=ft.TextAlign.CENTER
@@ -529,13 +547,13 @@ class IntelligenceView:
                 info_box = ft.Container(
                     content=ft.Text(
                         desc_str,
-                        color="#CBD5E1",
+                        color=self.palette["text_secondary"],
                         size=13,
                         text_align=ft.TextAlign.LEFT
                     ),
                     padding=ft.Padding(left=16, right=16, top=14, bottom=14),
-                    bgcolor="#1E293B",
-                    border=ft.Border.all(1, "#2E3C56"),
+                    bgcolor=self.palette["card_bg_secondary"],
+                    border=ft.Border.all(1, self.palette["card_border"]),
                     border_radius=12
                 )
 
@@ -556,13 +574,13 @@ class IntelligenceView:
                         ft.Button(
                             close_btn_text,
                             on_click=lambda _: self.page.pop_dialog(),
-                            bgcolor="#008DDA",
+                            bgcolor=self.palette["button_primary_bg"],
                             color="#FFFFFF",
                             style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8))
                         )
                     ],
                     actions_alignment=ft.MainAxisAlignment.CENTER,
-                    bgcolor="#151E33"
+                    bgcolor=self.palette["dialog_bg"]
                 )
                 self.page.show_dialog(dlg)
 
@@ -570,13 +588,13 @@ class IntelligenceView:
                 content=ft.Container(
                     content=ft.Row(
                         [
-                            ft.Icon(ft.Icons.SEARCH_ROUNDED, color="#00F0FF", size=22),
-                            ft.Icon(ft.Icons.ARROW_DROP_DOWN_ROUNDED, color="#00F0FF", size=18),
+                            ft.Icon(ft.Icons.SEARCH_ROUNDED, color=self.palette["accent"], size=22),
+                            ft.Icon(ft.Icons.ARROW_DROP_DOWN_ROUNDED, color=self.palette["accent"], size=18),
                         ],
                         alignment=ft.MainAxisAlignment.CENTER,
                         spacing=0
                     ),
-                    bgcolor="#1E293B",
+                    bgcolor=self.palette["button_secondary_bg"],
                     border_radius=8,
                     height=48,
                     padding=ft.Padding(left=10, right=6, top=0, bottom=0)
@@ -588,14 +606,14 @@ class IntelligenceView:
                             [
                                 ft.Row(
                                     [
-                                        ft.Icon(ft.Icons.SEARCH_ROUNDED, color="#00F0FF", size=18),
-                                        ft.Text(STRINGS[self.current_lang].get("btn_search_cache", "Поиск в базе VT"), color="#E2E8F0", size=13),
+                                        ft.Icon(ft.Icons.SEARCH_ROUNDED, color=self.palette["accent"], size=18),
+                                        ft.Text(STRINGS[self.current_lang].get("btn_search_cache", "Поиск в базе VT"), color=self.palette["text_secondary"], size=13),
                                     ],
                                     spacing=8
                                 ),
                                 ft.IconButton(
                                     icon=ft.Icons.HELP_OUTLINE_ROUNDED,
-                                    icon_color="#00F0FF",
+                                    icon_color=self.palette["accent"],
                                     icon_size=18,
                                     tooltip=STRINGS[self.current_lang].get("info_tooltip", "Информация о функции"),
                                     on_click=show_cache_search_info
@@ -611,14 +629,14 @@ class IntelligenceView:
                             [
                                 ft.Row(
                                     [
-                                        ft.Icon(ft.Icons.TRAVEL_EXPLORE_ROUNDED, color="#008DDA", size=18),
-                                        ft.Text(STRINGS[self.current_lang].get("btn_live_scan_url", "Живое сканирование URL"), color="#E2E8F0", size=13),
+                                        ft.Icon(ft.Icons.TRAVEL_EXPLORE_ROUNDED, color=self.palette["accent_secondary"], size=18),
+                                        ft.Text(STRINGS[self.current_lang].get("btn_live_scan_url", "Живое сканирование URL"), color=self.palette["text_secondary"], size=13),
                                     ],
                                     spacing=8
                                 ),
                                 ft.IconButton(
                                     icon=ft.Icons.HELP_OUTLINE_ROUNDED,
-                                    icon_color="#00F0FF",
+                                    icon_color=self.palette["accent"],
                                     icon_size=18,
                                     tooltip=STRINGS[self.current_lang].get("info_tooltip", "Информация о функции"),
                                     on_click=show_live_scan_info
@@ -634,8 +652,8 @@ class IntelligenceView:
         else:
             search_btn = ft.IconButton(
                 icon=ft.Icons.SEARCH_ROUNDED,
-                icon_color="#00F0FF",
-                bgcolor="#1E293B",
+                icon_color=self.palette["accent"],
+                bgcolor=self.palette["button_secondary_bg"],
                 on_click=lambda e: self.run_lookup_query(tab_key),
                 height=48,
                 width=48
@@ -648,8 +666,8 @@ class IntelligenceView:
         if state["status"] == "loading":
             results_area.content = ft.Column(
                 [
-                    ft.ProgressRing(color="#00F0FF", width=36, height=36),
-                    ft.Text(STRINGS[self.current_lang]["querying_vt"], color="#00F0FF", size=13)
+                    ft.ProgressRing(color=self.palette["accent"], width=36, height=36),
+                    ft.Text(STRINGS[self.current_lang]["querying_vt"], color=self.palette["accent"], size=13)
                 ],
                 alignment=ft.MainAxisAlignment.CENTER,
                 horizontal_alignment=ft.CrossAxisAlignment.CENTER,
@@ -663,7 +681,7 @@ class IntelligenceView:
                     content=ft.Text(STRINGS[self.current_lang]["btn_upgrade_premium"], color="#FFFFFF", size=13),
                     icon=ft.Icons.OPEN_IN_BROWSER_ROUNDED,
                     on_click=lambda _: webbrowser.open("https://www.virustotal.com/gui/contact-us/premium-services"),
-                    bgcolor="#008DDA",
+                    bgcolor=self.palette["button_primary_bg"],
                     color="#FFFFFF",
                     style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8))
                 )
@@ -681,14 +699,14 @@ class IntelligenceView:
                 results_area.content = self.build_lookup_results_view(state["results"], tab_key, state["input"].strip())
         else:
             results_area.content = ft.Container(
-                content=ft.Text(helper_desc, color="#94A3B8", size=13, text_align=ft.TextAlign.CENTER),
+                content=ft.Text(helper_desc, color=self.palette["text_muted"], size=13, text_align=ft.TextAlign.CENTER),
                 alignment=ft.Alignment(0, 0)
             )
             
         return ft.Column(
             [
                 ft.Row(buttons_row, spacing=10),
-                ft.Divider(color="#2E3C56", height=1),
+                ft.Divider(color=self.palette["divider"], height=1),
                 results_area
             ],
             spacing=10,

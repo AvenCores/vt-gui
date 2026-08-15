@@ -8,15 +8,18 @@ from ...core.config import STRINGS, get_api_key
 from ...api.vt_api import check_file_exists_direct, check_file_exists_vt, get_yara_rulesets
 from ...api.cli_manager import get_installed_binary_path
 from ...services.history_service import add_lookup_record
+from ..components.theme import get_theme_palette
 
 _NO_WINDOW = subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0
 
 
 class ToolsView:
-    def __init__(self, lang, show_alert_fn, page: ft.Page):
+    def __init__(self, lang, show_alert_fn, page: ft.Page, theme_mode="dark"):
         self.lang = lang
         self.show_alert_fn = show_alert_fn
         self.page = page
+        self.theme_mode = theme_mode
+        self.palette = get_theme_palette(theme_mode)
         self.active_subtab_index = 0
         
         # State for File Diff
@@ -63,11 +66,11 @@ class ToolsView:
         def update_subtab_buttons():
             for idx, btn in subtab_buttons_map.items():
                 is_active = (self.active_subtab_index == idx)
-                btn.border = ft.Border.all(1, "#00F0FF" if is_active else "transparent")
-                btn.bgcolor = "#1E293B" if is_active else "transparent"
+                btn.border = ft.Border.all(1, self.palette["accent"] if is_active else "transparent")
+                btn.bgcolor = self.palette["tab_active_bg"] if is_active else "transparent"
                 col = btn.content
-                col.controls[0].color = "#00F0FF" if is_active else "#94A3B8"
-                col.controls[1].color = "#FFFFFF" if is_active else "#94A3B8"
+                col.controls[0].color = self.palette["accent"] if is_active else self.palette["text_muted"]
+                col.controls[1].color = self.palette["text_primary"] if is_active else self.palette["text_muted"]
                 try:
                     btn.update()
                 except Exception:
@@ -95,8 +98,8 @@ class ToolsView:
             subtab_btn = ft.Container(
                 content=ft.Column(
                     [
-                        ft.Icon(icon, color="#00F0FF" if is_active else "#94A3B8", size=20),
-                        ft.Text(label, color="#FFFFFF" if is_active else "#94A3B8", size=12, weight=ft.FontWeight.W_600)
+                        ft.Icon(icon, color=self.palette["accent"] if is_active else self.palette["text_muted"], size=20),
+                        ft.Text(label, color=self.palette["text_primary"] if is_active else self.palette["text_muted"], size=12, weight=ft.FontWeight.W_600)
                     ],
                     alignment=ft.MainAxisAlignment.CENTER,
                     horizontal_alignment=ft.CrossAxisAlignment.CENTER,
@@ -105,8 +108,8 @@ class ToolsView:
                 padding=ft.Padding(left=12, right=12, top=6, bottom=6),
                 height=70,
                 border_radius=8,
-                border=ft.Border.all(1, "#00F0FF" if is_active else "transparent"),
-                bgcolor="#1E293B" if is_active else "transparent",
+                border=ft.Border.all(1, self.palette["accent"] if is_active else "transparent"),
+                bgcolor=self.palette["tab_active_bg"] if is_active else "transparent",
                 animate=ft.Animation(150, ft.AnimationCurve.EASE_OUT),
                 on_click=lambda _, i=idx: select_subtab(i)
             )
@@ -115,8 +118,8 @@ class ToolsView:
                 def on_tab_hover(e):
                     if self.active_subtab_index != tab_idx:
                         if e.data == "true":
-                            btn.border = ft.Border.all(1, "#00F0FF")
-                            btn.bgcolor = "#152035"
+                            btn.border = ft.Border.all(1, self.palette["tab_inactive_hover_border"])
+                            btn.bgcolor = self.palette["tab_inactive_hover_bg"]
                         else:
                             btn.border = ft.Border.all(1, "transparent")
                             btn.bgcolor = "transparent"
@@ -141,7 +144,7 @@ class ToolsView:
                 ft.Container(
                     content=subtab_header_row,
                     padding=ft.Padding(left=4, right=4, top=0, bottom=20),
-                    border=ft.Border(bottom=ft.BorderSide(1, "#1E293B"))
+                    border=ft.Border(bottom=ft.BorderSide(1, self.palette["divider"]))
                 ),
                 animated_subtab_content
             ],
@@ -154,8 +157,11 @@ class ToolsView:
             label=STRINGS[self.lang].get("hash_1_label", "SHA-256 Hash #1"),
             hint_text=STRINGS[self.lang].get("hash_1_hint", "First hash to compare"),
             value=self.diff_hash1,
-            border_color="#2E3C56",
-            focused_border_color="#00F0FF",
+            border_color=self.palette["input_border"],
+            focused_border_color=self.palette["accent"],
+            bgcolor=self.palette["input_bg"],
+            color=self.palette["text_primary"],
+            label_style=ft.TextStyle(color=self.palette["text_muted"]),
             expand=True,
             on_change=lambda e: setattr(self, 'diff_hash1', e.control.value.strip())
         )
@@ -164,8 +170,11 @@ class ToolsView:
             label=STRINGS[self.lang].get("hash_2_label", "SHA-256 Hash #2"),
             hint_text=STRINGS[self.lang].get("hash_2_hint", "Second hash to compare"),
             value=self.diff_hash2,
-            border_color="#2E3C56",
-            focused_border_color="#00F0FF",
+            border_color=self.palette["input_border"],
+            focused_border_color=self.palette["accent"],
+            bgcolor=self.palette["input_bg"],
+            color=self.palette["text_primary"],
+            label_style=ft.TextStyle(color=self.palette["text_muted"]),
             expand=True,
             on_change=lambda e: setattr(self, 'diff_hash2', e.control.value.strip())
         )
@@ -175,8 +184,8 @@ class ToolsView:
         def update_diff_ui():
             if self.diff_status == "loading":
                 results_container.content = ft.Column([
-                    ft.ProgressRing(color="#00F0FF"),
-                    ft.Text(STRINGS[self.lang].get("diff_comparing", "Comparing hashes via VirusTotal CLI..."), color="#00F0FF")
+                    ft.ProgressRing(color=self.palette["accent"]),
+                    ft.Text(STRINGS[self.lang].get("diff_comparing", "Comparing hashes via VirusTotal CLI..."), color=self.palette["accent"])
                 ], alignment=ft.MainAxisAlignment.CENTER, horizontal_alignment=ft.CrossAxisAlignment.CENTER)
             elif self.diff_status == "error":
                 results_container.content = ft.Column([
@@ -210,15 +219,15 @@ class ToolsView:
 
                 banner = ft.Container(
                     content=ft.Row([
-                        ft.Icon(ft.Icons.CHECK_CIRCLE_ROUNDED if is_same else ft.Icons.COMPARE_ARROWS_ROUNDED, color="#10B981" if is_same else "#00F0FF", size=22),
+                        ft.Icon(ft.Icons.CHECK_CIRCLE_ROUNDED if is_same else ft.Icons.COMPARE_ARROWS_ROUNDED, color="#10B981" if is_same else self.palette["accent"], size=22),
                         ft.Text(
                             STRINGS[self.lang].get("diff_same_hashes", "Identical Hashes: Files match 100%") if is_same else STRINGS[self.lang].get("diff_different_hashes", "Comparison Breakdown between File #1 and File #2:"),
                             weight=ft.FontWeight.BOLD,
-                            color="#10B981" if is_same else "#FFFFFF",
+                            color="#10B981" if is_same else self.palette["text_primary"],
                             size=13
                         )
                     ], spacing=8),
-                    padding=10, border_radius=8, bgcolor="#10B98122" if is_same else "#00F0FF11", border=ft.Border.all(1, "#10B981" if is_same else "#00F0FF")
+                    padding=10, border_radius=8, bgcolor="#10B98122" if is_same else self.palette["accent_bg"], border=ft.Border.all(1, "#10B981" if is_same else self.palette["accent"])
                 )
 
                 def make_row(prop_name, v1, v2):
@@ -228,9 +237,9 @@ class ToolsView:
                     
                     return ft.Container(
                         content=ft.Row([
-                            ft.Text(prop_name, weight=ft.FontWeight.BOLD, color="#94A3B8", width=130, size=11),
-                            ft.Text(str(v1), color="#E2E8F0", width=220, size=11, overflow=ft.TextOverflow.ELLIPSIS),
-                            ft.Text(str(v2), color="#E2E8F0", width=220, size=11, overflow=ft.TextOverflow.ELLIPSIS),
+                            ft.Text(prop_name, weight=ft.FontWeight.BOLD, color=self.palette["text_muted"], width=130, size=11),
+                            ft.Text(str(v1), color=self.palette["text_secondary"], width=220, size=11, overflow=ft.TextOverflow.ELLIPSIS),
+                            ft.Text(str(v2), color=self.palette["text_secondary"], width=220, size=11, overflow=ft.TextOverflow.ELLIPSIS),
                             ft.Container(
                                 content=ft.Text(st_text, color="#FFFFFF", size=10, weight=ft.FontWeight.BOLD),
                                 padding=ft.Padding(left=8, top=2, right=8, bottom=2),
@@ -239,7 +248,7 @@ class ToolsView:
                             )
                         ], alignment=ft.MainAxisAlignment.START, spacing=10),
                         padding=8,
-                        border=ft.Border(bottom=ft.BorderSide(1, "#2E3C56"))
+                        border=ft.Border(bottom=ft.BorderSide(1, self.palette["divider"]))
                     )
 
                 lbl_prop = STRINGS[self.lang].get("attr_property", "Property")
@@ -249,13 +258,13 @@ class ToolsView:
                 
                 header_row = ft.Container(
                     content=ft.Row([
-                        ft.Text(lbl_prop, weight=ft.FontWeight.BOLD, color="#00F0FF", width=130, size=12),
-                        ft.Text(lbl_f1, weight=ft.FontWeight.BOLD, color="#00F0FF", width=220, size=12),
-                        ft.Text(lbl_f2, weight=ft.FontWeight.BOLD, color="#00F0FF", width=220, size=12),
-                        ft.Text(lbl_st, weight=ft.FontWeight.BOLD, color="#00F0FF", size=12)
+                        ft.Text(lbl_prop, weight=ft.FontWeight.BOLD, color=self.palette["accent"], width=130, size=12),
+                        ft.Text(lbl_f1, weight=ft.FontWeight.BOLD, color=self.palette["accent"], width=220, size=12),
+                        ft.Text(lbl_f2, weight=ft.FontWeight.BOLD, color=self.palette["accent"], width=220, size=12),
+                        ft.Text(lbl_st, weight=ft.FontWeight.BOLD, color=self.palette["accent"], size=12)
                     ], alignment=ft.MainAxisAlignment.START, spacing=10),
                     padding=8,
-                    bgcolor="#1E293B",
+                    bgcolor=self.palette["card_bg_secondary"],
                     border_radius=6
                 )
 
@@ -272,7 +281,6 @@ class ToolsView:
                     make_row("Type / Format", type1, type2)
                 ]
 
-                # Optional metadata rows (only added if present for at least one file)
                 md5_1 = a1.get("md5", "N/A")
                 md5_2 = a2.get("md5", "N/A")
                 if md5_1 != "N/A" or md5_2 != "N/A":
@@ -288,7 +296,7 @@ class ToolsView:
 
                 results_container.content = ft.Column(table_rows, spacing=4, scroll=ft.ScrollMode.ALWAYS, expand=True)
             else:
-                results_container.content = ft.Text(STRINGS[self.lang].get("diff_prompt", "Enter two file hashes above to compare detections, PE headers, and metadata."), color="#94A3B8")
+                results_container.content = ft.Text(STRINGS[self.lang].get("diff_prompt", "Enter two file hashes above to compare detections, PE headers, and metadata."), color=self.palette["text_muted"])
             
             try:
                 self.page.update()
@@ -323,7 +331,6 @@ class ToolsView:
                     self.diff_status = "error"
                     self.diff_error = str(ex)
                 
-                # Save diff action to history
                 add_lookup_record(
                     "diff",
                     f"{self.diff_hash1[:8]}... vs {self.diff_hash2[:8]}...",
@@ -340,14 +347,14 @@ class ToolsView:
             STRINGS[self.lang].get("btn_compare_hashes", "Compare Hashes"),
             icon=ft.Icons.COMPARE_ARROWS_ROUNDED,
             on_click=run_diff,
-            bgcolor="#008DDA",
+            bgcolor=self.palette["button_primary_bg"],
             color="#FFFFFF"
         )
 
         return ft.Column([
             ft.Row([hash1_field, hash2_field], spacing=10),
             ft.Row([diff_btn], alignment=ft.MainAxisAlignment.END),
-            ft.Divider(color="#2E3C56"),
+            ft.Divider(color=self.palette["divider"]),
             results_container
         ], expand=True, spacing=10)
 
@@ -356,11 +363,11 @@ class ToolsView:
         
         def update_yara_ui():
             if self.yara_status == "loading":
-                yara_body_container.content = ft.Column([ft.ProgressRing(color="#00F0FF"), ft.Text(STRINGS[self.lang].get("yara_loading", "Loading YARA Rulesets..."), color="#00F0FF")], alignment=ft.MainAxisAlignment.CENTER, horizontal_alignment=ft.CrossAxisAlignment.CENTER)
+                yara_body_container.content = ft.Column([ft.ProgressRing(color=self.palette["accent"]), ft.Text(STRINGS[self.lang].get("yara_loading", "Loading YARA Rulesets..."), color=self.palette["accent"])], alignment=ft.MainAxisAlignment.CENTER, horizontal_alignment=ft.CrossAxisAlignment.CENTER)
             elif self.yara_status == "error":
                 yara_body_container.content = ft.Column([
-                    ft.Icon(ft.Icons.LOCK_ROUNDED, color="#FFD700", size=32),
-                    ft.Text(self.yara_error or "Could not fetch YARA rulesets", color="#E2E8F0", text_align=ft.TextAlign.CENTER)
+                    ft.Icon(ft.Icons.LOCK_ROUNDED, color="#FFD700" if self.theme_mode == "dark" else "#D97706", size=32),
+                    ft.Text(self.yara_error or "Could not fetch YARA rulesets", color=self.palette["text_secondary"], text_align=ft.TextAlign.CENTER)
                 ], alignment=ft.MainAxisAlignment.CENTER, horizontal_alignment=ft.CrossAxisAlignment.CENTER)
             elif self.yara_rulesets:
                 items = []
@@ -368,14 +375,14 @@ class ToolsView:
                     name = r.get("name", r.get("id", "Ruleset"))
                     items.append(ft.Container(
                         content=ft.Row([
-                            ft.Icon(ft.Icons.CODE_ROUNDED, color="#00F0FF"),
-                            ft.Text(name, color="#FFFFFF", weight=ft.FontWeight.BOLD)
+                            ft.Icon(ft.Icons.CODE_ROUNDED, color=self.palette["accent"]),
+                            ft.Text(name, color=self.palette["text_primary"], weight=ft.FontWeight.BOLD)
                         ]),
-                        padding=10, border_radius=8, bgcolor="#151E33", border=ft.Border.all(1, "#2E3C56")
+                        padding=10, border_radius=8, bgcolor=self.palette["card_bg"], border=ft.Border.all(1, self.palette["card_border"])
                     ))
                 yara_body_container.content = ft.Column(items, scroll=ft.ScrollMode.ALWAYS, expand=True)
             else:
-                yara_body_container.content = ft.Text(STRINGS[self.lang].get("yara_load_prompt", "Click refresh to load your VirusTotal Livehunt YARA rulesets."), color="#94A3B8")
+                yara_body_container.content = ft.Text(STRINGS[self.lang].get("yara_load_prompt", "Click refresh to load your VirusTotal Livehunt YARA rulesets."), color=self.palette["text_muted"])
             
             try:
                 self.page.update()
@@ -434,7 +441,6 @@ class ToolsView:
                         update_yara_ui()
                         return
 
-                # Save YARA action to history
                 add_lookup_record(
                     "yara",
                     f"YARA Rules ({len(self.yara_rulesets)} rulesets)" if self.yara_status == "success" else "YARA Livehunt",
@@ -447,13 +453,13 @@ class ToolsView:
 
             threading.Thread(target=worker, daemon=True).start()
 
-        refresh_btn = ft.IconButton(ft.Icons.REFRESH_ROUNDED, icon_color="#00F0FF", on_click=refresh_yara, tooltip=STRINGS[self.lang].get("yara_refresh_tooltip", "Refresh Rulesets"))
+        refresh_btn = ft.IconButton(ft.Icons.REFRESH_ROUNDED, icon_color=self.palette["accent"], on_click=refresh_yara, tooltip=STRINGS[self.lang].get("yara_refresh_tooltip", "Refresh Rulesets"))
 
         return ft.Column([
             ft.Row([
-                ft.Text(STRINGS[self.lang].get("tab_yara", "YARA Rulesets (Livehunt)"), size=16, weight=ft.FontWeight.BOLD, color="#FFFFFF"),
+                ft.Text(STRINGS[self.lang].get("tab_yara", "YARA Rulesets (Livehunt)"), size=16, weight=ft.FontWeight.BOLD, color=self.palette["text_primary"]),
                 refresh_btn
             ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
-            ft.Divider(color="#2E3C56"),
+            ft.Divider(color=self.palette["divider"]),
             yara_body_container
         ], expand=True)

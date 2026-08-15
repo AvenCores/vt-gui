@@ -2,13 +2,17 @@ import flet as ft
 import webbrowser
 import threading
 
-from ...core.config import write_env_var, STRINGS, get_api_key
+from ...core.config import write_env_var, STRINGS, get_api_key, get_app_theme, set_app_theme
 from ...api.vt_api import get_user_quota, verify_api_key
+from ..components.theme import get_theme_palette
 
 
-def open_settings(page, lang, on_settings_saved, on_reinstall_cli=None, cli_source=None):
-    """Opens a beautiful modal settings dialog with configuration options and API quota display."""
+def open_settings(page, lang, on_settings_saved, on_reinstall_cli=None, cli_source=None, theme_mode="dark", on_theme_change=None):
+    """Opens a beautiful modal settings dialog with configuration options, theme selection, and API quota display."""
+    palette = get_theme_palette(theme_mode)
+    is_dark = (theme_mode == "dark")
     api_key = get_api_key() or ""
+    current_selected_theme = [theme_mode or get_app_theme()]
 
     api_key_field = ft.TextField(
         label=STRINGS[lang]["api_key_label"],
@@ -16,24 +20,26 @@ def open_settings(page, lang, on_settings_saved, on_reinstall_cli=None, cli_sour
         value=api_key,
         password=True,
         can_reveal_password=True,
-        border_color="#2E3C56",
-        focused_border_color="#00F0FF",
-        label_style=ft.TextStyle(color="#94A3B8"),
-        text_style=ft.TextStyle(color="#E2E8F0"),
+        border_color=palette["input_border"],
+        focused_border_color=palette["accent"],
+        label_style=ft.TextStyle(color=palette["text_muted"]),
+        text_style=ft.TextStyle(color=palette["text_primary"]),
+        bgcolor=palette["input_bg"],
     )
 
     get_api_key_btn = ft.TextButton(
-        content=ft.Text(STRINGS[lang]["btn_get_api_key"], color="#00F0FF", size=13),
+        content=ft.Text(STRINGS[lang]["btn_get_api_key"], color=palette["accent"], size=13),
         icon=ft.Icons.OPEN_IN_NEW_ROUNDED,
+        icon_color=palette["accent"],
         on_click=lambda _: webbrowser.open("https://docs.virustotal.com/docs/please-give-me-an-api-key")
     )
 
     api_check_icon = ft.Icon(ft.Icons.VERIFIED_ROUNDED, color="transparent", size=16)
-    api_check_text = ft.Text(" ", size=12, color="#94A3B8")
+    api_check_text = ft.Text(" ", size=12, color=palette["text_muted"])
 
     # API Quota progress section
-    quota_text = ft.Text(STRINGS[lang].get("api_quota_click", "API Quota: Click 'Check API' to fetch usage"), size=12, color="#94A3B8")
-    quota_progress = ft.ProgressBar(value=0.0, color="#00F0FF", bgcolor="#334155", height=4, visible=False)
+    quota_text = ft.Text(STRINGS[lang].get("api_quota_click", "API Quota: Click 'Check API' to fetch usage"), size=12, color=palette["text_muted"])
+    quota_progress = ft.ProgressBar(value=0.0, color=palette["accent"], bgcolor=palette["card_border"], height=4, visible=False)
 
     def update_quota_display(key):
         try:
@@ -44,7 +50,7 @@ def open_settings(page, lang, on_settings_saved, on_reinstall_cli=None, cli_sour
                 if allowed > 0:
                     percent = min(used / allowed, 1.0)
                     quota_progress.value = percent
-                    quota_progress.color = "#FF3131" if percent > 0.9 else "#00F0FF"
+                    quota_progress.color = "#FF3131" if percent > 0.9 else palette["accent"]
                     quota_progress.visible = True
                     quota_text.value = STRINGS[lang].get("api_quota_daily", "Daily API Quota: {used} / {allowed} requests ({percent}%)").format(used=used, allowed=allowed, percent=int(percent*100))
                 else:
@@ -68,7 +74,7 @@ def open_settings(page, lang, on_settings_saved, on_reinstall_cli=None, cli_sour
 
         api_check_btn.disabled = True
         api_check_text.value = STRINGS[lang]["api_checking"]
-        api_check_text.color = "#94A3B8"
+        api_check_text.color = palette["text_muted"]
         api_check_icon.color = "transparent"
         page.update()
 
@@ -97,9 +103,9 @@ def open_settings(page, lang, on_settings_saved, on_reinstall_cli=None, cli_sour
         threading.Thread(target=run_check, daemon=True).start()
 
     api_check_btn = ft.TextButton(
-        content=ft.Text(STRINGS[lang]["btn_check_api"], color="#00F0FF", size=13),
+        content=ft.Text(STRINGS[lang]["btn_check_api"], color=palette["accent"], size=13),
         icon=ft.Icons.HELP_OUTLINE_ROUNDED,
-        icon_color="#00F0FF",
+        icon_color=palette["accent"],
         on_click=on_check_api_click,
     )
 
@@ -109,14 +115,39 @@ def open_settings(page, lang, on_settings_saved, on_reinstall_cli=None, cli_sour
         height=20,
     )
 
+    # Theme selection section
+    theme_dropdown = ft.Dropdown(
+        label=STRINGS[lang].get("theme_label", "Theme"),
+        value=current_selected_theme[0],
+        options=[
+            ft.dropdown.Option("dark", STRINGS[lang].get("theme_dark", "Dark")),
+            ft.dropdown.Option("light", STRINGS[lang].get("theme_light", "Light")),
+        ],
+        border_color=palette["input_border"],
+        focused_border_color=palette["accent"],
+        label_style=ft.TextStyle(color=palette["text_muted"]),
+        color=palette["text_primary"],
+        bgcolor=palette["input_bg"],
+    )
+
+    def on_theme_dropdown_change(e):
+        current_selected_theme[0] = theme_dropdown.value
+
+    theme_dropdown.on_change = on_theme_dropdown_change
+
     def save_settings(e):
         write_env_var("VT_APIKEY", api_key_field.value.strip())
+        new_theme = current_selected_theme[0]
+        set_app_theme(new_theme)
         page.pop_dialog()
-        on_settings_saved()
+        if on_theme_change and new_theme != theme_mode:
+            on_theme_change(new_theme)
+        else:
+            on_settings_saved()
 
     # Reinstall CLI section
     status_icon = ft.Icon(ft.Icons.SYNC_ROUNDED, color="transparent", size=14)
-    status_text = ft.Text(" ", size=12, color="#94A3B8")
+    status_text = ft.Text(" ", size=12, color=palette["text_muted"])
     status_row = ft.Row(
         [status_icon, status_text],
         spacing=6,
@@ -125,13 +156,13 @@ def open_settings(page, lang, on_settings_saved, on_reinstall_cli=None, cli_sour
 
     def set_button_disabled(disabled):
         if disabled:
-            reinstall_container.border = ft.Border.all(1, "#1E293B")
+            reinstall_container.border = ft.Border.all(1, palette["card_border_subtle"])
             reinstall_container.on_click = None
             reinstall_container.on_hover = None
-            reinstall_icon.color = "#4B5563"
-            reinstall_label.color = "#4B5563"
+            reinstall_icon.color = palette["text_muted"]
+            reinstall_label.color = palette["text_muted"]
         else:
-            reinstall_container.border = ft.Border.all(1, "#2E3C56")
+            reinstall_container.border = ft.Border.all(1, palette["card_border"])
             reinstall_container.on_click = reinstall_container.data_on_click
             reinstall_container.on_hover = reinstall_container.data_on_hover
             reinstall_icon.color = "#F59E0B"
@@ -149,11 +180,11 @@ def open_settings(page, lang, on_settings_saved, on_reinstall_cli=None, cli_sour
         if reinstall_container.on_click is None:
             return
         if e.data == "true":
-            reinstall_container.bgcolor = "#1E2A47"
+            reinstall_container.bgcolor = palette["card_bg_hover"]
             reinstall_container.border = ft.Border.all(1, "#F59E0B")
         else:
-            reinstall_container.bgcolor = "#151E33"
-            reinstall_container.border = ft.Border.all(1, "#2E3C56")
+            reinstall_container.bgcolor = palette["card_bg_secondary"]
+            reinstall_container.border = ft.Border.all(1, palette["card_border"])
         reinstall_container.update()
 
     reinstall_icon = ft.Icon(ft.Icons.REFRESH_ROUNDED, color="#F59E0B", size=20)
@@ -169,9 +200,9 @@ def open_settings(page, lang, on_settings_saved, on_reinstall_cli=None, cli_sour
         ),
         on_click=None if system_binary_active else on_reinstall_click,
         on_hover=None if system_binary_active else on_reinstall_hover,
-        border=ft.Border.all(1, "#1E293B" if system_binary_active else "#2E3C56"),
+        border=ft.Border.all(1, palette["card_border_subtle"] if system_binary_active else palette["card_border"]),
         border_radius=12,
-        bgcolor="#151E33",
+        bgcolor=palette["card_bg_secondary"],
         padding=ft.Padding(left=16, right=16, top=12, bottom=12),
         animate=ft.Animation(200, ft.AnimationCurve.EASE_OUT),
         tooltip=STRINGS[lang].get("reinstall_disabled_system", "Disabled: using system VT CLI") if system_binary_active else None,
@@ -180,12 +211,12 @@ def open_settings(page, lang, on_settings_saved, on_reinstall_cli=None, cli_sour
     reinstall_container.data_on_hover = on_reinstall_hover
 
     if system_binary_active:
-        reinstall_icon.color = "#4B5563"
-        reinstall_label.color = "#4B5563"
+        reinstall_icon.color = palette["text_muted"]
+        reinstall_label.color = palette["text_muted"]
 
     vt_cli_link_btn = ft.IconButton(
         icon=ft.Icons.LANGUAGE_ROUNDED,
-        icon_color="#94A3B8",
+        icon_color=palette["text_muted"],
         icon_size=20,
         tooltip="GitHub",
         on_click=lambda _: webbrowser.open("https://github.com/virustotal/vt-cli"),
@@ -215,7 +246,9 @@ def open_settings(page, lang, on_settings_saved, on_reinstall_cli=None, cli_sour
         get_api_key_btn,
         ft.Row([api_check_btn, api_check_row], alignment=ft.MainAxisAlignment.START, spacing=5),
         ft.Column([quota_text, quota_progress], spacing=4),
-        ft.Divider(height=1, color="#2E3C56"),
+        ft.Divider(height=1, color=palette["divider"]),
+        theme_dropdown,
+        ft.Divider(height=1, color=palette["divider"]),
         reinstall_row,
         system_warning_row,
         status_row,
@@ -234,15 +267,15 @@ def open_settings(page, lang, on_settings_saved, on_reinstall_cli=None, cli_sour
         content=ft.Column(
             [
                 ft.Container(
-                    content=ft.Icon(ft.Icons.SETTINGS_ROUNDED, color="#00F0FF", size=36),
+                    content=ft.Icon(ft.Icons.SETTINGS_ROUNDED, color=palette["accent"], size=36),
                     padding=12,
-                    bgcolor="#1E2A47",
-                    border=ft.Border.all(1.5, "#00F0FF"),
+                    bgcolor=palette["dialog_header_bg"],
+                    border=ft.Border.all(1.5, palette["accent"]),
                     shape=ft.BoxShape.CIRCLE
                 ),
                 ft.Text(
                     STRINGS[lang]["settings_title"],
-                    color="#FFFFFF",
+                    color=palette["text_primary"],
                     size=18,
                     weight=ft.FontWeight.BOLD,
                     text_align=ft.TextAlign.CENTER
@@ -262,17 +295,21 @@ def open_settings(page, lang, on_settings_saved, on_reinstall_cli=None, cli_sour
         actions_padding=ft.Padding(left=16, right=16, top=4, bottom=12),
         content=settings_content,
         actions=[
-            ft.TextButton(STRINGS[lang]["btn_no"], on_click=lambda _: page.pop_dialog()),
+            ft.TextButton(
+                STRINGS[lang]["btn_no"],
+                on_click=lambda _: page.pop_dialog(),
+                style=ft.ButtonStyle(color=palette["text_muted"])
+            ),
             ft.Button(
                 STRINGS[lang]["btn_save"],
                 on_click=save_settings,
-                bgcolor="#008DDA",
-                color="#FFFFFF",
+                bgcolor=palette["button_primary_bg"],
+                color=palette["button_primary_text"],
                 style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8))
             )
         ],
         actions_alignment=ft.MainAxisAlignment.END,
-        bgcolor="#151E33"
+        bgcolor=palette["dialog_bg"]
     )
 
     page.show_dialog(dlg)

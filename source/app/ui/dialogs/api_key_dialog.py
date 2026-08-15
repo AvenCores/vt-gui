@@ -6,26 +6,30 @@ import webbrowser
 from ...core.config import write_env_var, STRINGS
 from ...api.cli_manager import download_and_install_cli
 from ...api.vt_api import verify_api_key
+from ..components.theme import get_theme_palette
 
 
-def open_api_key_dialog(page, lang, on_saved, cli_source=None):
-    """Opens a non-dismissable dialog for entering an API key on first launch."""
+def open_api_key_dialog(page, lang, on_saved, cli_source=None, theme_mode="dark"):
+    """Opens a non-dismissable dialog for entering an API key on first launch with theme support."""
+    palette = get_theme_palette(theme_mode)
+
     api_key_field = ft.TextField(
         label=STRINGS[lang]["api_key_label"],
         hint_text=STRINGS[lang]["api_key_hint"],
         password=True,
         can_reveal_password=True,
-        border_color="#2E3C56",
-        focused_border_color="#00F0FF",
-        label_style=ft.TextStyle(color="#94A3B8"),
-        text_style=ft.TextStyle(color="#E2E8F0"),
+        border_color=palette["input_border"],
+        focused_border_color=palette["accent"],
+        label_style=ft.TextStyle(color=palette["text_muted"]),
+        text_style=ft.TextStyle(color=palette["text_primary"]),
+        bgcolor=palette["input_bg"],
     )
 
     save_btn = ft.Button(
         STRINGS[lang]["btn_save"],
         on_click=lambda _: None,
-        bgcolor="#008DDA",
-        color="#FFFFFF",
+        bgcolor=palette["button_primary_bg"],
+        color=palette["button_primary_text"],
         disabled=True
     )
 
@@ -51,7 +55,7 @@ def open_api_key_dialog(page, lang, on_saved, cli_source=None):
 
     # --- Check API Key ---
     api_check_icon = ft.Icon(ft.Icons.VERIFIED_ROUNDED, color="transparent", size=16)
-    api_check_text = ft.Text(" ", size=12, color="#94A3B8")
+    api_check_text = ft.Text(" ", size=12, color=palette["text_muted"])
     api_check_row = ft.Row([api_check_icon, api_check_text], spacing=6, height=20)
 
     def on_check_api_click(e):
@@ -66,7 +70,7 @@ def open_api_key_dialog(page, lang, on_saved, cli_source=None):
 
         api_check_btn.disabled = True
         api_check_text.value = STRINGS[lang]["api_checking"]
-        api_check_text.color = "#94A3B8"
+        api_check_text.color = palette["text_muted"]
         api_check_icon.color = "transparent"
         page.update()
 
@@ -94,26 +98,26 @@ def open_api_key_dialog(page, lang, on_saved, cli_source=None):
         threading.Thread(target=run_check, daemon=True).start()
 
     api_check_btn = ft.TextButton(
-        content=ft.Text(STRINGS[lang]["btn_check_api"], color="#00F0FF", size=13),
+        content=ft.Text(STRINGS[lang]["btn_check_api"], color=palette["accent"], size=13),
         icon=ft.Icons.HELP_OUTLINE_ROUNDED,
-        icon_color="#00F0FF",
+        icon_color=palette["accent"],
         on_click=on_check_api_click,
     )
 
-    # --- Reinstall VT CLI (same style as settings_dialog.py) ---
+    # --- Reinstall VT CLI ---
     reinstall_status_icon = ft.Icon(ft.Icons.SYNC_ROUNDED, color="transparent", size=14)
-    reinstall_status_text = ft.Text(" ", size=12, color="#94A3B8")
+    reinstall_status_text = ft.Text(" ", size=12, color=palette["text_muted"])
     reinstall_status_row = ft.Row([reinstall_status_icon, reinstall_status_text], spacing=6, height=20)
 
     def set_reinstall_disabled(disabled):
         if disabled:
-            reinstall_container.border = ft.Border.all(1, "#1E293B")
+            reinstall_container.border = ft.Border.all(1, palette["card_border_subtle"])
             reinstall_container.on_click = None
             reinstall_container.on_hover = None
-            reinstall_icon.color = "#4B5563"
-            reinstall_label.color = "#4B5563"
+            reinstall_icon.color = palette["text_muted"]
+            reinstall_label.color = palette["text_muted"]
         else:
-            reinstall_container.border = ft.Border.all(1, "#2E3C56")
+            reinstall_container.border = ft.Border.all(1, palette["card_border"])
             reinstall_container.on_click = reinstall_container.data_on_click
             reinstall_container.on_hover = reinstall_container.data_on_hover
             reinstall_icon.color = "#F59E0B"
@@ -153,17 +157,16 @@ def open_api_key_dialog(page, lang, on_saved, cli_source=None):
         if reinstall_container.on_click is None:
             return
         if e.data == "true":
-            reinstall_container.bgcolor = "#1E2A47"
+            reinstall_container.bgcolor = palette["card_bg_hover"]
             reinstall_container.border = ft.Border.all(1, "#F59E0B")
         else:
-            reinstall_container.bgcolor = "#151E33"
-            reinstall_container.border = ft.Border.all(1, "#2E3C56")
+            reinstall_container.bgcolor = palette["card_bg_secondary"]
+            reinstall_container.border = ft.Border.all(1, palette["card_border"])
         reinstall_container.update()
 
     reinstall_icon = ft.Icon(ft.Icons.REFRESH_ROUNDED, color="#F59E0B", size=20)
     reinstall_label = ft.Text(STRINGS[lang]["btn_reinstall_cli"], color="#F59E0B", size=14, weight=ft.FontWeight.W_600)
 
-    # Determine if reinstall should be locked (system binary in use)
     system_binary_active = (cli_source == 'system')
 
     reinstall_container = ft.Container(
@@ -174,9 +177,9 @@ def open_api_key_dialog(page, lang, on_saved, cli_source=None):
         ),
         on_click=None if system_binary_active else on_reinstall_click,
         on_hover=None if system_binary_active else on_reinstall_hover,
-        border=ft.Border.all(1, "#1E293B" if system_binary_active else "#2E3C56"),
+        border=ft.Border.all(1, palette["card_border_subtle"] if system_binary_active else palette["card_border"]),
         border_radius=12,
-        bgcolor="#151E33",
+        bgcolor=palette["card_bg_secondary"],
         padding=ft.Padding(left=16, right=16, top=12, bottom=12),
         animate=ft.Animation(200, ft.AnimationCurve.EASE_OUT),
         tooltip=STRINGS[lang].get("reinstall_disabled_system", "Disabled: using system VT CLI") if system_binary_active else None,
@@ -185,12 +188,12 @@ def open_api_key_dialog(page, lang, on_saved, cli_source=None):
     reinstall_container.data_on_hover = on_reinstall_hover
 
     if system_binary_active:
-        reinstall_icon.color = "#4B5563"
-        reinstall_label.color = "#4B5563"
+        reinstall_icon.color = palette["text_muted"]
+        reinstall_label.color = palette["text_muted"]
 
     vt_cli_link_btn = ft.IconButton(
         icon=ft.Icons.LANGUAGE_ROUNDED,
-        icon_color="#94A3B8",
+        icon_color=palette["text_muted"],
         icon_size=20,
         tooltip="GitHub",
         on_click=lambda _: webbrowser.open("https://github.com/virustotal/vt-cli"),
@@ -202,7 +205,6 @@ def open_api_key_dialog(page, lang, on_saved, cli_source=None):
         spacing=5,
     )
 
-    # Warning text when system binary is active
     system_warning_row = ft.Container()
     if system_binary_active:
         system_warning_row = ft.Row(
@@ -216,18 +218,18 @@ def open_api_key_dialog(page, lang, on_saved, cli_source=None):
             spacing=6,
         )
 
-    # --- Layout ---
     content = ft.Column(
         [
-            ft.Text(STRINGS[lang]["api_key_required_text"], color="#E2E8F0", size=12),
+            ft.Text(STRINGS[lang]["api_key_required_text"], color=palette["text_secondary"], size=12),
             api_key_field,
             ft.Row([api_check_btn, api_check_row], alignment=ft.MainAxisAlignment.START, spacing=5),
             ft.TextButton(
-                content=ft.Text(STRINGS[lang]["btn_get_api_key"], color="#00F0FF", size=13),
+                content=ft.Text(STRINGS[lang]["btn_get_api_key"], color=palette["accent"], size=13),
                 icon=ft.Icons.OPEN_IN_NEW_ROUNDED,
+                icon_color=palette["accent"],
                 on_click=open_get_key
             ),
-            ft.Divider(height=1, color="#2E3C56"),
+            ft.Divider(height=1, color=palette["divider"]),
             reinstall_row,
             system_warning_row,
             reinstall_status_row,
@@ -240,11 +242,11 @@ def open_api_key_dialog(page, lang, on_saved, cli_source=None):
 
     dlg = ft.AlertDialog(
         modal=True,
-        title=ft.Text(STRINGS[lang]["api_key_setup_title"], color="#FFFFFF", weight=ft.FontWeight.BOLD),
+        title=ft.Text(STRINGS[lang]["api_key_setup_title"], color=palette["text_primary"], weight=ft.FontWeight.BOLD),
         content=content,
         actions=[save_btn],
         actions_alignment=ft.MainAxisAlignment.END,
-        bgcolor="#151E33",
+        bgcolor=palette["dialog_bg"],
         content_padding=ft.Padding(left=24, right=24, top=10, bottom=10),
     )
 

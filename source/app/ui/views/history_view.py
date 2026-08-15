@@ -5,6 +5,7 @@ from datetime import datetime
 
 from ...core.config import STRINGS
 from ...services.history_service import load_history, delete_scan_record, clear_history
+from ..components.theme import get_theme_palette
 
 LOOKUP_TYPE_ICONS = {
     "url": ft.Icons.LINK_ROUNDED,
@@ -25,8 +26,9 @@ LOOKUP_TYPE_NAMES = {
 }
 
 
-def build_history_view(lang, page, on_back, on_rescan, on_open_in_app=None, on_import_click=None):
-    """Build the scan history view."""
+def build_history_view(lang, page, on_back, on_rescan, on_open_in_app=None, on_import_click=None, theme_mode="dark"):
+    """Build the scan history view with theme support."""
+    palette = get_theme_palette(theme_mode)
     history = load_history()
 
     def refresh_view():
@@ -39,13 +41,13 @@ def build_history_view(lang, page, on_back, on_rescan, on_open_in_app=None, on_i
             refresh_view()
 
         dlg = ft.AlertDialog(
-            title=ft.Text(STRINGS[lang]["history_clear"], color="#FFFFFF", weight=ft.FontWeight.BOLD),
-            content=ft.Text(STRINGS[lang]["history_clear_confirm"], color="#E2E8F0"),
+            title=ft.Text(STRINGS[lang]["history_clear"], color=palette["text_primary"], weight=ft.FontWeight.BOLD),
+            content=ft.Text(STRINGS[lang]["history_clear_confirm"], color=palette["text_secondary"]),
             actions=[
-                ft.TextButton(STRINGS[lang]["btn_no"], on_click=lambda _: page.pop_dialog()),
+                ft.TextButton(STRINGS[lang]["btn_no"], on_click=lambda _: page.pop_dialog(), style=ft.ButtonStyle(color=palette["text_muted"])),
                 ft.Button(STRINGS[lang]["history_clear"], on_click=confirm_clear, bgcolor="#EF4444", color="#FFFFFF"),
             ],
-            bgcolor="#151E33"
+            bgcolor=palette["dialog_bg"]
         )
         page.show_dialog(dlg)
 
@@ -67,12 +69,12 @@ def build_history_view(lang, page, on_back, on_rescan, on_open_in_app=None, on_i
         if record_type == "lookup":
             display_name = query
             item_icon = LOOKUP_TYPE_ICONS.get(lookup_type, ft.Icons.HELP_OUTLINE_ROUNDED)
-            item_color = "#00F0FF"
+            item_color = palette["accent"]
             subtitle = LOOKUP_TYPE_NAMES.get(lookup_type, lookup_type)
         else:
             display_name = filename
             item_icon = ft.Icons.ATTACH_FILE_ROUNDED
-            item_color = "#00F0FF"
+            item_color = palette["accent"]
             subtitle = sha256[:12] + "..." if sha256 else ""
 
         # Status icon and color
@@ -104,7 +106,7 @@ def build_history_view(lang, page, on_back, on_rescan, on_open_in_app=None, on_i
             detections_text = record.get("error", "")[:50]
         else:
             status_icon = ft.Icons.HELP_OUTLINE_ROUNDED
-            status_color = "#94A3B8"
+            status_color = palette["text_muted"]
             detections_text = ""
 
         def on_delete_click(e, rid=record_id):
@@ -131,7 +133,7 @@ def build_history_view(lang, page, on_back, on_rescan, on_open_in_app=None, on_i
                                 ft.Text(STRINGS[lang].get("history_open_report_title", "Открыть отчет"), weight=ft.FontWeight.W_600)
                             ], spacing=6, alignment=ft.MainAxisAlignment.CENTER),
                             on_click=open_report_from_missing,
-                            bgcolor="#008DDA",
+                            bgcolor=palette["button_primary_bg"],
                             color="#FFFFFF",
                             style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8)),
                             width=440
@@ -139,7 +141,7 @@ def build_history_view(lang, page, on_back, on_rescan, on_open_in_app=None, on_i
                     )
                 btn_controls.append(
                     ft.TextButton(
-                        content=ft.Text(STRINGS[lang].get("btn_close", "Закрыть"), color="#94A3B8", size=13),
+                        content=ft.Text(STRINGS[lang].get("btn_close", "Закрыть"), color=palette["text_muted"], size=13),
                         on_click=lambda _: page.pop_dialog(),
                         width=440
                     )
@@ -150,7 +152,7 @@ def build_history_view(lang, page, on_back, on_rescan, on_open_in_app=None, on_i
                         ft.Icon(ft.Icons.WARNING_ROUNDED, color="#F59E0B", size=22),
                         ft.Text(
                             STRINGS[lang].get("file_not_found_title", "Файл не найден"),
-                            color="#FFFFFF",
+                            color=palette["text_primary"],
                             weight=ft.FontWeight.BOLD
                         )
                     ], spacing=8),
@@ -162,7 +164,7 @@ def build_history_view(lang, page, on_back, on_rescan, on_open_in_app=None, on_i
                                     "file_not_found_desc",
                                     "Файл по пути «{path}» был удален или перемещен. Повторное сканирование невозможно."
                                 ).format(path=display_path),
-                                color="#E2E8F0",
+                                color=palette["text_secondary"],
                                 size=13
                             ),
                             ft.Container(height=14),
@@ -171,7 +173,7 @@ def build_history_view(lang, page, on_back, on_rescan, on_open_in_app=None, on_i
                     ),
                     actions_padding=ft.Padding(0, 0, 0, 0),
                     content_padding=ft.Padding(left=24, right=24, top=20, bottom=20),
-                    bgcolor="#151E33"
+                    bgcolor=palette["dialog_bg"]
                 )
                 page.show_dialog(missing_dlg)
 
@@ -255,11 +257,11 @@ def build_history_view(lang, page, on_back, on_rescan, on_open_in_app=None, on_i
             item_info_card = ft.Container(
                 content=ft.Row(
                     [
-                        ft.Icon(ft.Icons.INSERT_DRIVE_FILE_ROUNDED, color="#00F0FF", size=22),
+                        ft.Icon(ft.Icons.INSERT_DRIVE_FILE_ROUNDED, color=palette["accent"], size=22),
                         ft.Column(
                             [
-                                ft.Text(target_name, color="#FFFFFF", size=13, weight=ft.FontWeight.BOLD, overflow=ft.TextOverflow.ELLIPSIS),
-                                ft.Text(hash_text, color="#94A3B8", size=11) if hash_text else ft.Container(),
+                                ft.Text(target_name, color=palette["text_primary"], size=13, weight=ft.FontWeight.BOLD, overflow=ft.TextOverflow.ELLIPSIS),
+                                ft.Text(hash_text, color=palette["text_muted"], size=11) if hash_text else ft.Container(),
                                 ft.Row(
                                     [
                                         ft.Text(
@@ -268,7 +270,7 @@ def build_history_view(lang, page, on_back, on_rescan, on_open_in_app=None, on_i
                                             size=11,
                                             weight=ft.FontWeight.W_600
                                         ),
-                                        ft.Text(f"• {scan_time_str}" if scan_time_str else "", color="#94A3B8", size=11)
+                                        ft.Text(f"• {scan_time_str}" if scan_time_str else "", color=palette["text_muted"], size=11)
                                     ],
                                     spacing=6
                                 )
@@ -280,8 +282,8 @@ def build_history_view(lang, page, on_back, on_rescan, on_open_in_app=None, on_i
                     spacing=12
                 ),
                 padding=ft.Padding(left=14, right=14, top=10, bottom=10),
-                bgcolor="#0F172A",
-                border=ft.Border.all(1, "#1E293B"),
+                bgcolor=palette["card_bg_secondary"],
+                border=ft.Border.all(1, palette["card_border_subtle"]),
                 border_radius=10
             )
 
@@ -289,22 +291,22 @@ def build_history_view(lang, page, on_back, on_rescan, on_open_in_app=None, on_i
                 content=ft.Column(
                     [
                         ft.Container(
-                            content=ft.Icon(ft.Icons.ASSESSMENT_ROUNDED, color="#00F0FF", size=36),
+                            content=ft.Icon(ft.Icons.ASSESSMENT_ROUNDED, color=palette["accent"], size=36),
                             padding=12,
-                            bgcolor="#1E2A47",
-                            border=ft.Border.all(1.5, "#00F0FF"),
+                            bgcolor=palette["dialog_header_bg"],
+                            border=ft.Border.all(1.5, palette["accent"]),
                             shape=ft.BoxShape.CIRCLE
                         ),
                         ft.Text(
                             STRINGS[lang].get("history_open_report_title", "Открыть отчет"),
-                            color="#FFFFFF",
+                            color=palette["text_primary"],
                             size=18,
                             weight=ft.FontWeight.BOLD,
                             text_align=ft.TextAlign.CENTER
                         ),
                         ft.Text(
                             STRINGS[lang].get("history_open_report_desc", "Выберите, где вы хотите открыть отчет:"),
-                            color="#94A3B8",
+                            color=palette["text_muted"],
                             size=12,
                             text_align=ft.TextAlign.CENTER
                         )
@@ -326,7 +328,7 @@ def build_history_view(lang, page, on_back, on_rescan, on_open_in_app=None, on_i
                     alignment=ft.MainAxisAlignment.CENTER
                 ),
                 on_click=open_in_app,
-                bgcolor="#008DDA",
+                bgcolor=palette["button_primary_bg"],
                 color="#FFFFFF",
                 style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8)),
                 expand=True,
@@ -336,18 +338,18 @@ def build_history_view(lang, page, on_back, on_rescan, on_open_in_app=None, on_i
             open_browser_btn = ft.Button(
                 content=ft.Row(
                     [
-                        ft.Icon(ft.Icons.LANGUAGE_ROUNDED, size=18, color="#00F0FF"),
-                        ft.Text(STRINGS[lang].get("btn_open_in_browser", "В браузере"), weight=ft.FontWeight.W_600, color="#00F0FF")
+                        ft.Icon(ft.Icons.LANGUAGE_ROUNDED, size=18, color=palette["accent"]),
+                        ft.Text(STRINGS[lang].get("btn_open_in_browser", "В браузере"), weight=ft.FontWeight.W_600, color=palette["accent"])
                     ],
                     spacing=8,
                     alignment=ft.MainAxisAlignment.CENTER
                 ),
-                on_click=open_in_browser,
-                bgcolor="#1E293B",
-                color="#00F0FF",
+                on_click=lambda e_b: open_in_browser(e_b),
+                bgcolor=palette["button_secondary_bg"],
+                color=palette["accent"],
                 style=ft.ButtonStyle(
                     shape=ft.RoundedRectangleBorder(radius=8),
-                    side=ft.BorderSide(1, "#00F0FF")
+                    side=ft.BorderSide(1, palette["accent"])
                 ),
                 expand=True,
                 height=44
@@ -355,9 +357,10 @@ def build_history_view(lang, page, on_back, on_rescan, on_open_in_app=None, on_i
 
             panel = ft.Container(
                 width=440,
-                bgcolor="#151E33",
+                bgcolor=palette["dialog_bg"],
                 border_radius=14,
                 padding=ft.Padding(left=20, right=20, top=20, bottom=16),
+                border=ft.Border.all(1, palette["card_border"]),
                 content=ft.Column(
                     [
                         modal_header,
@@ -368,7 +371,8 @@ def build_history_view(lang, page, on_back, on_rescan, on_open_in_app=None, on_i
                                 [
                                     ft.TextButton(
                                         STRINGS[lang].get("btn_cancel", "Отмена"),
-                                        on_click=lambda _: close_overlay()
+                                        on_click=lambda _: close_overlay(),
+                                        style=ft.ButtonStyle(color=palette["text_muted"])
                                     )
                                 ],
                                 alignment=ft.MainAxisAlignment.END
@@ -403,20 +407,20 @@ def build_history_view(lang, page, on_back, on_rescan, on_open_in_app=None, on_i
                     ft.Icon(status_icon, color=status_color, size=22),
                     ft.Icon(item_icon, color=item_color, size=16),
                     ft.Column([
-                        ft.Text(display_name, size=13, weight=ft.FontWeight.BOLD, color="#FFFFFF", max_lines=1, overflow=ft.TextOverflow.ELLIPSIS),
-                        ft.Text(subtitle, size=10, color="#64748B", max_lines=1, overflow=ft.TextOverflow.ELLIPSIS),
+                        ft.Text(display_name, size=13, weight=ft.FontWeight.BOLD, color=palette["text_primary"], max_lines=1, overflow=ft.TextOverflow.ELLIPSIS),
+                        ft.Text(subtitle, size=10, color=palette["text_muted"], max_lines=1, overflow=ft.TextOverflow.ELLIPSIS),
                     ], spacing=1, expand=True),
                     ft.Row([
                         ft.IconButton(
                             icon=ft.Icons.REFRESH_ROUNDED,
-                            icon_color="#00F0FF",
+                            icon_color=palette["accent"],
                             icon_size=18,
                             tooltip=STRINGS[lang]["history_rescan"],
                             on_click=on_rescan_click,
                         ),
                         ft.IconButton(
                             icon=ft.Icons.ASSESSMENT_ROUNDED,
-                            icon_color="#00F0FF",
+                            icon_color=palette["accent"],
                             icon_size=18,
                             tooltip=STRINGS[lang].get("history_open_report_title", STRINGS[lang]["btn_web_report"]),
                             on_click=on_open_report_click,
@@ -430,10 +434,10 @@ def build_history_view(lang, page, on_back, on_rescan, on_open_in_app=None, on_i
                         ),
                     ], spacing=0),
                 ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
-                ft.Text(detail_text, size=10, color="#64748B"),
+                ft.Text(detail_text, size=10, color=palette["text_muted"]),
             ], spacing=4),
-            bgcolor="#151E33",
-            border=ft.Border.all(1, "#2E3C56"),
+            bgcolor=palette["card_bg"],
+            border=ft.Border.all(1, palette["card_border"]),
             border_radius=12,
             padding=ft.Padding(left=14, right=10, top=10, bottom=10),
         )
@@ -441,7 +445,7 @@ def build_history_view(lang, page, on_back, on_rescan, on_open_in_app=None, on_i
     # Animated Header Back Action
     back_icon = ft.Icon(
         ft.Icons.ARROW_BACK_ROUNDED,
-        color="#FFFFFF",
+        color=palette["text_primary"],
         size=22,
         offset=ft.Offset(0, 0),
         animate_offset=ft.Animation(50, ft.AnimationCurve.EASE_OUT)
@@ -477,14 +481,14 @@ def build_history_view(lang, page, on_back, on_rescan, on_open_in_app=None, on_i
             ft.Text(STRINGS[lang].get("btn_import_report", "Import Report"), size=12, weight=ft.FontWeight.W_600)
         ], spacing=6, alignment=ft.MainAxisAlignment.CENTER),
         on_click=on_import_click,
-        bgcolor="#1E293B",
-        color="#00F0FF",
+        bgcolor=palette["button_secondary_bg"],
+        color=palette["accent"],
         style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8))
     ) if on_import_click else None
 
     header_controls = [
         back_button_wrapper,
-        ft.Text(STRINGS[lang]["tab_history"], size=20, weight=ft.FontWeight.BOLD, color="#FFFFFF", expand=True)
+        ft.Text(STRINGS[lang]["tab_history"], size=20, weight=ft.FontWeight.BOLD, color=palette["text_primary"], expand=True)
     ]
     if import_btn:
         header_controls.append(import_btn)
@@ -505,8 +509,8 @@ def build_history_view(lang, page, on_back, on_rescan, on_open_in_app=None, on_i
         empty_placeholder = ft.Container(
             content=ft.Column(
                 [
-                    ft.Icon(ft.Icons.HISTORY_ROUNDED, size=64, color="#2E3C56"),
-                    ft.Text(STRINGS[lang]["history_empty"], size=16, color="#64748B", text_align=ft.TextAlign.CENTER)
+                    ft.Icon(ft.Icons.HISTORY_ROUNDED, size=64, color=palette["card_border"]),
+                    ft.Text(STRINGS[lang]["history_empty"], size=16, color=palette["text_muted"], text_align=ft.TextAlign.CENTER)
                 ],
                 alignment=ft.MainAxisAlignment.CENTER,
                 horizontal_alignment=ft.CrossAxisAlignment.CENTER,

@@ -5,6 +5,7 @@ UI components package providing layout headers, footers, and shared theme widget
 from .header import build_header
 from .footer import build_footer
 from .theme import (
+    get_theme_palette,
     make_loading_card,
     make_stat_card,
     make_file_details_card,
@@ -14,6 +15,7 @@ from .theme import (
 __all__ = [
     "build_header",
     "build_footer",
+    "get_theme_palette",
     "make_loading_card",
     "make_stat_card",
     "make_file_details_card",

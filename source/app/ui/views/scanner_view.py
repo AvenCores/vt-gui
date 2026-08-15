@@ -1,10 +1,13 @@
 import flet as ft
 from ...core.config import STRINGS
 from ...core.constants import KNOWN_HASHES
+from ..components.theme import get_theme_palette
 
 
-def build_scanner_view(cli_status, cli_hash, cli_source, lang, file_picker_scan, on_scan_click, on_folder_click=None, on_import_click=None):
-    """Builds the main File Scanner view with drag-and-drop simulated click zone, badges, folder scan, and import report buttons."""
+def build_scanner_view(cli_status, cli_hash, cli_source, lang, file_picker_scan, on_scan_click, on_folder_click=None, on_import_click=None, theme_mode="dark"):
+    """Builds the main File Scanner view with drag-and-drop zone, badges, folder scan, import report buttons, and theme support."""
+    palette = get_theme_palette(theme_mode)
+
     if cli_status == 'verified':
         version_str = KNOWN_HASHES.get(cli_hash, "CLI")
         badge_text = STRINGS[lang]["vt_exe_verified"].format(version=version_str)
@@ -49,18 +52,18 @@ def build_scanner_view(cli_status, cli_hash, cli_source, lang, file_picker_scan,
     dashed_area = ft.Container(
         content=ft.Column(
             [
-                ft.Icon(ft.Icons.CLOUD_UPLOAD_ROUNDED, size=56, color="#00F0FF"),
-                ft.Text(STRINGS[lang]["drag_drop_text"], size=16, color="#E2E8F0", weight=ft.FontWeight.W_600, text_align=ft.TextAlign.CENTER),
-                ft.Text(STRINGS[lang].get("drag_drop_hint", ""), size=12, color="#94A3B8", text_align=ft.TextAlign.CENTER),
-                ft.Text(STRINGS[lang].get("max_file_size", "Max size: 650 MB per file"), size=12, color="#94A3B8")
+                ft.Icon(ft.Icons.CLOUD_UPLOAD_ROUNDED, size=56, color=palette["accent"]),
+                ft.Text(STRINGS[lang]["drag_drop_text"], size=16, color=palette["text_primary"], weight=ft.FontWeight.W_600, text_align=ft.TextAlign.CENTER),
+                ft.Text(STRINGS[lang].get("drag_drop_hint", ""), size=12, color=palette["text_muted"], text_align=ft.TextAlign.CENTER),
+                ft.Text(STRINGS[lang].get("max_file_size", "Max size: 650 MB per file"), size=12, color=palette["text_muted"])
             ],
             alignment=ft.MainAxisAlignment.CENTER,
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
             spacing=10
         ),
-        border=ft.Border.all(2, "#2E3C56"),
+        border=ft.Border.all(2, palette["card_border"]),
         border_radius=16,
-        bgcolor="#151E33",
+        bgcolor=palette["card_bg"],
         height=220,
         alignment=ft.Alignment.CENTER,
         on_click=on_scan_click,
@@ -68,8 +71,8 @@ def build_scanner_view(cli_status, cli_hash, cli_source, lang, file_picker_scan,
     )
     
     def on_hover_dashed(e):
-        dashed_area.border = ft.Border.all(2, "#00F0FF" if e.data == "true" else "#2E3C56")
-        dashed_area.bgcolor = "#1E2A47" if e.data == "true" else "#151E33"
+        dashed_area.border = ft.Border.all(2, palette["accent"] if e.data == "true" else palette["card_border"])
+        dashed_area.bgcolor = palette["card_bg_hover"] if e.data == "true" else palette["card_bg"]
         dashed_area.update()
         
     dashed_area.on_hover = on_hover_dashed
@@ -78,8 +81,8 @@ def build_scanner_view(cli_status, cli_hash, cli_source, lang, file_picker_scan,
         STRINGS[lang].get("btn_scan_folder", "Scan Folder (Directory)"),
         icon=ft.Icons.FOLDER_OPEN_ROUNDED,
         on_click=on_folder_click,
-        bgcolor="#1E293B",
-        color="#00F0FF",
+        bgcolor=palette["button_secondary_bg"],
+        color=palette["accent"],
         style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=10))
     )
 
@@ -87,8 +90,8 @@ def build_scanner_view(cli_status, cli_hash, cli_source, lang, file_picker_scan,
         STRINGS[lang].get("btn_import_report", "Import Report"),
         icon=ft.Icons.UPLOAD_FILE_ROUNDED,
         on_click=on_import_click,
-        bgcolor="#1E293B",
-        color="#FFFFFF",
+        bgcolor=palette["button_secondary_bg"],
+        color=palette["button_secondary_text"],
         style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=10))
     ) if on_import_click else None
     
@@ -103,7 +106,7 @@ def build_scanner_view(cli_status, cli_hash, cli_source, lang, file_picker_scan,
     return ft.Column(
         [
             ft.Row([
-                ft.Text(STRINGS[lang]["vt_exe_status"] + ":", size=14, color="#94A3B8", weight=ft.FontWeight.BOLD),
+                ft.Text(STRINGS[lang]["vt_exe_status"] + ":", size=14, color=palette["text_muted"], weight=ft.FontWeight.BOLD),
                 ft.Row(badges, spacing=8)
             ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
             ft.Container(height=5),

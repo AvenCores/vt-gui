@@ -237,7 +237,12 @@
         "download_failed_premium": "Download failed (requires premium API key): {ex}",
         "compare_hashes_prompt": "Please enter both SHA-256 hashes to compare.",
         "yara_premium_required": "YARA Livehunt rulesets require a VirusTotal Premium API key.",
-        "yara_no_rules": "No YARA rulesets available."
+        "yara_no_rules": "No YARA rulesets available.",
+        "theme_toggle_light": "Switch to Light Theme",
+        "theme_toggle_dark": "Switch to Dark Theme",
+        "theme_label": "Theme",
+        "theme_dark": "Dark",
+        "theme_light": "Light"
     },
     "ru": {
         "app_title": "Сканер файлов VirusTotal",
@@ -477,7 +482,12 @@
         "download_failed_premium": "Ошибка скачивания (требуется Premium API-ключ): {ex}",
         "compare_hashes_prompt": "Пожалуйста, введите оба SHA-256 хэша для сравнения.",
         "yara_premium_required": "Для работы с YARA Livehunt требуется Premium API-ключ VirusTotal.",
-        "yara_no_rules": "Нет доступных правил YARA."
+        "yara_no_rules": "Нет доступных правил YARA.",
+        "theme_toggle_light": "Переключить на светлую тему",
+        "theme_toggle_dark": "Переключить на темную тему",
+        "theme_label": "Тема оформления",
+        "theme_dark": "Темная",
+        "theme_light": "Светлая"
     },
     "es": {
         "app_title": "Escáner de Archivos VirusTotal",
@@ -717,7 +727,12 @@
         "download_failed_premium": "Fallo de descarga (requiere clave API premium): {ex}",
         "compare_hashes_prompt": "Por favor, ingrese ambos hashes SHA-256 para comparar.",
         "yara_premium_required": "Los conjuntos de reglas de YARA Livehunt requieren una clave API Premium de VirusTotal.",
-        "yara_no_rules": "No hay conjuntos de reglas de YARA disponibles."
+        "yara_no_rules": "No hay conjuntos de reglas de YARA disponibles.",
+        "theme_toggle_light": "Cambiar a tema claro",
+        "theme_toggle_dark": "Cambiar a tema oscuro",
+        "theme_label": "Tema",
+        "theme_dark": "Oscuro",
+        "theme_light": "Claro"
     },
     "de": {
         "app_title": "VirusTotal Dateiscanner",
@@ -957,7 +972,12 @@
         "download_failed_premium": "Download fehlgeschlagen (Premium-API-Schlüssel erforderlich): {ex}",
         "compare_hashes_prompt": "Bitte geben Sie beide SHA-256-Hashes zum Vergleichen ein.",
         "yara_premium_required": "YARA Livehunt-Regelsätze erfordern einen VirusTotal Premium-API-Schlüssel.",
-        "yara_no_rules": "Keine YARA-Regelsätze verfügbar."
+        "yara_no_rules": "Keine YARA-Regelsätze verfügbar.",
+        "theme_toggle_light": "Zum hellen Design wechseln",
+        "theme_toggle_dark": "Zum dunklen Design wechseln",
+        "theme_label": "Design",
+        "theme_dark": "Dunkel",
+        "theme_light": "Hell"
     },
     "fr": {
         "app_title": "Scanner de Fichiers VirusTotal",
@@ -1197,7 +1217,12 @@
         "download_failed_premium": "Échec du téléchargement (nécessite une clé API premium) : {ex}",
         "compare_hashes_prompt": "Veuillez entrer les deux hachages SHA-256 à comparer.",
         "yara_premium_required": "Les ensembles de règles YARA Livehunt nécessitent une clé API Premium VirusTotal.",
-        "yara_no_rules": "Aucun ensemble de règles YARA disponible."
+        "yara_no_rules": "Aucun ensemble de règles YARA disponible.",
+        "theme_toggle_light": "Passer au thème clair",
+        "theme_toggle_dark": "Passer au thème sombre",
+        "theme_label": "Thème",
+        "theme_dark": "Sombre",
+        "theme_light": "Clair"
     },
     "pt": {
         "app_title": "Scanner de Arquivos VirusTotal",
@@ -1437,7 +1462,12 @@
         "download_failed_premium": "Falha no download (requer chave API premium): {ex}",
         "compare_hashes_prompt": "Por favor, insira ambos os hashes SHA-256 para comparar.",
         "yara_premium_required": "Os conjuntos de regras YARA Livehunt requerem uma chave API Premium do VirusTotal.",
-        "yara_no_rules": "Nenhum conjunto de regras YARA disponível."
+        "yara_no_rules": "Nenhum conjunto de regras YARA disponível.",
+        "theme_toggle_light": "Mudar para o tema claro",
+        "theme_toggle_dark": "Mudar para o tema escuro",
+        "theme_label": "Tema",
+        "theme_dark": "Escuro",
+        "theme_light": "Claro"
     },
     "tr": {
         "app_title": "VirusTotal Dosya Tarayıcı",
@@ -1677,7 +1707,12 @@
         "download_failed_premium": "İndirme başarısız (premium API anahtarı gerektirir): {ex}",
         "compare_hashes_prompt": "Karşılaştırmak için lütfen her iki SHA-256 özetini de girin.",
         "yara_premium_required": "YARA Livehunt kural setleri bir VirusTotal Premium API anahtarı gerektirir.",
-        "yara_no_rules": "Kullanılabilir YARA kural seti yok."
+        "yara_no_rules": "Kullanılabilir YARA kural seti yok.",
+        "theme_toggle_light": "Açık temaya geç",
+        "theme_toggle_dark": "Koyu temaya geç",
+        "theme_label": "Tema",
+        "theme_dark": "Koyu",
+        "theme_light": "Açık"
     },
     "uk": {
         "app_title": "Сканер файлів VirusTotal",
@@ -1917,7 +1952,12 @@
         "download_failed_premium": "Помилка завантаження (потрібен Premium API-ключ): {ex}",
         "compare_hashes_prompt": "Будь ласка, введіть обидва SHA-256 хеші для порівняння.",
         "yara_premium_required": "Для YARA Livehunt потрібен Premium API-ключ VirusTotal.",
-        "yara_no_rules": "Немає доступних наборів правил YARA."
+        "yara_no_rules": "Немає доступних наборів правил YARA.",
+        "theme_toggle_light": "Перемкнути на світлу тему",
+        "theme_toggle_dark": "Перемкнути на темну тему",
+        "theme_label": "Тема оформлення",
+        "theme_dark": "Темна",
+        "theme_light": "Світла"
     },
     "zh": {
         "app_title": "VirusTotal 文件扫描器",
@@ -2157,7 +2197,12 @@
         "download_failed_premium": "下载失败（需要高级 API 密钥）：{ex}",
         "compare_hashes_prompt": "请输入两个 SHA-256 哈希值进行比较。",
         "yara_premium_required": "YARA Livehunt 规则集需要 VirusTotal 高级 API 密钥。",
-        "yara_no_rules": "没有可用的 YARA 规则集。"
+        "yara_no_rules": "没有可用的 YARA 规则集。",
+        "theme_toggle_light": "切换到浅色主题",
+        "theme_toggle_dark": "切换到深色主题",
+        "theme_label": "主题",
+        "theme_dark": "深色",
+        "theme_light": "浅色"
     },
     "ja": {
         "app_title": "VirusTotal ファイルスキャナー",
@@ -2397,7 +2442,12 @@
         "download_failed_premium": "ダウンロードに失敗しました (プレミアム API キーが必要です): {ex}",
         "compare_hashes_prompt": "比較する両方の SHA-256 ハッシュを入力してください。",
         "yara_premium_required": "YARA Livehunt ルールセットには VirusTotal プレミアム API キーが必要です。",
-        "yara_no_rules": "利用可能な YARA ルールセットはありません。"
+        "yara_no_rules": "利用可能な YARA ルールセットはありません。",
+        "theme_toggle_light": "ライトテーマに切り替え",
+        "theme_toggle_dark": "ダークテーマに切り替え",
+        "theme_label": "テーマ",
+        "theme_dark": "ダーク",
+        "theme_light": "ライト"
     },
     "ko": {
         "app_title": "VirusTotal 파일 스캐너",
@@ -2637,7 +2687,12 @@
         "download_failed_premium": "다운로드 실패 (프리미엄 API 키 필요): {ex}",
         "compare_hashes_prompt": "비교할 두 SHA-256 해시를 모두 입력하십시오.",
         "yara_premium_required": "YARA Livehunt 규칙 세트에는 VirusTotal 프리미엄 API 키가 필요합니다.",
-        "yara_no_rules": "사용 가능한 YARA 규칙 세트가 없습니다."
+        "yara_no_rules": "사용 가능한 YARA 규칙 세트가 없습니다.",
+        "theme_toggle_light": "라이트 테마로 전환",
+        "theme_toggle_dark": "다크 테마로 전환",
+        "theme_label": "테마",
+        "theme_dark": "다크",
+        "theme_light": "라이트"
     },
     "ar": {
         "app_title": "ماسح ملفات VirusTotal",
@@ -2877,6 +2932,11 @@
         "download_failed_premium": "فشل التنزيل (يتطلب مفتاح API مميز): {ex}",
         "compare_hashes_prompt": "الرجاء إدخال كلا تجزئتي SHA-256 للمقارنة.",
         "yara_premium_required": "تتطلب مجموعات قواعد YARA Livehunt مفتاح API مميز من VirusTotal.",
-        "yara_no_rules": "لا تتوفر مجموعات قواعد YARA."
+        "yara_no_rules": "لا تتوفر مجموعات قواعد YARA.",
+        "theme_toggle_light": "التبديل إلى المظهر الفاتح",
+        "theme_toggle_dark": "التبديل إلى المظهر الداكن",
+        "theme_label": "المظهر",
+        "theme_dark": "داكن",
+        "theme_light": "فاتح"
     }
 }

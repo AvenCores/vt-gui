@@ -26,6 +26,8 @@ from app.core import (
     write_env_var,
     get_api_key,
     get_app_lang,
+    get_app_theme,
+    set_app_theme,
     IS_WINDOWS,
     STRINGS,
     KNOWN_HASHES,
@@ -53,6 +55,7 @@ from app.utils import safe_copy_to_clipboard
 from app.ui import (
     build_header,
     build_footer,
+    get_theme_palette,
     build_install_view,
     build_scanner_view,
     build_scanning_view,
@@ -128,13 +131,14 @@ def main(page: ft.Page):
     get_api_key()
     
     current_lang = get_app_lang()
+    current_theme = get_app_theme()
     
     # Initialize and register clipboard service
     clipboard_service = ft.Clipboard()
     
     # Page setup
     page.title = STRINGS[current_lang]["app_title"]
-    page.theme_mode = ft.ThemeMode.DARK
+    page.theme_mode = ft.ThemeMode.DARK if current_theme == "dark" else ft.ThemeMode.LIGHT
     # Set window icon — use .ico on Windows, .png on other platforms if available
     _script_dir = os.path.dirname(os.path.abspath(__file__))
     icon_file = "icon.ico" if IS_WINDOWS else "icon.png"
@@ -177,18 +181,22 @@ def main(page: ft.Page):
     install_status_text = ft.Text("", size=14, color="#94A3B8")
     install_progress_bar = ft.ProgressBar(value=0, color="#00F0FF", bgcolor="#334155", height=6, visible=False)
     
+    # Persistent tools view instance to maintain comparison & YARA state across theme toggles
+    tools_view_instance = None
+    
     # Temporary variables for installer verification
     selected_installer_data = None
     selected_installer_hash = None
     
     # Helper to show alerts
     def show_alert(title, text):
+        palette = get_theme_palette(current_theme)
         dlg = ft.AlertDialog(
-            title=ft.Text(title, color="#FFFFFF", weight=ft.FontWeight.BOLD),
-            content=ft.Text(text, color="#E2E8F0"),
-            actions=[ft.TextButton(STRINGS[current_lang]["btn_close"], on_click=lambda _: page.pop_dialog())],
+            title=ft.Text(title, color=palette["text_primary"], weight=ft.FontWeight.BOLD),
+            content=ft.Text(text, color=palette["text_secondary"]),
+            actions=[ft.TextButton(STRINGS[current_lang]["btn_close"], style=ft.ButtonStyle(color=palette["accent"]), on_click=lambda _: page.pop_dialog())],
             actions_alignment=ft.MainAxisAlignment.END,
-            bgcolor="#1E293B"
+            bgcolor=palette["dialog_bg"]
         )
         page.show_dialog(dlg)
 
@@ -242,6 +250,17 @@ def main(page: ft.Page):
                 scan_service.current_lang = lang_code
             build_ui()
 
+        # Theme switcher callback
+        def toggle_theme(target_theme=None):
+            nonlocal current_theme
+            if target_theme in ("dark", "light"):
+                current_theme = target_theme
+            else:
+                current_theme = "light" if current_theme == "dark" else "dark"
+            set_app_theme(current_theme)
+            page.theme_mode = ft.ThemeMode.DARK if current_theme == "dark" else ft.ThemeMode.LIGHT
+            build_ui()
+
         # Settings CLI Reinstall callback
         def on_reinstall_cli(status_text_widget, status_icon, set_button_disabled):
             def run_reinstall():
@@ -268,10 +287,14 @@ def main(page: ft.Page):
 
             threading.Thread(target=run_reinstall, daemon=True).start()
 
+        palette = get_theme_palette(current_theme)
+
         header = build_header(
             current_lang=current_lang,
             on_language_change=change_language,
-            on_settings_click=lambda _: open_settings(page, current_lang, build_ui, on_reinstall_cli, cli_source)
+            on_settings_click=lambda _: open_settings(page, current_lang, build_ui, on_reinstall_cli, cli_source, theme_mode=current_theme, on_theme_change=toggle_theme),
+            theme_mode=current_theme,
+            on_theme_toggle=lambda _: toggle_theme()
         )
         
         # Central view content switcher with fast fade & slide transitions
@@ -327,22 +350,24 @@ def main(page: ft.Page):
                 install_status_text,
                 install_progress_bar,
                 on_auto_install_click,
-                on_manual_install_click
+                on_manual_install_click,
+                theme_mode=current_theme
             )
         elif app_state == "scans":
             tab_headers = []
             tab_contents = []
             for idx, scan in enumerate(active_scans):
                 if scan["status"] == "scanning":
-                    scan_status_text = ft.Text(scan["status_text"], size=15, weight=ft.FontWeight.W_600, color="#00F0FF")
-                    scan_progress_bar = ft.ProgressBar(value=scan["progress"], color="#00F0FF", bgcolor="#334155", height=6)
+                    scan_status_text = ft.Text(scan["status_text"], size=15, weight=ft.FontWeight.W_600, color=palette["accent"])
+                    scan_progress_bar = ft.ProgressBar(value=scan["progress"], color=palette["accent"], bgcolor=palette["card_border"], height=6)
                     scan["_status_text_widget"] = scan_status_text
                     scan["_progress_bar_widget"] = scan_progress_bar
                     tab_content = build_scanning_view(
-                        ft.ProgressRing(color="#00F0FF", width=48, height=48),
+                        ft.ProgressRing(color=palette["accent"], width=48, height=48),
                         scan_status_text,
                         scan_progress_bar,
-                        current_lang
+                        current_lang,
+                        theme_mode=current_theme
                     )
                 elif scan["status"] == "completed":
                     tab_content = build_results_view(
@@ -350,7 +375,8 @@ def main(page: ft.Page):
                         scan["file_path"],
                         scan["sha256"],
                         current_lang,
-                        page
+                        page,
+                        theme_mode=current_theme
                     )
                 else:  # failed
                     def make_retry_callback(scan_idx, path):
@@ -370,7 +396,7 @@ def main(page: ft.Page):
                         content=ft.Column(
                             [
                                 ft.Icon(ft.Icons.ERROR_OUTLINE_ROUNDED, color="#EF4444", size=48),
-                                ft.Text(STRINGS[current_lang]["scan_failed"].format(e=""), size=16, weight=ft.FontWeight.BOLD, color="#FFFFFF"),
+                                ft.Text(STRINGS[current_lang]["scan_failed"].format(e=""), size=16, weight=ft.FontWeight.BOLD, color=palette["text_primary"]),
                                 ft.Text(scan["error"], size=14, color="#EF4444", text_align=ft.TextAlign.CENTER),
                                 ft.Container(height=10),
                                 ft.Row(
@@ -379,7 +405,7 @@ def main(page: ft.Page):
                                             content=ft.Text("Retry / Повторить"),
                                             icon=ft.Icons.REFRESH_ROUNDED,
                                             on_click=make_retry_callback(idx, scan["file_path"]),
-                                            bgcolor="#008DDA",
+                                            bgcolor=palette["button_primary_bg"],
                                             color="#FFFFFF"
                                         )
                                     ],
@@ -411,7 +437,7 @@ def main(page: ft.Page):
                         content=ft.Row(
                             [
                                 ft.Text(scan_icon, size=16),
-                                ft.Text(scan_name, color="#FFFFFF" if is_act else "#94A3B8", size=12, weight=ft.FontWeight.W_600)
+                                ft.Text(scan_name, color=palette["text_primary"] if is_act else palette["text_muted"], size=12, weight=ft.FontWeight.W_600)
                             ],
                             alignment=ft.MainAxisAlignment.CENTER,
                             vertical_alignment=ft.CrossAxisAlignment.CENTER,
@@ -419,8 +445,8 @@ def main(page: ft.Page):
                         ),
                         padding=ft.Padding(left=12, right=12, top=8, bottom=8),
                         border_radius=8,
-                        border=ft.Border.all(1, "#00F0FF" if is_act else "transparent"),
-                        bgcolor="#1E293B" if is_act else "transparent",
+                        border=ft.Border.all(1, palette["accent"] if is_act else "transparent"),
+                        bgcolor=palette["tab_active_bg"] if is_act else "transparent",
                         animate=ft.Animation(150, ft.AnimationCurve.EASE_OUT),
                         on_click=lambda _, idx=i: on_tab_change(idx)
                     )
@@ -428,8 +454,8 @@ def main(page: ft.Page):
                     def on_tab_hover(e):
                         if current_tab_index != i:
                             if e.data == "true":
-                                btn.border = ft.Border.all(1, "#00F0FF")
-                                btn.bgcolor = "#152035"
+                                btn.border = ft.Border.all(1, palette["tab_inactive_hover_border"])
+                                btn.bgcolor = palette["tab_inactive_hover_bg"]
                             else:
                                 btn.border = ft.Border.all(1, "transparent")
                                 btn.bgcolor = "transparent"
@@ -454,10 +480,10 @@ def main(page: ft.Page):
 
             add_tab_btn = ft.IconButton(
                 icon=ft.Icons.ADD_ROUNDED,
-                icon_color="#00F0FF",
+                icon_color=palette["accent"],
                 tooltip=STRINGS[current_lang].get("add_file_tooltip", "Add file to scan"),
                 on_click=on_add_scan_click,
-                bgcolor="#1E293B",
+                bgcolor=palette["button_secondary_bg"],
                 style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8))
             )
             
@@ -522,7 +548,7 @@ def main(page: ft.Page):
                 
             back_icon = ft.Icon(
                 ft.Icons.ARROW_BACK_ROUNDED,
-                color="#FFFFFF",
+                color=palette["button_secondary_text"],
                 size=18,
                 offset=ft.Offset(0, 0),
                 animate_offset=ft.Animation(50, ft.AnimationCurve.EASE_OUT)
@@ -531,11 +557,11 @@ def main(page: ft.Page):
             back_btn_container = ft.Container(
                 content=ft.Row([
                     back_icon,
-                    ft.Text(STRINGS[current_lang]["btn_back"], color="#FFFFFF", size=14, weight=ft.FontWeight.W_500)
+                    ft.Text(STRINGS[current_lang]["btn_back"], color=palette["button_secondary_text"], size=14, weight=ft.FontWeight.W_500)
                 ], spacing=6, alignment=ft.MainAxisAlignment.CENTER),
                 padding=ft.Padding(left=14, right=16, top=0, bottom=0),
                 height=40,
-                bgcolor="#1E293B",
+                bgcolor=palette["button_secondary_bg"],
                 border_radius=8,
                 scale=1.0,
                 animate_scale=ft.Animation(50, ft.AnimationCurve.EASE_OUT),
@@ -567,7 +593,7 @@ def main(page: ft.Page):
                     
                 copy_btn = ft.IconButton(
                     icon=ft.Icons.COPY_ROUNDED,
-                    icon_color="#00F0FF",
+                    icon_color=palette["accent"],
                     tooltip=STRINGS[current_lang]["copy_link_tooltip"],
                     on_click=copy_web_report_link
                 )
@@ -576,7 +602,7 @@ def main(page: ft.Page):
                     content=ft.Text(STRINGS[current_lang]["btn_open_web"]),
                     icon=ft.Icons.OPEN_IN_BROWSER_ROUNDED,
                     on_click=open_web_report,
-                    bgcolor="#008DDA",
+                    bgcolor=palette["button_primary_bg"],
                     color="#FFFFFF",
                     height=40,
                     style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8))
@@ -600,13 +626,20 @@ def main(page: ft.Page):
             def on_import_report_click(e=None):
                 prompt_import_report(page, current_lang, on_history_open_in_app)
 
-            files_view = build_scanner_view(cli_status, cli_hash, cli_source, current_lang, file_picker_scan, on_scan_click, on_folder_click, on_import_report_click)
-            intel_view = IntelligenceView(search_states, current_lang, show_alert, get_installed_binary_path, thread_safe_build, build_ui, page)
+            files_view = build_scanner_view(cli_status, cli_hash, cli_source, current_lang, file_picker_scan, on_scan_click, on_folder_click, on_import_report_click, theme_mode=current_theme)
+            intel_view = IntelligenceView(search_states, current_lang, show_alert, get_installed_binary_path, thread_safe_build, build_ui, page, theme_mode=current_theme)
             url_view = intel_view.build_lookup_tab("url", STRINGS[current_lang]["url_placeholder"], STRINGS[current_lang]["url_helper"])
             domain_view = intel_view.build_lookup_tab("domain", STRINGS[current_lang]["domain_placeholder"], STRINGS[current_lang]["domain_helper"])
             ip_view = intel_view.build_lookup_tab("ip", STRINGS[current_lang]["ip_placeholder"], STRINGS[current_lang]["ip_helper"])
             search_view = intel_view.build_lookup_tab("search", STRINGS[current_lang]["search_placeholder"], STRINGS[current_lang]["search_helper"])
-            tools_view = ToolsView(current_lang, show_alert, page).build_tools_tab()
+            nonlocal tools_view_instance
+            if tools_view_instance is None:
+                tools_view_instance = ToolsView(current_lang, show_alert, page, theme_mode=current_theme)
+            else:
+                tools_view_instance.lang = current_lang
+                tools_view_instance.theme_mode = current_theme
+                tools_view_instance.palette = palette
+            tools_view = tools_view_instance.build_tools_tab()
 
             def on_history_back():
                 def perform_back():
@@ -760,7 +793,7 @@ def main(page: ft.Page):
                     if not results and query and lookup_type in search_states:
                         intel_view.run_lookup_query(lookup_type)
 
-            history_view = build_history_view(current_lang, page, on_history_back, on_history_rescan, on_history_open_in_app, on_import_report_click)
+            history_view = build_history_view(current_lang, page, on_history_back, on_history_rescan, on_history_open_in_app, on_import_report_click, theme_mode=current_theme)
 
             def on_active_tab_change(e):
                 nonlocal active_scanner_tab_index, app_state
@@ -799,11 +832,11 @@ def main(page: ft.Page):
             def update_tab_buttons():
                 for idx, btn in tab_buttons_map.items():
                     is_active = (active_scanner_tab_index == idx)
-                    btn.border = ft.Border.all(1, "#00F0FF" if is_active else "transparent")
-                    btn.bgcolor = "#1E293B" if is_active else "transparent"
+                    btn.border = ft.Border.all(1, palette["accent"] if is_active else "transparent")
+                    btn.bgcolor = palette["tab_active_bg"] if is_active else "transparent"
                     col = btn.content
-                    col.controls[0].color = "#00F0FF" if is_active else "#94A3B8"
-                    col.controls[1].color = "#FFFFFF" if is_active else "#94A3B8"
+                    col.controls[0].color = palette["accent"] if is_active else palette["text_muted"]
+                    col.controls[1].color = palette["text_primary"] if is_active else palette["text_muted"]
                     try:
                         btn.update()
                     except Exception:
@@ -837,8 +870,8 @@ def main(page: ft.Page):
                 tab_btn = ft.Container(
                     content=ft.Column(
                         [
-                            ft.Icon(icon, color="#00F0FF" if is_active else "#94A3B8", size=20),
-                            ft.Text(label, color="#FFFFFF" if is_active else "#94A3B8", size=12, weight=ft.FontWeight.W_600)
+                            ft.Icon(icon, color=palette["accent"] if is_active else palette["text_muted"], size=20),
+                            ft.Text(label, color=palette["text_primary"] if is_active else palette["text_muted"], size=12, weight=ft.FontWeight.W_600)
                         ],
                         alignment=ft.MainAxisAlignment.CENTER,
                         horizontal_alignment=ft.CrossAxisAlignment.CENTER,
@@ -847,8 +880,8 @@ def main(page: ft.Page):
                     padding=ft.Padding(left=12, right=12, top=6, bottom=6),
                     height=70,
                     border_radius=8,
-                    border=ft.Border.all(1, "#00F0FF" if is_active else "transparent"),
-                    bgcolor="#1E293B" if is_active else "transparent",
+                    border=ft.Border.all(1, palette["accent"] if is_active else "transparent"),
+                    bgcolor=palette["tab_active_bg"] if is_active else "transparent",
                     animate=ft.Animation(150, ft.AnimationCurve.EASE_OUT),
                     on_click=lambda _, i=idx: select_tab(i)
                 )
@@ -857,8 +890,8 @@ def main(page: ft.Page):
                     def on_tab_hover(e):
                         if active_scanner_tab_index != tab_idx:
                             if e.data == "true":
-                                btn.border = ft.Border.all(1, "#00F0FF")
-                                btn.bgcolor = "#152035"
+                                btn.border = ft.Border.all(1, palette["tab_inactive_hover_border"])
+                                btn.bgcolor = palette["tab_inactive_hover_bg"]
                             else:
                                 btn.border = ft.Border.all(1, "transparent")
                                 btn.bgcolor = "transparent"
@@ -883,7 +916,7 @@ def main(page: ft.Page):
                     ft.Container(
                         content=tab_header_row,
                         padding=ft.Padding(left=4, right=4, top=5, bottom=15),
-                        border=ft.Border(bottom=ft.BorderSide(1, "#1E293B"))
+                        border=ft.Border(bottom=ft.BorderSide(1, palette["divider"]))
                     ),
                     animated_tab_content
                 ],
@@ -900,13 +933,13 @@ def main(page: ft.Page):
         )
             
         # Build footer with social links
-        footer = build_footer(current_lang, page)
+        footer = build_footer(current_lang, page, theme_mode=current_theme)
 
         outer_container = ft.Container(
             gradient=ft.LinearGradient(
                 begin=ft.Alignment.TOP_LEFT,
                 end=ft.Alignment.BOTTOM_RIGHT,
-                colors=["#0B0F19", "#111827"]
+                colors=palette["bg_gradient_colors"]
             ),
             expand=True,
             padding=20,
@@ -1098,14 +1131,15 @@ def main(page: ft.Page):
                 def reject_custom_binary(e):
                     page.pop_dialog()
                     
+                p = get_theme_palette(current_theme)
                 dlg = ft.AlertDialog(
-                    title=ft.Text(STRINGS[current_lang]["hash_warning_title"], color="#FFFFFF", weight=ft.FontWeight.BOLD),
-                    content=ft.Text(STRINGS[current_lang]["hash_warning_text"].format(hash=exe_hash)),
+                    title=ft.Text(STRINGS[current_lang]["hash_warning_title"], color=p["text_primary"], weight=ft.FontWeight.BOLD),
+                    content=ft.Text(STRINGS[current_lang]["hash_warning_text"].format(hash=exe_hash), color=p["text_secondary"]),
                     actions=[
-                        ft.TextButton(STRINGS[current_lang]["btn_no"], on_click=reject_custom_binary),
-                        ft.Button(STRINGS[current_lang]["btn_yes"], on_click=approve_custom_binary, bgcolor="#008DDA", color="#FFFFFF")
+                        ft.TextButton(STRINGS[current_lang]["btn_no"], style=ft.ButtonStyle(color=p["text_muted"]), on_click=reject_custom_binary),
+                        ft.Button(STRINGS[current_lang]["btn_yes"], on_click=approve_custom_binary, bgcolor=p["button_primary_bg"], color="#FFFFFF")
                     ],
-                    bgcolor="#151E33"
+                    bgcolor=p["dialog_bg"]
                 )
                 page.show_dialog(dlg)
                 
@@ -1156,7 +1190,7 @@ def main(page: ft.Page):
         def on_api_key_saved():
             build_ui()
         _, _, _cli_source = check_installed_binary()
-        open_api_key_dialog(page, current_lang, on_api_key_saved, _cli_source)
+        open_api_key_dialog(page, current_lang, on_api_key_saved, _cli_source, theme_mode=current_theme)
     elif init_file_path and os.path.exists(init_file_path):
         api_key = get_api_key()
         cli_status, _, _ = check_installed_binary()

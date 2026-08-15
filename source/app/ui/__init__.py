@@ -5,6 +5,7 @@ UI package providing user interface components, dialogs, and views.
 from .components import (
     build_header,
     build_footer,
+    get_theme_palette,
     make_loading_card,
     make_stat_card,
     make_file_details_card,
@@ -27,6 +28,7 @@ from .views import (
 __all__ = [
     "build_header",
     "build_footer",
+    "get_theme_palette",
     "make_loading_card",
     "make_stat_card",
     "make_file_details_card",

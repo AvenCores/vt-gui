@@ -22,6 +22,8 @@ from .config import (
     write_env_var,
     get_api_key,
     get_app_lang,
+    get_app_theme,
+    set_app_theme,
 )
 from .bundle_runtime import prepare_flet_runtime
 from .ssl_helper import get_ca_bundle_path, get_ssl_context, init_ssl_context
@@ -44,6 +46,8 @@ __all__ = [
     "write_env_var",
     "get_api_key",
     "get_app_lang",
+    "get_app_theme",
+    "set_app_theme",
     "prepare_flet_runtime",
     "get_ca_bundle_path",
     "get_ssl_context",
