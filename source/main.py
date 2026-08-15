@@ -1,5 +1,24 @@
 import os
 import sys
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PyInstaller Subprocess & LD_LIBRARY_PATH Sanitization
+# On Linux, PyInstaller sets LD_LIBRARY_PATH to sys._MEIPASS and saves the original
+# value into LD_LIBRARY_PATH_ORIG. When launching child processes (e.g. Flet's
+# Flutter desktop view executable, VirusTotal CLI binary, etc.), inheriting
+# LD_LIBRARY_PATH pointing to _MEIPASS forces host system libraries (such as
+# libsecret-1.so.0) to link against incompatible GLib libraries bundled from the
+# build runner, causing symbol lookup errors (e.g. undefined symbol: g_variant_builder_init_).
+# Restoring the original environment variables ensures all child processes run
+# against the native host system libraries.
+# ─────────────────────────────────────────────────────────────────────────────
+for _var in ("LD_LIBRARY_PATH", "LIBPATH", "DYLD_LIBRARY_PATH"):
+    _orig_var = f"{_var}_ORIG"
+    if _orig_var in os.environ:
+        os.environ[_var] = os.environ[_orig_var]
+    elif _var in os.environ and getattr(sys, "frozen", False):
+        os.environ.pop(_var, None)
+
 import threading
 import flet as ft
 
