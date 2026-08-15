@@ -151,6 +151,8 @@ def main(page: ft.Page):
     page.window.min_height = 750
     page.padding = 0
 
+    page.theme_animation_style = ft.AnimationStyle(duration=ft.Duration(milliseconds=350), curve=ft.AnimationCurve.EASE_IN_OUT)
+
     # Use system font to prevent network loading and font layout shifts (jumping)
     if IS_WINDOWS:
         page.theme = ft.Theme(font_family="Segoe UI")
@@ -166,8 +168,19 @@ def main(page: ft.Page):
     current_tab_index = 0
     _build_lock = threading.Lock()
 
+    # Root animated switcher for smooth theme and state transitions
+    root_switcher = ft.AnimatedSwitcher(
+        content=ft.Container(expand=True),
+        transition=ft.AnimatedSwitcherTransition.FADE,
+        duration=300,
+        reverse_duration=200,
+        switch_in_curve=ft.AnimationCurve.EASE_OUT,
+        switch_out_curve=ft.AnimationCurve.EASE_IN,
+        expand=True
+    )
+
     # Persistent root container — populated before first page.add()
-    page_root = ft.Column(expand=True, spacing=0)
+    page_root = ft.Column([root_switcher], expand=True, spacing=0)
     
     # State for lookup tabs
     active_scanner_tab_index = 0
@@ -936,6 +949,7 @@ def main(page: ft.Page):
         footer = build_footer(current_lang, page, theme_mode=current_theme)
 
         outer_container = ft.Container(
+            key=f"app_outer_container_{current_theme}_{app_state}",
             gradient=ft.LinearGradient(
                 begin=ft.Alignment.TOP_LEFT,
                 end=ft.Alignment.BOTTOM_RIGHT,
@@ -943,6 +957,8 @@ def main(page: ft.Page):
             ),
             expand=True,
             padding=20,
+            animate=ft.Animation(300, ft.AnimationCurve.EASE_OUT),
+            animate_opacity=ft.Animation(250, ft.AnimationCurve.EASE_OUT),
             content=ft.Column(
                 [
                     header,
@@ -953,14 +969,14 @@ def main(page: ft.Page):
             )
         )
         
-        page_root.controls = [outer_container]
+        root_switcher.content = outer_container
         if not page.controls:
             # First render: add root with content already set — single render
             page.controls.append(page_root)
             page.update()
         else:
-            # Subsequent renders: just update content — single render
-            page_root.update()
+            # Subsequent renders: animated switcher will smoothly crossfade — single render
+            root_switcher.update()
 
     import asyncio
     try:
