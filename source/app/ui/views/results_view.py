@@ -289,7 +289,7 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
     )
 
     # Tab 1: Detections
-    detections_list = ft.Column(spacing=5, expand=True)
+    detections_list = ft.Column(spacing=5, expand=True, horizontal_alignment=ft.CrossAxisAlignment.STRETCH)
     mal_susp_list = []
     clean_list = []
     if isinstance(results_dict, dict):
@@ -324,7 +324,7 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
         )
         
     is_engines_expanded = _ENGINES_EXPANDED.get(target_sha256, False)
-    full_list_column = ft.Column(spacing=5, visible=is_engines_expanded)
+    full_list_column = ft.Column(spacing=5, visible=is_engines_expanded, horizontal_alignment=ft.CrossAxisAlignment.STRETCH)
     for engine, category, res, method in sorted(clean_list + mal_susp_list, key=lambda x: x[0].lower()):
         full_list_column.controls.append(make_engine_row(engine, category, res, method, theme_mode=theme_mode))
         
@@ -356,7 +356,7 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
         ft.Container(height=10),
         show_all_btn,
         full_list_column
-    ], scroll=ft.ScrollMode.ALWAYS, expand=True)
+    ], scroll=ft.ScrollMode.ALWAYS, expand=True, horizontal_alignment=ft.CrossAxisAlignment.STRETCH)
 
     # Tab 2: Behavior & Sandbox Reports
     def build_behavior_item_controls(behaviours):
@@ -381,17 +381,21 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
                     details.append(ft.Text(f" • {tech_id}", color=palette["text_secondary"], size=11))
 
             items.append(ft.Container(
-                content=ft.Column(details, spacing=4),
-                padding=12, border_radius=10, bgcolor=palette["card_bg"], border=ft.Border.all(1, palette["card_border"])
+                content=ft.Column(details, spacing=4, horizontal_alignment=ft.CrossAxisAlignment.START),
+                padding=12,
+                border_radius=10,
+                bgcolor=palette["card_bg"],
+                border=ft.Border.all(1, palette["card_border"]),
+                alignment=ft.Alignment.CENTER_LEFT
             ))
         return items
 
     behavior_loading_card = make_loading_card(STRINGS[lang].get("behavior_loading", "Loading sandbox execution reports..."), theme_mode=theme_mode)
     
     if target_sha256 in _BEHAVIORS_CACHE:
-        behavior_container = ft.Column(controls=build_behavior_item_controls(_BEHAVIORS_CACHE[target_sha256]), spacing=8, scroll=ft.ScrollMode.ALWAYS, expand=True)
+        behavior_container = ft.Column(controls=build_behavior_item_controls(_BEHAVIORS_CACHE[target_sha256]), spacing=8, scroll=ft.ScrollMode.ALWAYS, expand=True, horizontal_alignment=ft.CrossAxisAlignment.STRETCH)
     else:
-        behavior_container = ft.Column(controls=[behavior_loading_card], spacing=8, scroll=ft.ScrollMode.ALWAYS, expand=True)
+        behavior_container = ft.Column(controls=[behavior_loading_card], spacing=8, scroll=ft.ScrollMode.ALWAYS, expand=True, horizontal_alignment=ft.CrossAxisAlignment.STRETCH)
 
     def load_behavior(e=None):
         if target_sha256 in _BEHAVIORS_CACHE:
@@ -450,7 +454,7 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
 
             items.append(ft.Container(
                 content=ft.Row([
-                    ft.Column(content_controls, spacing=2, expand=True),
+                    ft.Column(content_controls, spacing=2, expand=True, horizontal_alignment=ft.CrossAxisAlignment.START),
                     delete_btn
                 ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN, vertical_alignment=ft.CrossAxisAlignment.CENTER),
                 padding=ft.Padding(left=12, right=8, top=8, bottom=8),
@@ -463,9 +467,9 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
     comments_loading_card = make_loading_card(STRINGS[lang].get("comments_loading", "Loading community comments..."), theme_mode=theme_mode)
     
     if target_sha256 in _COMMENTS_CACHE:
-        comments_container = ft.Column(controls=build_comment_item_controls(_COMMENTS_CACHE[target_sha256]), spacing=8, scroll=ft.ScrollMode.ALWAYS, expand=True)
+        comments_container = ft.Column(controls=build_comment_item_controls(_COMMENTS_CACHE[target_sha256]), spacing=8, scroll=ft.ScrollMode.ALWAYS, expand=True, horizontal_alignment=ft.CrossAxisAlignment.STRETCH)
     else:
-        comments_container = ft.Column(controls=[comments_loading_card], spacing=8, scroll=ft.ScrollMode.ALWAYS, expand=True)
+        comments_container = ft.Column(controls=[comments_loading_card], spacing=8, scroll=ft.ScrollMode.ALWAYS, expand=True, horizontal_alignment=ft.CrossAxisAlignment.STRETCH)
 
     send_progress = ft.ProgressRing(width=20, height=20, stroke_width=2.5, color=palette["accent"], visible=False)
     send_button = ft.IconButton(
@@ -657,7 +661,7 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
         ]),
         ft.Divider(color=palette["divider"]),
         comments_container
-    ], expand=True)
+    ], expand=True, horizontal_alignment=ft.CrossAxisAlignment.STRETCH)
 
     res_tab_defs = [
         (0, STRINGS[lang].get("tab_detections", "Detections"), ft.Icons.SECURITY_ROUNDED, detections_tab_view),
@@ -668,19 +672,11 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
     active_res_tab = [_ACTIVE_RES_TAB.get(target_sha256, 0)]
     res_tab_views_map = {idx: v for idx, _, _, v in res_tab_defs}
 
-    animated_res_tab_content = ft.AnimatedSwitcher(
-        content=ft.Container(
-            key=f"res_tab_container_{active_res_tab[0]}",
-            content=res_tab_views_map[active_res_tab[0]],
-            padding=5,
-            expand=True
-        ),
-        transition=ft.AnimatedSwitcherTransition.FADE,
-        duration=200,
-        reverse_duration=150,
-        switch_in_curve=ft.AnimationCurve.EASE_OUT,
-        switch_out_curve=ft.AnimationCurve.EASE_IN,
-        expand=True
+    res_tab_content_container = ft.Container(
+        content=res_tab_views_map[active_res_tab[0]],
+        padding=5,
+        expand=True,
+        alignment=ft.Alignment.TOP_LEFT
     )
 
     res_tab_buttons = []
@@ -704,13 +700,8 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
         if idx == 1:
             load_behavior(None)
         update_res_tab_buttons()
-        animated_res_tab_content.content = ft.Container(
-            key=f"res_tab_container_{idx}",
-            content=res_tab_views_map[idx],
-            padding=5,
-            expand=True
-        )
-        safe_update_control(animated_res_tab_content)
+        res_tab_content_container.content = res_tab_views_map[idx]
+        safe_update_control(res_tab_content_container)
 
     for idx, label, icon, _ in res_tab_defs:
         is_active = (active_res_tab[0] == idx)
@@ -766,7 +757,7 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
                     bottom=ft.BorderSide(1, palette["divider"])
                 )
             ),
-            animated_res_tab_content
+            res_tab_content_container
         ],
         expand=True,
         height=480,
