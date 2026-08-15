@@ -155,6 +155,45 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
     user_vote_state = [_VOTE_CACHE.get(target_sha256)]
     is_voting_state = [False]
 
+    def handle_vote(verdict):
+        def vote_action(e):
+            if is_voting_state[0]:
+                return
+            api_key = get_api_key()
+            if not api_key:
+                page.show_dialog(ft.SnackBar(content=ft.Text(STRINGS[lang]["api_key_missing"])))
+                return
+            if not target_sha256:
+                page.show_dialog(ft.SnackBar(content=ft.Text(STRINGS[lang].get("vote_sha_missing", "SHA-256 is missing for voting.")), bgcolor="#EF4444"))
+                return
+
+            if user_vote_state[0] == verdict:
+                verdict_word = STRINGS[lang].get(f"verdict_{verdict}_word", verdict)
+                msg = STRINGS[lang].get("already_voted", "Already voted '{verdict}' for this file.").format(verdict=verdict_word)
+                page.show_dialog(ft.SnackBar(content=ft.Text(msg), bgcolor=palette["button_primary_bg"]))
+                return
+
+            is_voting_state[0] = True
+            update_vote_ui()
+
+            def worker():
+                try:
+                    vote_item("files", target_sha256, verdict, api_key)
+                    user_vote_state[0] = verdict
+                    _VOTE_CACHE[target_sha256] = verdict
+                    is_voting_state[0] = False
+                    update_vote_ui()
+                    verdict_word = STRINGS[lang].get(f"verdict_{verdict}_word", verdict)
+                    msg = STRINGS[lang].get("toast_vote_success", "Voted '{verdict}' successfully!").format(verdict=verdict_word)
+                    page.show_dialog(ft.SnackBar(content=ft.Text(msg), bgcolor="#10B981"))
+                except Exception as ex:
+                    is_voting_state[0] = False
+                    update_vote_ui()
+                    msg = STRINGS[lang].get("toast_vote_fail", "Vote failed: {e}").format(e=str(ex))
+                    page.show_dialog(ft.SnackBar(content=ft.Text(msg), bgcolor="#EF4444"))
+            threading.Thread(target=worker, daemon=True).start()
+        return vote_action
+
     def build_vote_controls():
         if is_voting_state[0]:
             return [
@@ -205,45 +244,6 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
             return [harmless_btn, malicious_btn]
 
     vote_buttons_container = ft.Row(controls=build_vote_controls(), spacing=6)
-
-    def handle_vote(verdict):
-        def vote_action(e):
-            if is_voting_state[0]:
-                return
-            api_key = get_api_key()
-            if not api_key:
-                page.show_dialog(ft.SnackBar(content=ft.Text(STRINGS[lang]["api_key_missing"])))
-                return
-            if not target_sha256:
-                page.show_dialog(ft.SnackBar(content=ft.Text(STRINGS[lang].get("vote_sha_missing", "SHA-256 is missing for voting.")), bgcolor="#EF4444"))
-                return
-
-            if user_vote_state[0] == verdict:
-                verdict_word = STRINGS[lang].get(f"verdict_{verdict}_word", verdict)
-                msg = STRINGS[lang].get("already_voted", "Already voted '{verdict}' for this file.").format(verdict=verdict_word)
-                page.show_dialog(ft.SnackBar(content=ft.Text(msg), bgcolor=palette["button_primary_bg"]))
-                return
-
-            is_voting_state[0] = True
-            update_vote_ui()
-
-            def worker():
-                try:
-                    vote_item("files", target_sha256, verdict, api_key)
-                    user_vote_state[0] = verdict
-                    _VOTE_CACHE[target_sha256] = verdict
-                    is_voting_state[0] = False
-                    update_vote_ui()
-                    verdict_word = STRINGS[lang].get(f"verdict_{verdict}_word", verdict)
-                    msg = STRINGS[lang].get("toast_vote_success", "Voted '{verdict}' successfully!").format(verdict=verdict_word)
-                    page.show_dialog(ft.SnackBar(content=ft.Text(msg), bgcolor="#10B981"))
-                except Exception as ex:
-                    is_voting_state[0] = False
-                    update_vote_ui()
-                    msg = STRINGS[lang].get("toast_vote_fail", "Vote failed: {e}").format(e=str(ex))
-                    page.show_dialog(ft.SnackBar(content=ft.Text(msg), bgcolor="#EF4444"))
-            threading.Thread(target=worker, daemon=True).start()
-        return vote_action
 
     def update_vote_ui():
         vote_buttons_container.controls = build_vote_controls()
