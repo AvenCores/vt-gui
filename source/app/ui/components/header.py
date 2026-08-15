@@ -54,66 +54,17 @@ def build_header(
 
     is_dark = (theme_mode == "dark")
     theme_icon = ft.Icons.LIGHT_MODE_ROUNDED if is_dark else ft.Icons.DARK_MODE_ROUNDED
-    theme_icon_color = "#F59E0B" if is_dark else "#3B82F6"
     theme_tooltip = STRINGS.get(current_lang, {}).get(
         "theme_toggle_light" if is_dark else "theme_toggle_dark",
         "Switch to Light Theme" if is_dark else "Switch to Dark Theme"
     )
 
-    theme_icon_widget = ft.Icon(
-        theme_icon,
-        color=theme_icon_color,
-        size=19
-    )
-
-    icon_wrapper = ft.Container(
-        content=theme_icon_widget,
-        alignment=ft.Alignment.CENTER,
-        rotate=0.0,
-        scale=1.0,
-        animate_rotation=ft.Animation(400, ft.AnimationCurve.EASE_OUT_BACK),
-        animate_scale=ft.Animation(200, ft.AnimationCurve.EASE_OUT),
-    )
-
-    theme_button = ft.Container(
-        content=icon_wrapper,
-        width=38,
-        height=38,
-        border_radius=8,
-        border=ft.Border.all(1, palette["card_border"]),
-        bgcolor=palette["card_bg"],
-        alignment=ft.Alignment.CENTER,
+    theme_button = ft.IconButton(
+        icon=theme_icon,
+        icon_color=palette["text_muted"],
         tooltip=theme_tooltip,
-        animate=ft.Animation(150, ft.AnimationCurve.EASE_OUT),
+        on_click=on_theme_toggle
     )
-
-    def on_theme_click(e):
-        icon_wrapper.rotate = (icon_wrapper.rotate or 0.0) + 3.14159
-        icon_wrapper.scale = 0.75
-        try:
-            icon_wrapper.update()
-        except Exception:
-            pass
-        if on_theme_toggle:
-            on_theme_toggle(e)
-
-    def on_theme_hover(e):
-        if e.data == "true":
-            theme_button.bgcolor = palette["card_bg_hover"]
-            theme_button.border = ft.Border.all(1, palette["accent"])
-            icon_wrapper.scale = 1.12
-        else:
-            theme_button.bgcolor = palette["card_bg"]
-            theme_button.border = ft.Border.all(1, palette["card_border"])
-            icon_wrapper.scale = 1.0
-        try:
-            theme_button.update()
-            icon_wrapper.update()
-        except Exception:
-            pass
-
-    theme_button.on_click = on_theme_click
-    theme_button.on_hover = on_theme_hover
 
     settings_button = ft.IconButton(
         icon=ft.Icons.SETTINGS_ROUNDED,
