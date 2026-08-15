@@ -1,5 +1,5 @@
 import flet as ft
-from ..config import STRINGS, get_available_langs, get_lang_flag
+from ...core.config import STRINGS, get_available_langs, get_lang_flag
 
 
 def build_header(current_lang: str, on_language_change, on_settings_click) -> ft.Container:

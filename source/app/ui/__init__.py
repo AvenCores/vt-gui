@@ -1,19 +1,38 @@
-# UI Components module
-from .header import build_header
-from .footer import build_footer
-from .install_view import build_install_view
-from .scanner_view import build_scanner_view
-from .scanning_view import build_scanning_view
-from .results_view import build_results_view
-from .history_view import build_history_view
-from .intelligence_view import IntelligenceView
-from .tools_view import ToolsView
-from .settings_dialog import open_settings
-from .api_key_dialog import open_api_key_dialog
+"""
+UI package providing user interface components, dialogs, and views.
+"""
+
+from .components import (
+    build_header,
+    build_footer,
+    make_loading_card,
+    make_stat_card,
+    make_file_details_card,
+    make_engine_row,
+)
+from .dialogs import (
+    open_api_key_dialog,
+    open_settings,
+)
+from .views import (
+    build_install_view,
+    build_scanner_view,
+    build_scanning_view,
+    build_results_view,
+    build_history_view,
+    IntelligenceView,
+    ToolsView,
+)
 
 __all__ = [
     "build_header",
     "build_footer",
+    "make_loading_card",
+    "make_stat_card",
+    "make_file_details_card",
+    "make_engine_row",
+    "open_api_key_dialog",
+    "open_settings",
     "build_install_view",
     "build_scanner_view",
     "build_scanning_view",
@@ -21,6 +40,4 @@ __all__ = [
     "build_history_view",
     "IntelligenceView",
     "ToolsView",
-    "open_settings",
-    "open_api_key_dialog",
 ]

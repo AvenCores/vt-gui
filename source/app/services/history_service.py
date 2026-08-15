@@ -2,7 +2,8 @@ import os
 import json
 import time
 import uuid
-from .config import _get_config_dir
+
+from ..core.config import _get_config_dir
 
 HISTORY_FILE = "scan_history.json"
 MAX_RECORDS = 100
@@ -112,4 +113,3 @@ def clear_history():
 
 # Alias for backward compatibility
 get_history = load_history
-

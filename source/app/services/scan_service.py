@@ -3,10 +3,13 @@ import sys
 import time
 import json
 import subprocess
-from ..config import STRINGS, get_api_key, CLI_BINARY_NAME
-from ..cli_manager import get_installed_binary_path, compute_sha256
-from ..vt_api import check_file_exists_direct, check_file_exists_vt
-from ..history_manager import add_scan_record
+
+from ..core.constants import CLI_BINARY_NAME
+from ..core.config import STRINGS, get_api_key
+from ..api.cli_manager import get_installed_binary_path
+from ..utils.hashing import compute_sha256
+from ..api.vt_api import check_file_exists_direct, check_file_exists_vt
+from .history_service import add_scan_record
 
 _NO_WINDOW = subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0
 
@@ -244,4 +247,3 @@ class ScanService:
                 error=str(ex)
             )
             self.thread_safe_build_fn()
-

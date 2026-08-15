@@ -35,7 +35,7 @@ jobs:
       - name: Install dependencies & pre-cache runtime
         run: |
           pip install -r requirements.txt
-          python -m app.bundle_runtime
+          python -m app.core.bundle_runtime
         working-directory: source
 
       - name: Build with PyInstaller
@@ -80,7 +80,7 @@ jobs:
       - name: Install dependencies & pre-cache runtime
         run: |
           pip install -r requirements.txt
-          python -m app.bundle_runtime
+          python -m app.core.bundle_runtime
         working-directory: source
 
       - name: Build with PyInstaller
@@ -125,7 +125,7 @@ jobs:
       - name: Install dependencies & pre-cache runtime
         run: |
           pip install -r requirements.txt
-          python -m app.bundle_runtime
+          python -m app.core.bundle_runtime
         working-directory: source
 
       - name: Build with PyInstaller
@@ -167,7 +167,7 @@ jobs:
       - name: Install dependencies & pre-cache runtime
         run: |
           pip install -r requirements.txt
-          python -m app.bundle_runtime
+          python -m app.core.bundle_runtime
         working-directory: source
 
       - name: Build with PyInstaller
@@ -210,7 +210,7 @@ jobs:
       - name: Install dependencies & pre-cache runtime
         run: |
           pip install -r requirements.txt
-          python -m app.bundle_runtime
+          python -m app.core.bundle_runtime
         working-directory: source
 
       - name: Build with PyInstaller

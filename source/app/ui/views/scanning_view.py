@@ -1,5 +1,6 @@
 import flet as ft
-from ..config import STRINGS
+from ...core.config import STRINGS
+
 
 def build_scanning_view(scan_progress_ring, scan_status_text, scan_progress_bar, lang):
     """Builds the progress indicator view for ongoing file scans."""

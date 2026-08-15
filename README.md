@@ -100,30 +100,38 @@
 ## 📂 Структура проекта
 
 * [source/main.py](source/main.py) — Главный файл приложения, точка входа, конфигурация окна Flet, обработка аргументов командной строки и маршрутизация между экранами.
-* **`source/app/`** — Основной модуль логики приложения:
-  * [source/app/config.py](source/app/config.py) — Настройки окружения (синхронизация `.env` и `~/.vt.toml`), автоопределение языка, база хэшей `vt-cli` и строки локализации.
-  * [source/app/cli_manager.py](source/app/cli_manager.py) — Менеджер работы с бинарником `vt` (проверка, вычисление SHA-256, скачивание и распаковка релизов GitHub в изолированный каталог).
-  * [source/app/clipboard_utils.py](source/app/clipboard_utils.py) — Утилиты для безопасной работы с буфером обмена (включая Win32 fallback для стабильности).
-  * [source/app/vt_api.py](source/app/vt_api.py) — Взаимодействие с VirusTotal v3 REST API (поиск хэшей, сканирование URL, домены, IP, поиск, субдомены, DNS, diff файлов).
-  * [source/app/exporter.py](source/app/exporter.py) — Экспорт отчетов сканирований и аналитики в файлы JSON через нативный системный диалог файла или в папку «Загрузки».
-  * [source/app/history_manager.py](source/app/history_manager.py) — Менеджер истории сканирований и поисковых запросов (`history.json`).
-  * [source/app/bundle_runtime.py](source/app/bundle_runtime.py) — Скрипт подготовки и автономной упаковки рантайма Flet Desktop для сборки с PyInstaller.
-  * [source/app/strings.json](source/app/strings.json) — Файл локализации со всеми текстовыми строками интерфейса.
+* **`source/app/`** — Модульная архитектура приложения:
+  * [source/app/strings.json](source/app/strings.json) — Файл локализации со всеми текстовыми строками интерфейса (12 языков).
+  * **`core/`** — Системное ядро и конфигурация:
+    * [source/app/core/constants.py](source/app/core/constants.py) — Платформенные константы, хэши официальных релизов `vt-cli`, настройки языков.
+    * [source/app/core/config.py](source/app/core/config.py) — Синхронизация окружения (`.env` и `~/.vt.toml`), автоопределение системного языка, загрузка `strings.json`.
+    * [source/app/core/bundle_runtime.py](source/app/core/bundle_runtime.py) — Подготовка и автономная упаковка рантайма Flet Desktop для PyInstaller.
+  * **`api/`** — Сетевой слой и интеграция с VirusTotal:
+    * [source/app/api/vt_api.py](source/app/api/vt_api.py) — Клиент VirusTotal v3 REST API (хэши, файлы, URL, домены, IP, поиск, субдомены, DNS, комментарии, голосование, квоты).
+    * [source/app/api/cli_manager.py](source/app/api/cli_manager.py) — Менеджер утилиты `vt` (скачивание с GitHub Releases, проверка SHA-256, распаковка и поиск бинарника).
   * **`services/`** — Сервисный слой бизнес-логики:
-    * [source/app/services/scan_service.py](source/app/services/scan_service.py) — Пайплайн многопоточного сканирования файлов (хэширование -> VT API -> отправка CLI -> отслеживание).
-  * **`ui/`** — Графический интерфейс и компоненты:
-    * [source/app/ui/header.py](source/app/ui/header.py) — Верхняя панель приложения (логотип, переключатель языков, кнопка настроек).
-    * [source/app/ui/theme.py](source/app/ui/theme.py) — Дизайн-система (стили, карточки статистики, список антивирусных вердиктов).
-    * [source/app/ui/scanner_view.py](source/app/ui/scanner_view.py) — Стартовый экран выбора файла/папки и зоны Drag-and-Drop.
-    * [source/app/ui/scanning_view.py](source/app/ui/scanning_view.py) — Экран прогресса сканирования.
-    * [source/app/ui/results_view.py](source/app/ui/results_view.py) — Панель результатов с вердиктом, сводкой детектов, антивирусами и экспортом.
-    * [source/app/ui/intelligence_view.py](source/app/ui/intelligence_view.py) — Экраны проверки URL, доменов, IP-адресов и поисковых запросов.
-    * [source/app/ui/tools_view.py](source/app/ui/tools_view.py) — Дополнительный инструментарий: сравнение файлов (`vt diff`) и наборы YARA-правил (`Livehunt`).
-    * [source/app/ui/history_view.py](source/app/ui/history_view.py) — Экран истории сканирований с поиском, повторным анализом и очисткой.
-    * [source/app/ui/install_view.py](source/app/ui/install_view.py) — Мастер установки `vt-cli` (автоматическая загрузка или ручной выбор).
-    * [source/app/ui/settings_dialog.py](source/app/ui/settings_dialog.py) — Диалог настроек (управление API-ключом, переустановка CLI).
-    * [source/app/ui/api_key_dialog.py](source/app/ui/api_key_dialog.py) — Диалог ввода API-ключа при первом запуске.
-    * [source/app/ui/footer.py](source/app/ui/footer.py) — Нижняя панель с социальными сетями, проверкой обновлений и диалогом «О программе».
+    * [source/app/services/scan_service.py](source/app/services/scan_service.py) — Пайплайн сканирования файлов (хэширование -> VT API -> отправка через CLI -> отслеживание).
+    * [source/app/services/history_service.py](source/app/services/history_service.py) — Менеджер локальной истории сканирований и поисков (`scan_history.json`).
+    * [source/app/services/export_service.py](source/app/services/export_service.py) — Экспорт и импорт отчетов анализа в формате JSON.
+  * **`utils/`** — Утилиты общего назначения:
+    * [source/app/utils/clipboard.py](source/app/utils/clipboard.py) — Безопасная работа с буфером обмена (с поддержкой Win32 API fallback).
+    * [source/app/utils/hashing.py](source/app/utils/hashing.py) — Потоковое вычисление хэш-суммы SHA-256 локальных файлов.
+  * **`ui/`** — Графический интерфейс на Flet:
+    * **`components/`** — Переиспользуемые визуальные компоненты:
+      * [source/app/ui/components/header.py](source/app/ui/components/header.py) — Верхняя панель (логотип, выбор языка, настройки).
+      * [source/app/ui/components/footer.py](source/app/ui/components/footer.py) — Нижняя панель (версия, ссылки, проверка обновлений).
+      * [source/app/ui/components/theme.py](source/app/ui/components/theme.py) — Карточки статистики, индикаторы загрузки, строки вердиктов антивирусов.
+    * **`dialogs/`** — Модальные окна:
+      * [source/app/ui/dialogs/api_key_dialog.py](source/app/ui/dialogs/api_key_dialog.py) — Диалог ввода API-ключа при первом запуске.
+      * [source/app/ui/dialogs/settings_dialog.py](source/app/ui/dialogs/settings_dialog.py) — Окно настроек (API-ключ, квоты, переустановка CLI).
+    * **`views/`** — Экраны и вкладки приложения:
+      * [source/app/ui/views/install_view.py](source/app/ui/views/install_view.py) — Мастер установки `vt-cli` (автоматическая загрузка или ручной выбор).
+      * [source/app/ui/views/scanner_view.py](source/app/ui/views/scanner_view.py) — Стартовый экран выбора файлов/папок и Drag-and-Drop.
+      * [source/app/ui/views/scanning_view.py](source/app/ui/views/scanning_view.py) — Экран прогресса сканирования.
+      * [source/app/ui/views/results_view.py](source/app/ui/views/results_view.py) — Панель результатов с вердиктами, поведением, комментариями и голосованием.
+      * [source/app/ui/views/history_view.py](source/app/ui/views/history_view.py) — История проверок с фильтрацией, повторным анализом и удалением.
+      * [source/app/ui/views/intelligence_view.py](source/app/ui/views/intelligence_view.py) — Аналитика угроз (URL, домены, IP-адреса, поиск по базе VT).
+      * [source/app/ui/views/tools_view.py](source/app/ui/views/tools_view.py) — Инструменты: сравнение файлов (`vt diff`) и наборы правил YARA (`Livehunt`).
 
 ---
 

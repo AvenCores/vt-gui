@@ -1,7 +1,13 @@
 import os
 import json
 import threading
+import uuid
+import time
 import flet as ft
+
+from ..core.config import STRINGS
+from .history_service import save_history, load_history
+
 
 def export_report_to_path(data_dict, out_path):
     """Export scan report or intelligence report to a specific file path."""
@@ -15,6 +21,7 @@ def export_report_to_path(data_dict, out_path):
     except Exception as ex:
         return False, str(ex)
 
+
 def export_report_to_file(data_dict, file_name, file_format="json"):
     """Export scan report or intelligence report to user Downloads folder."""
     downloads_dir = os.path.join(os.path.expanduser("~"), "Downloads")
@@ -24,10 +31,9 @@ def export_report_to_file(data_dict, file_name, file_format="json"):
     out_path = os.path.join(downloads_dir, out_filename)
     return export_report_to_path(data_dict, out_path)
 
+
 def prompt_export_report(page, data_dict, default_name, lang):
     """Opens native OS file save dialog allowing user to select destination folder and filename."""
-    from .config import STRINGS
-
     clean_name = "".join(c if c.isalnum() or c in ("-", "_", ".") else "_" for c in default_name)
     suggested_filename = f"vt_report_{clean_name}.json"
 
@@ -70,10 +76,6 @@ def prompt_export_report(page, data_dict, default_name, lang):
 
 def parse_imported_report(data_dict, file_path=""):
     """Parses imported JSON data and converts it to a standard history record structure safely."""
-    import uuid
-    import time
-    import os
-
     if not isinstance(data_dict, (dict, list)):
         raise ValueError("Invalid report structure: JSON root must be an object or array.")
 
@@ -180,10 +182,6 @@ def parse_imported_report(data_dict, file_path=""):
 
 def prompt_import_report(page, lang, on_report_imported):
     """Opens native OS file dialog allowing user to select an exported JSON report to open."""
-    from .config import STRINGS
-    from .history_manager import save_history, load_history
-    import time
-
     def worker():
         try:
             import tkinter as tk
@@ -200,7 +198,6 @@ def prompt_import_report(page, lang, on_report_imported):
             root.destroy()
 
             if chosen_path and os.path.exists(chosen_path):
-                # Show animated import progress indicator immediately
                 importing_msg = STRINGS[lang].get("toast_importing", "Importing report...")
                 importing_snack = ft.SnackBar(
                     content=ft.Row([
@@ -233,4 +230,3 @@ def prompt_import_report(page, lang, on_report_imported):
             page.show_dialog(ft.SnackBar(content=ft.Text(msg), bgcolor="#EF4444"))
 
     threading.Thread(target=worker, daemon=True).start()
-

@@ -2,9 +2,9 @@ import flet as ft
 import os
 import webbrowser
 from datetime import datetime
-from ..config import STRINGS
-from ..history_manager import load_history, delete_scan_record, clear_history
 
+from ...core.config import STRINGS
+from ...services.history_service import load_history, delete_scan_record, clear_history
 
 LOOKUP_TYPE_ICONS = {
     "url": ft.Icons.LINK_ROUNDED,
@@ -187,10 +187,6 @@ def build_history_view(lang, page, on_back, on_rescan, on_open_in_app=None, on_i
                 webbrowser.open(f"https://www.virustotal.com/gui/file/{h}")
 
         def on_open_report_click(e, rec=record):
-            # Custom overlay-based dialog: AlertDialog via page.show_dialog stays
-            # stuck on screen when the whole view is rebuilt right after closing
-            # (Flutter's dismiss event gets lost), so we manage the overlay
-            # element ourselves.
             overlay_holder = [None]
 
             def close_overlay():
@@ -215,27 +211,10 @@ def build_history_view(lang, page, on_back, on_rescan, on_open_in_app=None, on_i
                 if on_open_in_app:
                     on_open_in_app(rec)
 
-            def open_in_app_from_dialog(e_d):
-                close_overlay()
-                if on_open_in_app:
-                    on_open_in_app(rec)
-
-            def confirm_browser(e_cb):
-                close_overlay()
-                on_web_report(
-                    e_cb,
-                    rt=rec.get("type", "file"),
-                    lt=rec.get("lookup_type", ""),
-                    q=rec.get("query", ""),
-                    h=rec.get("sha256", "")
-                )
-
-
             target_name = rec.get("filename") or rec.get("query") or rec.get("sha256", "Report")
             if len(target_name) > 36:
                 target_name = target_name[:33] + "..."
 
-            # Accurately parse malicious detection count from record results
             results_data = rec.get("results")
             malicious_count = 0
             if results_data:
@@ -256,14 +235,12 @@ def build_history_view(lang, page, on_back, on_rescan, on_open_in_app=None, on_i
             elif rec.get("detections") is not None:
                 malicious_count = rec.get("detections", 0)
 
-            # Format timestamp
             raw_ts = rec.get("timestamp", 0)
             if isinstance(raw_ts, (int, float)) and raw_ts > 0:
                 scan_time_str = datetime.fromtimestamp(raw_ts).strftime("%d.%m.%Y %H:%M")
             else:
                 scan_time_str = str(raw_ts) if raw_ts else ""
 
-            # Format SHA-256 / Query hash label
             raw_sha = rec.get("sha256", "")
             raw_query = rec.get("query", "")
             if raw_sha:

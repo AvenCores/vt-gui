@@ -3,13 +3,15 @@ import webbrowser
 import urllib.request
 import json
 import asyncio
-from ..config import STRINGS
-from ..clipboard_utils import safe_copy_to_clipboard
+
+from ...core.config import STRINGS
+from ...utils.clipboard import safe_copy_to_clipboard
 
 APP_VERSION = "V1.0.7"
 GITHUB_REPO = "AvenCores/vt-gui"
 RELEASES_URL = f"https://github.com/{GITHUB_REPO}/releases"
 API_URL = f"https://api.github.com/repos/{GITHUB_REPO}/releases/latest"
+
 
 def _parse_version(version_str):
     """Parse version string like 'V1.0.0' or '1.0.0' into tuple of ints."""
@@ -18,6 +20,7 @@ def _parse_version(version_str):
         return tuple(int(x) for x in v.split("."))
     except (ValueError, AttributeError):
         return (0, 0, 0)
+
 
 def _check_for_update():
     """Check GitHub for the latest release. Returns (latest_tag, html_url) or None."""
@@ -33,6 +36,7 @@ def _check_for_update():
             return tag, html_url
     except Exception:
         return None
+
 
 def build_footer(lang="en", page=None):
     """Builds a sticky, premium footer containing social links with hover animations."""

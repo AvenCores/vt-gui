@@ -1,10 +1,12 @@
 import json
 import urllib.request
 import urllib.error
+import urllib.parse
 import subprocess
 import sys
 
 _NO_WINDOW = subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0
+
 
 def check_file_exists_direct(sha256, api_key):
     """Check if the file hash already exists on VirusTotal using HTTP API."""
@@ -25,6 +27,7 @@ def check_file_exists_direct(sha256, api_key):
     except Exception:
         return None
 
+
 def verify_api_key(api_key):
     """Verify that the API key is valid by making a test request to VirusTotal.
     Returns (True, None) on success or (False, error_message) on failure."""
@@ -43,6 +46,7 @@ def verify_api_key(api_key):
         return False, f"HTTP {e.code}"
     except Exception as e:
         return False, str(e)
+
 
 def check_file_exists_vt(vt_path, sha256):
     """Check if the file hash already exists on VirusTotal using vt CLI."""
@@ -65,6 +69,7 @@ def check_file_exists_vt(vt_path, sha256):
     except Exception:
         pass
     return None
+
 
 def get_user_quota(api_key):
     """Fetch user account info and overall API quota usage from VirusTotal API."""
@@ -103,6 +108,7 @@ def get_user_quota(api_key):
     except Exception:
         return None
 
+
 def reanalyze_item(item_type, item_id, api_key, vt_path=None):
     """Request a fresh re-analysis for a file, domain, IP, or URL."""
     if item_type == "file":
@@ -134,9 +140,9 @@ def reanalyze_item(item_type, item_id, api_key, vt_path=None):
     except Exception as ex:
         raise ex
 
+
 def submit_url_scan(url_str, api_key):
     """Submit a URL for a live scan on VirusTotal. Returns analysis_id."""
-    import urllib.parse
     url = "https://www.virustotal.com/api/v3/urls"
     data = f"url={urllib.parse.quote(url_str, safe='')}".encode('utf-8')
     req = urllib.request.Request(
@@ -157,6 +163,7 @@ def submit_url_scan(url_str, api_key):
     except Exception as ex:
         raise ex
 
+
 def get_file_behaviours(sha256, api_key):
     """Fetch file execution behaviors and sandbox reports from VirusTotal API."""
     url = f"https://www.virustotal.com/api/v3/files/{sha256}/behaviours"
@@ -171,6 +178,7 @@ def get_file_behaviours(sha256, api_key):
     except Exception:
         return []
 
+
 def get_subdomains(domain, api_key):
     """Fetch subdomains for a given domain from VirusTotal API."""
     url = f"https://www.virustotal.com/api/v3/domains/{domain}/subdomains?limit=20"
@@ -184,6 +192,7 @@ def get_subdomains(domain, api_key):
             return res.get("data", [])
     except Exception:
         return []
+
 
 def get_dns_resolutions(item_type, item_id, api_key):
     """Fetch historical DNS resolutions for a domain or IP from VirusTotal API."""
@@ -203,6 +212,7 @@ def get_dns_resolutions(item_type, item_id, api_key):
     except Exception:
         return []
 
+
 def get_comments(collection, item_id, api_key):
     """Fetch community comments for a file, domain, IP, or URL."""
     url = f"https://www.virustotal.com/api/v3/{collection}/{item_id}/comments?limit=10"
@@ -216,6 +226,7 @@ def get_comments(collection, item_id, api_key):
             return res.get("data", [])
     except Exception:
         return []
+
 
 def add_comment(collection, item_id, text, api_key):
     """Post a comment to a file, domain, IP, or URL on VirusTotal."""
@@ -245,6 +256,7 @@ def add_comment(collection, item_id, text, api_key):
     except Exception as ex:
         raise ex
 
+
 def delete_comment(comment_id, api_key):
     """Delete a comment by its ID on VirusTotal."""
     url = f"https://www.virustotal.com/api/v3/comments/{comment_id}"
@@ -264,6 +276,7 @@ def delete_comment(comment_id, api_key):
             return {"data": "deleted"}
     except Exception as ex:
         raise ex
+
 
 def vote_item(collection, item_id, verdict, api_key):
     """Submit a vote ('harmless' or 'malicious') for an item on VirusTotal."""
@@ -301,6 +314,7 @@ def vote_item(collection, item_id, verdict, api_key):
     except Exception as ex:
         raise ex
 
+
 def get_user_vote(collection, item_id, api_key):
     """Fetch current user's vote for an item ('harmless', 'malicious', or None)."""
     url = f"https://www.virustotal.com/api/v3/{collection}/{item_id}/user_votes"
@@ -322,6 +336,7 @@ def get_user_vote(collection, item_id, api_key):
         pass
     return None
 
+
 def diff_files(hash1, hash2, vt_path):
     """Compare two file hashes using vt CLI `vt diff` or fetch both file details."""
     try:
@@ -340,6 +355,7 @@ def diff_files(hash1, hash2, vt_path):
         pass
     return None
 
+
 def get_yara_rulesets(api_key):
     """Fetch user's YARA Livehunt rulesets directly via VirusTotal API v3."""
     url = "https://www.virustotal.com/api/v3/yara_rulesets?limit=20"
@@ -357,5 +373,3 @@ def get_yara_rulesets(api_key):
         raise ex
     except Exception as ex:
         raise ex
-
-

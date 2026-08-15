@@ -3,6 +3,7 @@ import time
 import ctypes
 import flet as ft
 
+
 def set_clipboard_win32(text: str) -> bool:
     """Sets clipboard text using Win32 API with retry loop for Windows lock errors."""
     if sys.platform != "win32":
@@ -34,6 +35,7 @@ def set_clipboard_win32(text: str) -> bool:
     except Exception:
         pass
     return False
+
 
 async def safe_copy_to_clipboard(page: ft.Page, text: str, clipboard_service=None):
     """Safely copies text to clipboard, catching PlatformException/RuntimeError and trying Win32 fallback."""

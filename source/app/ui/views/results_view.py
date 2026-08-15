@@ -1,10 +1,12 @@
 import flet as ft
 import os
 import threading
-from ..config import STRINGS, get_api_key
-from ..vt_api import reanalyze_item, get_file_behaviours, get_comments, add_comment, delete_comment, vote_item, get_user_vote
-from ..exporter import export_report_to_file, prompt_export_report
-from .theme import make_stat_card, make_file_details_card, make_engine_row, make_loading_card
+
+from ...core.config import STRINGS, get_api_key
+from ...api.vt_api import reanalyze_item, get_file_behaviours, get_comments, add_comment, delete_comment, vote_item, get_user_vote
+from ...services.export_service import export_report_to_file, prompt_export_report
+from ..components.theme import make_stat_card, make_file_details_card, make_engine_row, make_loading_card
+
 
 def build_results_view(current_scan_results, selected_target_file, last_completed_sha256, lang, page):
     """Builds the enhanced results dashboard, showing detections, behaviors, comments, voting, and export options."""

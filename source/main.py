@@ -3,38 +3,45 @@ import sys
 import threading
 import flet as ft
 
-from app.config import (
+from app.core import (
     write_env_var,
     get_api_key,
     get_app_lang,
     get_available_langs,
     get_lang_flag,
     IS_WINDOWS,
-    STRINGS
+    STRINGS,
+    KNOWN_HASHES,
 )
-from app.cli_manager import (
+from app.api import (
     check_installed_binary,
     get_temp_bin_path,
     get_installed_binary_path,
     process_selected_binary,
-    download_and_install_cli
+    download_and_install_cli,
+    check_file_exists_direct,
+    check_file_exists_vt,
 )
-from app.ui.header import build_header
-from app.ui.install_view import build_install_view
-from app.ui.scanner_view import build_scanner_view
-from app.ui.scanning_view import build_scanning_view
-from app.ui.results_view import build_results_view
-from app.ui.settings_dialog import open_settings
-from app.ui.api_key_dialog import open_api_key_dialog
-from app.ui.intelligence_view import IntelligenceView
-from app.ui.footer import build_footer
-from app.services.scan_service import ScanService, resolve_scan_status
-from app.ui.history_view import build_history_view
-from app.ui.tools_view import ToolsView
-from app.vt_api import check_file_exists_direct, check_file_exists_vt
-from app.history_manager import update_scan_record_results
-from app.exporter import prompt_import_report
-from app.clipboard_utils import safe_copy_to_clipboard
+from app.services import (
+    ScanService,
+    resolve_scan_status,
+    update_scan_record_results,
+    prompt_import_report,
+)
+from app.utils import safe_copy_to_clipboard
+from app.ui import (
+    build_header,
+    build_footer,
+    build_install_view,
+    build_scanner_view,
+    build_scanning_view,
+    build_results_view,
+    build_history_view,
+    open_settings,
+    open_api_key_dialog,
+    IntelligenceView,
+    ToolsView,
+)
 
 # Parse CLI arguments for context-menu invocation
 init_file_path = None
@@ -1047,9 +1054,6 @@ def main(page: ft.Page):
             exe_hash, exe_data = process_selected_binary(file_path)
             selected_installer_data = exe_data
             selected_installer_hash = exe_hash
-            
-            from app.config import KNOWN_HASHES
-            
             if exe_hash in KNOWN_HASHES:
                 temp_bin = get_temp_bin_path()
                 with open(temp_bin, "wb") as f:

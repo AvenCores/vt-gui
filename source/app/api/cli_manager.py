@@ -3,16 +3,21 @@ import shutil
 import hashlib
 import tempfile
 import zipfile
-from .config import KNOWN_HASHES, CLI_BINARY_NAME, IS_WINDOWS, load_env_vars
+
+from ..core.constants import KNOWN_HASHES, CLI_BINARY_NAME, IS_WINDOWS
+from ..core.config import load_env_vars, get_release_zip_name, STRINGS
+from ..utils.hashing import compute_sha256
 
 # Cache for binary validation to avoid repeated SHA-256 computation
 _validation_cache = {}  # {path: (mtime, size, status, hash)}
+
 
 def get_temp_bin_path():
     """Returns the immutable temp directory binary file path."""
     temp_dir = os.path.join(tempfile.gettempdir(), "vt_cli_immutable")
     os.makedirs(temp_dir, exist_ok=True)
     return os.path.join(temp_dir, CLI_BINARY_NAME)
+
 
 def _find_binary_in_path():
     """Checks if vt CLI is available in the system PATH."""
@@ -25,6 +30,7 @@ def _find_binary_in_path():
         if found:
             return found
     return None
+
 
 def check_installed_binary():
     """Checks if the vt CLI binary is installed and validates its hash.
@@ -44,6 +50,7 @@ def check_installed_binary():
 
     return 'missing', None, None
 
+
 def get_installed_binary_path():
     """Returns absolute path to the valid installed vt CLI binary, or None if missing."""
     path = get_temp_bin_path()
@@ -60,14 +67,15 @@ def get_installed_binary_path():
 
     return None
 
+
 def _validate_binary(path):
     """Validates a binary at the given path. Returns (status, hash).
     Uses a cache keyed on (mtime, size) to avoid redundant hashing."""
     try:
-        stat = os.stat(path)
+        stat_res = os.stat(path)
         cache_key = path
         cached = _validation_cache.get(cache_key)
-        if cached and cached[0] == stat.st_mtime and cached[1] == stat.st_size:
+        if cached and cached[0] == stat_res.st_mtime and cached[1] == stat_res.st_size:
             return cached[2], cached[3]
 
         with open(path, "rb") as f:
@@ -83,10 +91,11 @@ def _validate_binary(path):
             else:
                 status = 'unapproved'
 
-        _validation_cache[cache_key] = (stat.st_mtime, stat.st_size, status, file_hash)
+        _validation_cache[cache_key] = (stat_res.st_mtime, stat_res.st_size, status, file_hash)
         return status, file_hash
     except Exception:
         return 'missing', None
+
 
 def process_selected_binary(file_path):
     """Parses ZIP or vt binary directly to compute hash and extract data.
@@ -114,16 +123,6 @@ def process_selected_binary(file_path):
     exe_hash = hashlib.sha256(exe_data).hexdigest()
     return exe_hash, exe_data
 
-def compute_sha256(file_path):
-    """Computes the SHA-256 hash of a file."""
-    sha256_hash = hashlib.sha256()
-    try:
-        with open(file_path, "rb") as f:
-            for byte_block in iter(lambda: f.read(65536), b""):
-                sha256_hash.update(byte_block)
-        return sha256_hash.hexdigest()
-    except Exception:
-        return None
 
 def download_and_install_cli(progress_callback=None, lang="en"):
     """Downloads the official vt CLI zip for the current platform, verifies its hash, and extracts it.
@@ -131,7 +130,6 @@ def download_and_install_cli(progress_callback=None, lang="en"):
     Raises Exception on error."""
     import urllib.request
     import io
-    from .config import get_release_zip_name, STRINGS
 
     strings = STRINGS.get(lang, STRINGS.get("en", {}))
     filename = get_release_zip_name()

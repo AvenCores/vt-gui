@@ -4,12 +4,15 @@ import json
 import threading
 import subprocess
 import flet as ft
-from ..config import STRINGS, get_api_key, CLI_BINARY_NAME
-from ..vt_api import diff_files, check_file_exists_direct, check_file_exists_vt
-from ..cli_manager import get_installed_binary_path
-from ..history_manager import add_lookup_record
+
+from ...core.config import STRINGS, get_api_key
+from ...core.constants import CLI_BINARY_NAME
+from ...api.vt_api import diff_files, check_file_exists_direct, check_file_exists_vt, get_yara_rulesets
+from ...api.cli_manager import get_installed_binary_path
+from ...services.history_service import add_lookup_record
 
 _NO_WINDOW = subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0
+
 
 class ToolsView:
     def __init__(self, lang, show_alert_fn, page: ft.Page):
@@ -394,7 +397,6 @@ class ToolsView:
                 # Method 1: VirusTotal API v3
                 if api_key:
                     try:
-                        from ..vt_api import get_yara_rulesets
                         rules = get_yara_rulesets(api_key)
                         if rules:
                             self.yara_rulesets = rules

@@ -1,5 +1,7 @@
 import flet as ft
-from ..config import STRINGS, KNOWN_HASHES
+from ...core.config import STRINGS
+from ...core.constants import KNOWN_HASHES
+
 
 def build_scanner_view(cli_status, cli_hash, cli_source, lang, file_picker_scan, on_scan_click, on_folder_click=None, on_import_click=None):
     """Builds the main File Scanner view with drag-and-drop simulated click zone, badges, folder scan, and import report buttons."""

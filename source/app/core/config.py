@@ -4,24 +4,14 @@ import locale
 import sys
 import platform
 
-# Platform-aware binary name
-IS_WINDOWS = sys.platform == "win32"
-CLI_BINARY_NAME = "vt.exe" if IS_WINDOWS else "vt"
+from .constants import (
+    IS_WINDOWS,
+    CLI_BINARY_NAME,
+    KNOWN_HASHES,
+    LANG_NAMES,
+    LANG_FLAGS,
+)
 
-# Official SHA-256 hashes of the vt CLI binary itself
-KNOWN_HASHES = {
-    # Version 1.3.1 — Windows
-    "1f46c735b74a0a094b10faa3c58fee84577e767e2c7df3c2b0799ec8ff85c404": "1.3.1 (Windows 64-bit)",
-    "b8a1acb1a5e857046852f9ca806099a9c48faedfc690ec3c8233659a6c8cc1e7": "1.3.1 (Windows 32-bit)",
-    # Version 1.3.1 — Linux
-    "600b19a99dced17d9e8d075f76a719ff30d7b6e3b18884d1eac670b128c34f8c": "1.3.1 (Linux 64-bit)",
-    "1310faa6e352a22e3a95c8c82e3ff69ced1f507a7be2d2de3dc7a2c4e1465dee": "1.3.1 (Linux 32-bit)",
-    # Version 1.3.1 — macOS
-    "d32449caf0cb059c9331e3f2dfce7703823ff0faf8a40270a20f68ebb618a970": "1.3.1 (macOS)",
-    # Version 1.3.1 — FreeBSD
-    "87edffbd677e81083c4d0954383ad314f76ef3e3b58c01d471c3a152d2b80c56": "1.3.1 (FreeBSD 64-bit)",
-    "516fbd51c01aaa086d71a34eb5bc0c5032eb2b1c7c55778b100952e5339573d0": "1.3.1 (FreeBSD 32-bit)",
-}
 
 def get_release_zip_name():
     """Returns the appropriate release ZIP filename for the current platform."""
@@ -40,56 +30,47 @@ def get_release_zip_name():
         # Fallback: try 64-bit
         return "Linux64.zip"
 
+
 def _load_strings():
-    """Load UI strings from the external JSON file."""
-    strings_path = os.path.join(os.path.dirname(__file__), "strings.json")
-    try:
-        with open(strings_path, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except Exception:
-        return {}
+    """Load UI strings from external JSON file with comprehensive fallback paths."""
+    candidates = [
+        os.path.join(os.path.dirname(os.path.dirname(__file__)), "strings.json"),
+        os.path.join(os.path.dirname(__file__), "strings.json"),
+        os.path.join(os.path.dirname(__file__), "..", "strings.json"),
+    ]
+    
+    # Check PyInstaller bundle directory
+    meipass = getattr(sys, '_MEIPASS', None)
+    if meipass:
+        candidates.insert(0, os.path.join(meipass, "app", "strings.json"))
+        candidates.insert(1, os.path.join(meipass, "strings.json"))
+
+    # Check working directory
+    candidates.append(os.path.join(os.getcwd(), "app", "strings.json"))
+    candidates.append(os.path.join(os.getcwd(), "strings.json"))
+
+    for path in candidates:
+        try:
+            if os.path.exists(path) and os.path.isfile(path):
+                with open(path, "r", encoding="utf-8") as f:
+                    return json.load(f)
+        except Exception:
+            continue
+    return {}
+
 
 STRINGS = _load_strings()
 
-# Display names for each language code
-LANG_NAMES = {
-    "en": "English",
-    "ru": "Русский",
-    "es": "Español",
-    "de": "Deutsch",
-    "fr": "Français",
-    "pt": "Português",
-    "tr": "Türkçe",
-    "uk": "Українська",
-    "zh": "中文",
-    "ja": "日本語",
-    "ko": "한국어",
-    "ar": "العربية",
-}
-
-# Country flag image asset paths for each language code
-LANG_FLAGS = {
-    "en": "flags/en.png",
-    "ru": "flags/ru.png",
-    "es": "flags/es.png",
-    "de": "flags/de.png",
-    "fr": "flags/fr.png",
-    "pt": "flags/pt.png",
-    "tr": "flags/tr.png",
-    "uk": "flags/uk.png",
-    "zh": "flags/zh.png",
-    "ja": "flags/ja.png",
-    "ko": "flags/ko.png",
-    "ar": "flags/ar.png",
-}
 
 def get_lang_flag(code):
     """Returns country flag image asset path for a given language code."""
     return LANG_FLAGS.get(code, "flags/en.png")
 
+
 def get_available_langs():
     """Returns list of (code, display_name, flag_asset) for languages present in strings.json."""
     return [(code, LANG_NAMES.get(code, code), LANG_FLAGS.get(code, "flags/en.png")) for code in STRINGS if code in LANG_NAMES]
+
 
 def _get_config_dir():
     """Returns a writable, persistent config directory for the application."""
@@ -115,6 +96,7 @@ def get_env_file_path():
         return os.path.join(env_path, '.env')
     return env_path
 
+
 def load_env_vars():
     """Load settings from the environment file."""
     env_path = get_env_file_path()
@@ -135,9 +117,11 @@ def load_env_vars():
             pass
     return vars_dict
 
+
 def get_vt_toml_path():
     """Returns the path to the user's .vt.toml file."""
     return os.path.join(os.path.expanduser("~"), ".vt.toml")
+
 
 def read_key_from_vt_toml():
     """Reads the API key from the ~/.vt.toml file."""
@@ -157,6 +141,7 @@ def read_key_from_vt_toml():
         except Exception:
             pass
     return None
+
 
 def write_key_to_vt_toml(key):
     """Writes or updates the API key in the ~/.vt.toml file."""
@@ -196,6 +181,7 @@ def write_key_to_vt_toml(key):
     except Exception:
         return False
 
+
 def write_env_var(key, value):
     """Write settings to the environment file."""
     env_path = get_env_file_path()
@@ -215,6 +201,7 @@ def write_env_var(key, value):
         return True
     except Exception:
         return False
+
 
 def get_api_key():
     """Retrieves configured VirusTotal API Key."""
@@ -242,9 +229,9 @@ def get_api_key():
             
     return None
 
+
 def _detect_system_lang():
     """Detect system locale and return best matching language code."""
-    # Map of locale prefixes to language codes
     locale_map = {
         "ru": "ru", "uk": "uk",
         "es": "es",
@@ -271,7 +258,6 @@ def _detect_system_lang():
             try:
                 import ctypes
                 lang_id = ctypes.windll.kernel32.GetUserDefaultUILanguage() & 0x3FF
-                # Windows LCID sublanguage bits
                 win_lang_map = {
                     0x19: "ru",  # LANG_RUSSIAN
                     0x22: "uk",  # LANG_UKRAINIAN
@@ -292,7 +278,7 @@ def _detect_system_lang():
             except Exception:
                 pass
 
-        # 3. Try locale module (may not work in all PyInstaller builds)
+        # 3. Try locale module
         try:
             lang, _ = locale.getlocale()
             if lang:
@@ -302,7 +288,6 @@ def _detect_system_lang():
         except Exception:
             pass
         try:
-            # getdefaultlocale() is deprecated in 3.11+, use getlocale() fallback
             lang = locale.getlocale(locale.LC_CTYPE)[0]
             if lang:
                 prefix = lang.split('_')[0].split('-')[0].lower()
@@ -313,6 +298,7 @@ def _detect_system_lang():
     except Exception:
         pass
     return "en"
+
 
 def get_app_lang():
     """Determines application language from saved settings or system locale."""

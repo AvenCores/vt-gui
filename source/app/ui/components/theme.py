@@ -1,5 +1,6 @@
 import flet as ft
 
+
 def make_loading_card(message, height=140):
     """Creates a premium, glowing glassmorphism loading card for async data fetching."""
     return ft.Container(
@@ -20,6 +21,7 @@ def make_loading_card(message, height=140):
         border=ft.Border.all(1, "#00F0FF33"),
         shadow=ft.BoxShadow(blur_radius=10, color="#00F0FF10", offset=ft.Offset(0, 2))
     )
+
 
 def make_stat_card(label, count, color_hex, icon):
     """Creates a beautiful, glowing stat card control."""
@@ -42,6 +44,7 @@ def make_stat_card(label, count, color_hex, icon):
         expand=True,
         shadow=ft.BoxShadow(blur_radius=8, color="#000000", offset=ft.Offset(0, 3))
     )
+
 
 def make_file_details_card(filename, size, sha256, strings, lang):
     """Creates a clean metadata display card for the scanned file."""
@@ -74,6 +77,7 @@ def make_file_details_card(filename, size, sha256, strings, lang):
         border_radius=12,
         padding=15
     )
+
 
 def make_engine_row(name, category, result, method):
     """Creates a highly-styled row for antivirus verdicts with semantic colors."""

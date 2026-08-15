@@ -1,8 +1,10 @@
 import flet as ft
 import webbrowser
 import threading
-from ..config import write_env_var, STRINGS, get_api_key
-from ..vt_api import get_user_quota
+
+from ...core.config import write_env_var, STRINGS, get_api_key
+from ...api.vt_api import get_user_quota, verify_api_key
+
 
 def open_settings(page, lang, on_settings_saved, on_reinstall_cli=None, cli_source=None):
     """Opens a beautiful modal settings dialog with configuration options and API quota display."""
@@ -71,7 +73,6 @@ def open_settings(page, lang, on_settings_saved, on_reinstall_cli=None, cli_sour
         page.update()
 
         def run_check():
-            from ..vt_api import verify_api_key
             try:
                 success, error = verify_api_key(key)
                 if success:

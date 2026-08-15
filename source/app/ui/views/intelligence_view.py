@@ -5,14 +5,17 @@ import subprocess
 import json
 import webbrowser
 import flet as ft
-from ..config import STRINGS, get_api_key, CLI_BINARY_NAME
-from ..vt_api import submit_url_scan, get_subdomains, get_dns_resolutions, reanalyze_item
-from ..exporter import export_report_to_file, prompt_export_report
-from ..history_manager import add_lookup_record
-from ..clipboard_utils import safe_copy_to_clipboard
-from .theme import make_stat_card, make_engine_row, make_loading_card
+
+from ...core.config import STRINGS, get_api_key
+from ...core.constants import CLI_BINARY_NAME
+from ...api.vt_api import submit_url_scan, get_subdomains, get_dns_resolutions, reanalyze_item
+from ...services.export_service import export_report_to_file, prompt_export_report
+from ...services.history_service import add_lookup_record
+from ...utils.clipboard import safe_copy_to_clipboard
+from ..components.theme import make_stat_card, make_engine_row, make_loading_card
 
 _NO_WINDOW = subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0
+
 
 class IntelligenceView:
     def __init__(self, search_states, current_lang, show_alert_fn, get_installed_binary_path_fn, thread_safe_build_fn, build_ui_fn, page: ft.Page):

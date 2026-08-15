@@ -2,8 +2,11 @@ import os
 import threading
 import flet as ft
 import webbrowser
-from ..config import write_env_var, STRINGS
-from ..cli_manager import download_and_install_cli
+
+from ...core.config import write_env_var, STRINGS
+from ...api.cli_manager import download_and_install_cli
+from ...api.vt_api import verify_api_key
+
 
 def open_api_key_dialog(page, lang, on_saved, cli_source=None):
     """Opens a non-dismissable dialog for entering an API key on first launch."""
@@ -68,7 +71,6 @@ def open_api_key_dialog(page, lang, on_saved, cli_source=None):
         page.update()
 
         def run_check():
-            from ..vt_api import verify_api_key
             try:
                 success, error = verify_api_key(key)
                 if success:
