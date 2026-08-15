@@ -365,6 +365,7 @@ def main(page: ft.Page):
         elif app_state == "scans":
             tab_headers = []
             tab_contents = []
+            tab_buttons_map = {}
             for idx, scan in enumerate(active_scans):
                 if scan["status"] == "scanning":
                     scan_status_text = ft.Text(scan["status_text"], size=15, weight=ft.FontWeight.W_600, color=palette["accent"])
@@ -442,11 +443,12 @@ def main(page: ft.Page):
                 is_active = (current_tab_index == idx)
                 
                 def make_tab_btn(i, scan_icon, scan_name, is_act):
+                    label_w = ft.Text(scan_name, color=palette["text_primary"] if is_act else palette["text_muted"], size=12, weight=ft.FontWeight.W_600)
                     btn = ft.Container(
                         content=ft.Row(
                             [
                                 ft.Text(scan_icon, size=16),
-                                ft.Text(scan_name, color=palette["text_primary"] if is_act else palette["text_muted"], size=12, weight=ft.FontWeight.W_600)
+                                label_w
                             ],
                             alignment=ft.MainAxisAlignment.CENTER,
                             vertical_alignment=ft.CrossAxisAlignment.CENTER,
@@ -474,18 +476,98 @@ def main(page: ft.Page):
                                 pass
                     
                     btn.on_hover = on_tab_hover
+                    tab_buttons_map[i] = (btn, label_w)
                     return btn
                 
                 tab_headers.append(make_tab_btn(idx, icon, scan['filename'], is_active))
                 tab_contents.append(
-                    ft.Container(content=tab_content, padding=15)
+                    ft.Container(
+                        key=f"scan_tab_page_{idx}_{scan.get('sha256') or scan['status']}",
+                        content=tab_content,
+                        padding=15,
+                        expand=True
+                    )
                 )
                 
+            def update_tab_buttons():
+                for idx, (btn, label_w) in tab_buttons_map.items():
+                    is_act = (current_tab_index == idx)
+                    btn.border = ft.Border.all(1, palette["accent"] if is_act else "transparent")
+                    btn.bgcolor = palette["tab_active_bg"] if is_act else "transparent"
+                    label_w.color = palette["text_primary"] if is_act else palette["text_muted"]
+                    try:
+                        btn.update()
+                    except Exception:
+                        pass
+
+            animated_scan_content = ft.AnimatedSwitcher(
+                content=tab_contents[current_tab_index] if tab_contents and current_tab_index < len(tab_contents) else ft.Container(),
+                transition=ft.AnimatedSwitcherTransition.FADE,
+                duration=250,
+                reverse_duration=200,
+                switch_in_curve=ft.AnimationCurve.EASE_OUT,
+                switch_out_curve=ft.AnimationCurve.EASE_IN,
+                expand=True
+            )
+
+            # Right side actions (copy link & open web report)
+            right_actions = ft.Row([], alignment=ft.MainAxisAlignment.END, spacing=10)
+
+            def update_right_actions():
+                right_actions.controls.clear()
+                if active_scans and current_tab_index < len(active_scans):
+                    current_scan = active_scans[current_tab_index]
+                    if current_scan.get("status") == "completed" and current_scan.get("sha256"):
+                        report_url = f"https://www.virustotal.com/gui/file/{current_scan['sha256']}"
+
+                        def open_web_report(e, url=report_url):
+                            import webbrowser
+                            webbrowser.open(url)
+                            
+                        def copy_web_report_link(e, url=report_url):
+                            page.run_task(safe_copy_to_clipboard, page, url, clipboard_service)
+                            page.show_dialog(
+                                ft.SnackBar(
+                                    content=ft.Text(STRINGS[current_lang]["link_copied"], color="#FFFFFF"),
+                                    bgcolor="#10B981"
+                                )
+                            )
+                            
+                        copy_btn = ft.IconButton(
+                            icon=ft.Icons.COPY_ROUNDED,
+                            icon_color=palette["accent"],
+                            tooltip=STRINGS[current_lang]["copy_link_tooltip"],
+                            on_click=copy_web_report_link
+                        )
+                        
+                        web_btn = ft.Button(
+                            content=ft.Text(STRINGS[current_lang]["btn_open_web"]),
+                            icon=ft.Icons.OPEN_IN_BROWSER_ROUNDED,
+                            on_click=open_web_report,
+                            bgcolor=palette["button_primary_bg"],
+                            color="#FFFFFF",
+                            height=40,
+                            style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8))
+                        )
+                        right_actions.controls.extend([copy_btn, web_btn])
+                try:
+                    right_actions.update()
+                except Exception:
+                    pass
+
+            update_right_actions()
+
             def on_tab_change(new_index):
                 nonlocal current_tab_index
-                if new_index != current_tab_index:
+                if new_index != current_tab_index and 0 <= new_index < len(tab_contents):
                     current_tab_index = new_index
-                    build_ui()
+                    update_tab_buttons()
+                    update_right_actions()
+                    animated_scan_content.content = tab_contents[new_index]
+                    try:
+                        animated_scan_content.update()
+                    except Exception:
+                        build_ui()
 
             add_tab_btn = ft.IconButton(
                 icon=ft.Icons.ADD_ROUNDED,
@@ -519,22 +601,10 @@ def main(page: ft.Page):
                     expand=True,
                     controls=[
                         tab_bar_row,
-                        ft.Container(
-                            content=tab_contents[current_tab_index] if tab_contents else ft.Container(),
-                            expand=True
-                        )
+                        animated_scan_content
                     ]
                 )
             )
-            
-            # Check if current tab is completed and has a hash
-            show_web_report_btn = False
-            report_url = None
-            if active_scans and current_tab_index < len(active_scans):
-                current_scan = active_scans[current_tab_index]
-                if current_scan["status"] == "completed" and current_scan["sha256"]:
-                    show_web_report_btn = True
-                    report_url = f"https://www.virustotal.com/gui/file/{current_scan['sha256']}"
             
             def go_back_to_scanner(e):
                 back_icon.offset = ft.Offset(-0.25, 0)
@@ -582,41 +652,6 @@ def main(page: ft.Page):
             
             # Left side row with back button
             left_actions = ft.Row([back_btn], alignment=ft.MainAxisAlignment.START)
-            
-            # Right side actions (copy link & open web report)
-            right_actions = ft.Row([], alignment=ft.MainAxisAlignment.END, spacing=10)
-            
-            if show_web_report_btn:
-                def open_web_report(e, url=report_url):
-                    import webbrowser
-                    webbrowser.open(url)
-                    
-                def copy_web_report_link(e, url=report_url):
-                    page.run_task(safe_copy_to_clipboard, page, url, clipboard_service)
-                    page.show_dialog(
-                        ft.SnackBar(
-                            content=ft.Text(STRINGS[current_lang]["link_copied"], color="#FFFFFF"),
-                            bgcolor="#10B981"
-                        )
-                    )
-                    
-                copy_btn = ft.IconButton(
-                    icon=ft.Icons.COPY_ROUNDED,
-                    icon_color=palette["accent"],
-                    tooltip=STRINGS[current_lang]["copy_link_tooltip"],
-                    on_click=copy_web_report_link
-                )
-                
-                web_btn = ft.Button(
-                    content=ft.Text(STRINGS[current_lang]["btn_open_web"]),
-                    icon=ft.Icons.OPEN_IN_BROWSER_ROUNDED,
-                    on_click=open_web_report,
-                    bgcolor=palette["button_primary_bg"],
-                    color="#FFFFFF",
-                    height=40,
-                    style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8))
-                )
-                right_actions.controls.extend([copy_btn, web_btn])
             
             top_buttons_row = ft.Row(
                 [left_actions, right_actions],
@@ -825,12 +860,18 @@ def main(page: ft.Page):
 
             tab_views_map = {idx: v for idx, _, _, v in tab_definitions}
 
-            animated_tab_content = ft.Container(
+            animated_tab_content = ft.AnimatedSwitcher(
                 content=ft.Container(
+                    key=f"landing_tab_container_{active_scanner_tab_index}",
                     content=tab_views_map[active_scanner_tab_index],
                     padding=10,
                     expand=True
                 ),
+                transition=ft.AnimatedSwitcherTransition.FADE,
+                duration=250,
+                reverse_duration=200,
+                switch_in_curve=ft.AnimationCurve.EASE_OUT,
+                switch_out_curve=ft.AnimationCurve.EASE_IN,
                 expand=True
             )
 
@@ -861,6 +902,7 @@ def main(page: ft.Page):
                 update_tab_buttons()
 
                 animated_tab_content.content = ft.Container(
+                    key=f"landing_tab_container_{idx}",
                     content=tab_views_map[idx],
                     padding=10,
                     expand=True

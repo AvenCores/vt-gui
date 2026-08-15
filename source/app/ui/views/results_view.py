@@ -672,11 +672,20 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
     active_res_tab = [_ACTIVE_RES_TAB.get(target_sha256, 0)]
     res_tab_views_map = {idx: v for idx, _, _, v in res_tab_defs}
 
-    res_tab_content_container = ft.Container(
-        content=res_tab_views_map[active_res_tab[0]],
-        padding=5,
-        expand=True,
-        alignment=ft.Alignment.TOP_LEFT
+    animated_res_tab_content = ft.AnimatedSwitcher(
+        content=ft.Container(
+            key=f"res_tab_{target_sha256}_{active_res_tab[0]}",
+            content=res_tab_views_map[active_res_tab[0]],
+            padding=5,
+            expand=True,
+            alignment=ft.Alignment.TOP_LEFT
+        ),
+        transition=ft.AnimatedSwitcherTransition.FADE,
+        duration=250,
+        reverse_duration=200,
+        switch_in_curve=ft.AnimationCurve.EASE_OUT,
+        switch_out_curve=ft.AnimationCurve.EASE_IN,
+        expand=True
     )
 
     res_tab_buttons = []
@@ -700,8 +709,14 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
         if idx == 1:
             load_behavior(None)
         update_res_tab_buttons()
-        res_tab_content_container.content = res_tab_views_map[idx]
-        safe_update_control(res_tab_content_container)
+        animated_res_tab_content.content = ft.Container(
+            key=f"res_tab_{target_sha256}_{idx}",
+            content=res_tab_views_map[idx],
+            padding=5,
+            expand=True,
+            alignment=ft.Alignment.TOP_LEFT
+        )
+        safe_update_control(animated_res_tab_content)
 
     for idx, label, icon, _ in res_tab_defs:
         is_active = (active_res_tab[0] == idx)
@@ -757,7 +772,7 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
                     bottom=ft.BorderSide(1, palette["divider"])
                 )
             ),
-            res_tab_content_container
+            animated_res_tab_content
         ],
         expand=True,
         height=480,
