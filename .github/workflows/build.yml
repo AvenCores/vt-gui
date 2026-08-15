@@ -47,6 +47,7 @@ jobs:
           --add-data="app/strings.json;app"
           --collect-all flet
           --collect-all flet_desktop
+          --collect-all certifi
           --name="VirusTotal_File_Scanner_Windows_x64"
           --noupx
           --clean
@@ -92,6 +93,7 @@ jobs:
           --add-data="app/strings.json;app"
           --collect-all flet
           --collect-all flet_desktop
+          --collect-all certifi
           --name="VirusTotal_File_Scanner_Windows_arm64"
           --noupx
           --clean
@@ -136,6 +138,7 @@ jobs:
           --add-data="app/strings.json:app"
           --collect-all flet
           --collect-all flet_desktop
+          --collect-all certifi
           --name="VirusTotal_File_Scanner_Linux_x64"
           --clean
           main.py
@@ -178,6 +181,7 @@ jobs:
           --add-data="app/strings.json:app"
           --collect-all flet
           --collect-all flet_desktop
+          --collect-all certifi
           --name="VirusTotal_File_Scanner_Linux_arm64"
           --clean
           main.py

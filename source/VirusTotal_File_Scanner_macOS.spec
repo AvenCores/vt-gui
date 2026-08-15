@@ -14,6 +14,7 @@ a = Analysis(
         'flet',
         'flet_desktop',
         'flet_cli',
+        'certifi',
     ],
     hookspath=[],
     hooksconfig={},

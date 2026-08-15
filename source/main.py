@@ -29,7 +29,11 @@ from app.core import (
     IS_WINDOWS,
     STRINGS,
     KNOWN_HASHES,
+    init_ssl_context,
 )
+
+# Initialize SSL CA certificates configuration for cross-distro compatibility
+init_ssl_context()
 from app.api import (
     check_installed_binary,
     get_temp_bin_path,

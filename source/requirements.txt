@@ -2,3 +2,4 @@ flet[all]
 flet-desktop
 flet-cli
 pyinstaller
+certifi
