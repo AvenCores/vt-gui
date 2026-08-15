@@ -142,6 +142,7 @@ def main(page: ft.Page):
     page.title = STRINGS[current_lang]["app_title"]
     page.theme_mode = ft.ThemeMode.DARK if current_theme == "dark" else ft.ThemeMode.LIGHT
     page.bgcolor = initial_palette["bg_gradient_colors"][0]
+    page.window.bgcolor = initial_palette["bg_gradient_colors"][0]
     page.theme_animation_style = ft.AnimationStyle(duration=ft.Duration(milliseconds=250), curve=ft.AnimationCurve.EASE_IN_OUT)
     # Set window icon — use .ico on Windows, .png on other platforms if available
     _script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -153,6 +154,7 @@ def main(page: ft.Page):
     page.window.height = 750
     page.window.min_width = 1300
     page.window.min_height = 750
+    page.window.visible = False
     page.padding = 0
 
     # Use system font to prevent network loading and font layout shifts (jumping)
@@ -264,6 +266,7 @@ def main(page: ft.Page):
             set_app_theme(current_theme)
             p = get_theme_palette(current_theme)
             page.bgcolor = p["bg_gradient_colors"][0]
+            page.window.bgcolor = p["bg_gradient_colors"][0]
             page.theme_mode = ft.ThemeMode.DARK if current_theme == "dark" else ft.ThemeMode.LIGHT
             build_ui()
 
@@ -1189,6 +1192,20 @@ def main(page: ft.Page):
     
     build_ui()
 
+    async def _show_window_when_ready():
+        try:
+            await page.window.wait_until_ready_to_show()
+            await page.window.center()
+        except Exception:
+            pass
+        page.window.visible = True
+        try:
+            page.update()
+        except Exception:
+            pass
+
+    page.run_task(_show_window_when_ready)
+
     # Show API key setup dialog on first launch if no key is configured
     if not get_api_key():
         def on_api_key_saved():
@@ -1277,9 +1294,10 @@ def _setup_flet_environment():
 
 if __name__ == '__main__':
     _setup_flet_environment()
+    os.environ["FLET_HIDE_WINDOW_ON_START"] = "true"
 
     try:
-        ft.run(main, assets_dir="assets")
+        ft.run(main, view=ft.AppView.FLET_APP_HIDDEN, assets_dir="assets")
     except Exception as e:
         error_msg = (
             f"Failed to start VT GUI / Ошибка запуска VT GUI:\n\n{e}\n\n"
