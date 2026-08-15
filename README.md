@@ -33,7 +33,7 @@
 
 Приложение представляет собой удобную графическую оболочку над официальной утилитой командной строки VirusTotal (`vt-cli`), интегрируя её с прямыми HTTP-запросами к VirusTotal API v3 для максимального быстродействия и удобства работы.
 
-![maxresdefault](https://i.ibb.co/Z7S6T6d/flet-Ft-Fc-Lgjb-V9.png)
+![maxresdefault](https://i.ibb.co/hFvxwWyc/flet-0tkqso5f-Gk.png)
 
 # 🎦 Видео гайд по установке и использованию программы
 
