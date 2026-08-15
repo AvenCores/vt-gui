@@ -38,7 +38,7 @@ def verify_api_key(api_key):
     )
     try:
         with urllib.request.urlopen(req) as response:
-            data = json.loads(response.read().decode('utf-8'))
+            json.loads(response.read().decode('utf-8'))
             return True, None
     except urllib.error.HTTPError as e:
         if e.code in (401, 403):

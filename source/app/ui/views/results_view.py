@@ -339,7 +339,6 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
     behavior_loaded = False
 
     def load_behavior(e=None):
-        nonlocal behavior_loaded
         if behavior_loaded:
             return
         behavior_container.controls = [behavior_loading_card]

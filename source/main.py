@@ -193,7 +193,6 @@ def main(page: ft.Page):
     main_content = None
 
     def animate_back_navigation(on_finish):
-        nonlocal main_content
         if main_content is not None and main_content.content is not None:
             main_content.opacity = 0.0
             main_content.offset = ft.Offset(0.03, 0)
@@ -210,7 +209,6 @@ def main(page: ft.Page):
         threading.Thread(target=delayed_finish, daemon=True).start()
 
     def build_ui():
-        nonlocal app_state
         if not _build_lock.acquire(blocking=False):
             return
         try:
@@ -228,7 +226,7 @@ def main(page: ft.Page):
         
         # Header Language Switcher
         def change_language(lang_code):
-            nonlocal current_lang, scan_service
+            nonlocal current_lang
             current_lang = lang_code
             write_env_var("LANGUAGE", lang_code)
             page.title = STRINGS[current_lang]["app_title"]
@@ -653,7 +651,7 @@ def main(page: ft.Page):
             select_tab_ref = [None]
 
             def on_history_open_in_app(record):
-                nonlocal active_scans, app_state, current_tab_index, active_scanner_tab_index, scan_service
+                nonlocal active_scans, app_state, current_tab_index, active_scanner_tab_index
                 record_type = record.get("type", "file")
                 results = record.get("results")
                 record_id = record.get("id")
@@ -697,6 +695,7 @@ def main(page: ft.Page):
                         build_ui()
 
                         def fetch_and_show():
+                            nonlocal scan_service
                             try:
                                 api_key = get_api_key()
                                 vt_path = get_installed_binary_path()
