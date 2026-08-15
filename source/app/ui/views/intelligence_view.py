@@ -9,7 +9,7 @@ import flet as ft
 from ...core.config import STRINGS, get_api_key
 from ...core.constants import CLI_BINARY_NAME
 from ...api.vt_api import submit_url_scan, get_subdomains, get_dns_resolutions, reanalyze_item
-from ...services.export_service import export_report_to_file, prompt_export_report
+from ...services.export_service import prompt_export_report
 from ...services.history_service import add_lookup_record
 from ...utils.clipboard import safe_copy_to_clipboard
 from ..components.theme import make_stat_card, make_engine_row, make_loading_card

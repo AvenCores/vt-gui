@@ -6,7 +6,6 @@ import zipfile
 
 from ..core.constants import KNOWN_HASHES, CLI_BINARY_NAME, IS_WINDOWS
 from ..core.config import load_env_vars, get_release_zip_name, STRINGS
-from ..utils.hashing import compute_sha256
 
 # Cache for binary validation to avoid repeated SHA-256 computation
 _validation_cache = {}  # {path: (mtime, size, status, hash)}

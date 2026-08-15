@@ -1,7 +1,6 @@
 import os
 import sys
 import shutil
-import stat
 import urllib.request
 import flet_desktop
 import flet_desktop.version

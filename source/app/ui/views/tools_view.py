@@ -1,4 +1,3 @@
-import os
 import sys
 import json
 import threading
@@ -6,8 +5,7 @@ import subprocess
 import flet as ft
 
 from ...core.config import STRINGS, get_api_key
-from ...core.constants import CLI_BINARY_NAME
-from ...api.vt_api import diff_files, check_file_exists_direct, check_file_exists_vt, get_yara_rulesets
+from ...api.vt_api import check_file_exists_direct, check_file_exists_vt, get_yara_rulesets
 from ...api.cli_manager import get_installed_binary_path
 from ...services.history_service import add_lookup_record
 

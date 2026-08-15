@@ -7,8 +7,6 @@ from app.core import (
     write_env_var,
     get_api_key,
     get_app_lang,
-    get_available_langs,
-    get_lang_flag,
     IS_WINDOWS,
     STRINGS,
     KNOWN_HASHES,

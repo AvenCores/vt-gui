@@ -6,8 +6,6 @@ import platform
 
 from .constants import (
     IS_WINDOWS,
-    CLI_BINARY_NAME,
-    KNOWN_HASHES,
     LANG_NAMES,
     LANG_FLAGS,
 )
