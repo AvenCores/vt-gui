@@ -200,59 +200,62 @@ class IntelligenceView:
         # Extended relations view for Domain & IP
         relations_view = None
         if item_type in ("domain", "ip"):
-            loading_indicator = make_loading_card(STRINGS[self.current_lang].get("dns_loading", "Loading DNS resolutions & subdomains..."), height=90, theme_mode=self.theme_mode)
-            rel_container = ft.Column([loading_indicator], spacing=6)
             cache_key = f"{item_type}:{item_id}"
             
-            def render_rel_items(items_data):
-                rel_container.controls.clear()
+            def build_rel_controls(items_data):
                 if not items_data:
-                    rel_container.controls = [ft.Text(STRINGS[self.current_lang].get("dns_no_data", "DNS-резолвинг и поддомены не найдены."), color=self.palette["text_muted"], size=12)]
-                else:
-                    controls = []
-                    for group_type, values in items_data:
-                        if group_type == "subdomains" and values:
-                            controls.append(ft.Text(STRINGS[self.current_lang].get("lbl_subdomains", "Subdomains:"), weight=ft.FontWeight.BOLD, color=self.palette["accent"]))
-                            for val in values:
-                                controls.append(ft.Text(f" • {val}", color=self.palette["text_secondary"], size=12))
-                        elif group_type == "dns" and values:
-                            controls.append(ft.Text(STRINGS[self.current_lang].get("lbl_dns_resolutions", "DNS Resolutions:"), weight=ft.FontWeight.BOLD, color=self.palette["accent"]))
-                            for val in values:
-                                controls.append(ft.Text(f" • {val}", color=self.palette["text_secondary"], size=12))
-                    rel_container.controls = controls if controls else [ft.Text(STRINGS[self.current_lang].get("dns_no_data", "DNS-резолвинг и поддомены не найдены."), color=self.palette["text_muted"], size=12)]
-                try:
-                    self.page.update()
-                except Exception:
-                    pass
+                    return [ft.Text(STRINGS[self.current_lang].get("dns_no_data", "DNS-резолвинг и поддомены не найдены."), color=self.palette["text_muted"], size=12)]
+                controls = []
+                for group_type, values in items_data:
+                    if group_type == "subdomains" and values:
+                        controls.append(ft.Text(STRINGS[self.current_lang].get("lbl_subdomains", "Subdomains:"), weight=ft.FontWeight.BOLD, color=self.palette["accent"]))
+                        for val in values:
+                            controls.append(ft.Text(f" • {val}", color=self.palette["text_secondary"], size=12))
+                    elif group_type == "dns" and values:
+                        controls.append(ft.Text(STRINGS[self.current_lang].get("lbl_dns_resolutions", "DNS Resolutions:"), weight=ft.FontWeight.BOLD, color=self.palette["accent"]))
+                        for val in values:
+                            controls.append(ft.Text(f" • {val}", color=self.palette["text_secondary"], size=12))
+                return controls if controls else [ft.Text(STRINGS[self.current_lang].get("dns_no_data", "DNS-резолвинг и поддомены не найдены."), color=self.palette["text_muted"], size=12)]
 
-            def load_relations():
-                if cache_key in _RELATIONS_CACHE:
-                    render_rel_items(_RELATIONS_CACHE[cache_key])
-                    return
+            if cache_key in _RELATIONS_CACHE:
+                rel_container = ft.Column(build_rel_controls(_RELATIONS_CACHE[cache_key]), spacing=6)
+            else:
+                loading_indicator = make_loading_card(STRINGS[self.current_lang].get("dns_loading", "Loading DNS resolutions & subdomains..."), height=90, theme_mode=self.theme_mode)
+                rel_container = ft.Column([loading_indicator], spacing=6)
+                
+                def load_relations():
+                    api_key = get_api_key()
+                    if not api_key:
+                        rel_container.controls = [ft.Text(STRINGS[self.current_lang]["api_key_missing"], color="#F59E0B", size=12)]
+                        try:
+                            self.page.update()
+                        except Exception:
+                            pass
+                        return
+                    def worker():
+                        items_data = []
+                        if item_type == "domain":
+                            subs = get_subdomains(item_id, api_key)
+                            if subs and isinstance(subs, list):
+                                items_data.append(("subdomains", [s.get("id", "") if isinstance(s, dict) else str(s) for s in subs[:10]]))
+                        res = get_dns_resolutions(item_type, item_id, api_key)
+                        if res and isinstance(res, list):
+                            hosts = []
+                            for r in res[:10]:
+                                attrs = r.get("attributes", {}) if isinstance(r, dict) else {}
+                                host = attrs.get("host_name") or attrs.get("ip_address") or str(r)
+                                hosts.append(host)
+                            items_data.append(("dns", hosts))
+                        
+                        _RELATIONS_CACHE[cache_key] = items_data
+                        rel_container.controls = build_rel_controls(items_data)
+                        try:
+                            self.page.update()
+                        except Exception:
+                            pass
+                    threading.Thread(target=worker, daemon=True).start()
+                load_relations()
 
-                api_key = get_api_key()
-                if not api_key:
-                    rel_container.controls = [ft.Text(STRINGS[self.current_lang]["api_key_missing"], color="#F59E0B", size=12)]
-                    return
-                def worker():
-                    items_data = []
-                    if item_type == "domain":
-                        subs = get_subdomains(item_id, api_key)
-                        if subs and isinstance(subs, list):
-                            items_data.append(("subdomains", [s.get("id", "") if isinstance(s, dict) else str(s) for s in subs[:10]]))
-                    res = get_dns_resolutions(item_type, item_id, api_key)
-                    if res and isinstance(res, list):
-                        hosts = []
-                        for r in res[:10]:
-                            attrs = r.get("attributes", {}) if isinstance(r, dict) else {}
-                            host = attrs.get("host_name") or attrs.get("ip_address") or str(r)
-                            hosts.append(host)
-                        items_data.append(("dns", hosts))
-                    
-                    _RELATIONS_CACHE[cache_key] = items_data
-                    render_rel_items(items_data)
-                threading.Thread(target=worker, daemon=True).start()
-            load_relations()
             relations_view = ft.Container(content=rel_container, padding=12, bgcolor=self.palette["card_bg"], border_radius=10, border=ft.Border.all(1, self.palette["card_border"]))
 
         main_items = [

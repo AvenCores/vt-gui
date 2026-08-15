@@ -137,8 +137,12 @@ def main(page: ft.Page):
     clipboard_service = ft.Clipboard()
     
     # Page setup
+    current_theme = get_app_theme()
+    initial_palette = get_theme_palette(current_theme)
     page.title = STRINGS[current_lang]["app_title"]
     page.theme_mode = ft.ThemeMode.DARK if current_theme == "dark" else ft.ThemeMode.LIGHT
+    page.bgcolor = initial_palette["bg_gradient_colors"][0]
+    page.theme_animation_style = ft.AnimationStyle(duration=ft.Duration(milliseconds=250), curve=ft.AnimationCurve.EASE_IN_OUT)
     # Set window icon — use .ico on Windows, .png on other platforms if available
     _script_dir = os.path.dirname(os.path.abspath(__file__))
     icon_file = "icon.ico" if IS_WINDOWS else "icon.png"
@@ -150,8 +154,6 @@ def main(page: ft.Page):
     page.window.min_width = 1300
     page.window.min_height = 750
     page.padding = 0
-
-    page.theme_animation_style = ft.AnimationStyle(duration=ft.Duration(milliseconds=350), curve=ft.AnimationCurve.EASE_IN_OUT)
 
     # Use system font to prevent network loading and font layout shifts (jumping)
     if IS_WINDOWS:
@@ -168,19 +170,8 @@ def main(page: ft.Page):
     current_tab_index = 0
     _build_lock = threading.Lock()
 
-    # Root animated switcher for smooth theme and state transitions
-    root_switcher = ft.AnimatedSwitcher(
-        content=ft.Container(expand=True),
-        transition=ft.AnimatedSwitcherTransition.FADE,
-        duration=300,
-        reverse_duration=200,
-        switch_in_curve=ft.AnimationCurve.EASE_OUT,
-        switch_out_curve=ft.AnimationCurve.EASE_IN,
-        expand=True
-    )
-
     # Persistent root container — populated before first page.add()
-    page_root = ft.Column([root_switcher], expand=True, spacing=0)
+    page_root = ft.Column(expand=True, spacing=0)
     
     # State for lookup tabs
     active_scanner_tab_index = 0
@@ -271,6 +262,8 @@ def main(page: ft.Page):
             else:
                 current_theme = "light" if current_theme == "dark" else "dark"
             set_app_theme(current_theme)
+            p = get_theme_palette(current_theme)
+            page.bgcolor = p["bg_gradient_colors"][0]
             page.theme_mode = ft.ThemeMode.DARK if current_theme == "dark" else ft.ThemeMode.LIGHT
             build_ui()
 
@@ -835,8 +828,7 @@ def main(page: ft.Page):
                     padding=10,
                     expand=True
                 ),
-                expand=True,
-                animate_opacity=ft.Animation(200, ft.AnimationCurve.EASE_OUT),
+                expand=True
             )
 
             tab_buttons = []
@@ -940,16 +932,13 @@ def main(page: ft.Page):
             
         main_content = ft.Container(
             content=current_view_body,
-            expand=True,
-            animate_opacity=ft.Animation(150, ft.AnimationCurve.EASE_OUT),
-            animate_offset=ft.Animation(150, ft.AnimationCurve.EASE_OUT),
+            expand=True
         )
             
         # Build footer with social links
         footer = build_footer(current_lang, page, theme_mode=current_theme)
 
         outer_container = ft.Container(
-            key=f"app_outer_container_{current_theme}_{app_state}",
             gradient=ft.LinearGradient(
                 begin=ft.Alignment.TOP_LEFT,
                 end=ft.Alignment.BOTTOM_RIGHT,
@@ -957,8 +946,7 @@ def main(page: ft.Page):
             ),
             expand=True,
             padding=20,
-            animate=ft.Animation(300, ft.AnimationCurve.EASE_OUT),
-            animate_opacity=ft.Animation(250, ft.AnimationCurve.EASE_OUT),
+            animate=ft.Animation(250, ft.AnimationCurve.EASE_OUT),
             content=ft.Column(
                 [
                     header,
@@ -969,14 +957,14 @@ def main(page: ft.Page):
             )
         )
         
-        root_switcher.content = outer_container
+        page_root.controls = [outer_container]
         if not page.controls:
             # First render: add root with content already set — single render
             page.controls.append(page_root)
             page.update()
         else:
-            # Subsequent renders: animated switcher will smoothly crossfade — single render
-            root_switcher.update()
+            # Subsequent renders: smoothly animates theme transition
+            page_root.update()
 
     import asyncio
     try:

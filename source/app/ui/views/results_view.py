@@ -155,7 +155,56 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
     user_vote_state = [_VOTE_CACHE.get(target_sha256)]
     is_voting_state = [False]
 
-    vote_buttons_container = ft.Row(spacing=6)
+    def build_vote_controls():
+        if is_voting_state[0]:
+            return [
+                ft.Container(
+                    content=ft.Row([
+                        ft.ProgressRing(width=14, height=14, stroke_width=2, color=palette["accent"]),
+                        ft.Text(STRINGS[lang].get("voting_progress", "Sending vote..."), color=palette["text_muted"], size=11)
+                    ], spacing=6),
+                    padding=ft.Padding(left=8, right=8, top=4, bottom=4),
+                    bgcolor=palette["card_bg"],
+                    border_radius=8,
+                    border=ft.Border.all(1, palette["accent"])
+                )
+            ]
+        else:
+            is_harmless = (user_vote_state[0] == "harmless")
+            is_malicious = (user_vote_state[0] == "malicious")
+
+            harmless_label = STRINGS[lang].get("vote_harmless", "Vote Harmless") if not is_harmless else STRINGS[lang].get("voted_harmless", "Voted Harmless")
+            malicious_label = STRINGS[lang].get("vote_malicious", "Vote Malicious") if not is_malicious else STRINGS[lang].get("voted_malicious", "Voted Malicious")
+
+            harmless_btn = ft.Container(
+                content=ft.Row([
+                    ft.Icon(ft.Icons.THUMBS_UP_DOWN_ROUNDED, color="#10B981" if is_harmless else ("#39FF14" if theme_mode == "dark" else "#16A34A"), size=18),
+                    ft.Text(harmless_label, color="#10B981" if is_harmless else palette["text_secondary"], size=11, weight=ft.FontWeight.BOLD if is_harmless else ft.FontWeight.NORMAL)
+                ], spacing=4),
+                padding=ft.Padding(left=10, right=10, top=6, bottom=6),
+                border_radius=8,
+                bgcolor="#10B98122" if is_harmless else palette["button_secondary_bg"],
+                border=ft.Border.all(1, "#10B981" if is_harmless else palette["card_border"]),
+                on_click=handle_vote("harmless"),
+                tooltip=STRINGS[lang].get("vote_harmless", "Vote Harmless")
+            )
+
+            malicious_btn = ft.Container(
+                content=ft.Row([
+                    ft.Icon(ft.Icons.THUMB_DOWN_ALT_ROUNDED, color="#EF4444", size=18),
+                    ft.Text(malicious_label, color="#EF4444" if is_malicious else palette["text_secondary"], size=11, weight=ft.FontWeight.BOLD if is_malicious else ft.FontWeight.NORMAL)
+                ], spacing=4),
+                padding=ft.Padding(left=10, right=10, top=6, bottom=6),
+                border_radius=8,
+                bgcolor="#EF444422" if is_malicious else palette["button_secondary_bg"],
+                border=ft.Border.all(1, "#EF4444" if is_malicious else palette["card_border"]),
+                on_click=handle_vote("malicious"),
+                tooltip=STRINGS[lang].get("vote_malicious", "Vote Malicious")
+            )
+
+            return [harmless_btn, malicious_btn]
+
+    vote_buttons_container = ft.Row(controls=build_vote_controls(), spacing=6)
 
     def handle_vote(verdict):
         def vote_action(e):
@@ -197,63 +246,11 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
         return vote_action
 
     def update_vote_ui():
-        controls = []
-        if is_voting_state[0]:
-            controls.append(
-                ft.Container(
-                    content=ft.Row([
-                        ft.ProgressRing(width=14, height=14, stroke_width=2, color=palette["accent"]),
-                        ft.Text(STRINGS[lang].get("voting_progress", "Sending vote..."), color=palette["text_muted"], size=11)
-                    ], spacing=6),
-                    padding=ft.Padding(left=8, right=8, top=4, bottom=4),
-                    bgcolor=palette["card_bg"],
-                    border_radius=8,
-                    border=ft.Border.all(1, palette["accent"])
-                )
-            )
-        else:
-            is_harmless = (user_vote_state[0] == "harmless")
-            is_malicious = (user_vote_state[0] == "malicious")
-
-            harmless_label = STRINGS[lang].get("vote_harmless", "Vote Harmless") if not is_harmless else STRINGS[lang].get("voted_harmless", "Voted Harmless")
-            malicious_label = STRINGS[lang].get("vote_malicious", "Vote Malicious") if not is_malicious else STRINGS[lang].get("voted_malicious", "Voted Malicious")
-
-            harmless_btn = ft.Container(
-                content=ft.Row([
-                    ft.Icon(ft.Icons.THUMBS_UP_DOWN_ROUNDED, color="#10B981" if is_harmless else ("#39FF14" if theme_mode == "dark" else "#16A34A"), size=18),
-                    ft.Text(harmless_label, color="#10B981" if is_harmless else palette["text_secondary"], size=11, weight=ft.FontWeight.BOLD if is_harmless else ft.FontWeight.NORMAL)
-                ], spacing=4),
-                padding=ft.Padding(left=10, right=10, top=6, bottom=6),
-                border_radius=8,
-                bgcolor="#10B98122" if is_harmless else palette["button_secondary_bg"],
-                border=ft.Border.all(1, "#10B981" if is_harmless else palette["card_border"]),
-                on_click=handle_vote("harmless"),
-                tooltip=STRINGS[lang].get("vote_harmless", "Vote Harmless")
-            )
-
-            malicious_btn = ft.Container(
-                content=ft.Row([
-                    ft.Icon(ft.Icons.THUMB_DOWN_ALT_ROUNDED, color="#EF4444", size=18),
-                    ft.Text(malicious_label, color="#EF4444" if is_malicious else palette["text_secondary"], size=11, weight=ft.FontWeight.BOLD if is_malicious else ft.FontWeight.NORMAL)
-                ], spacing=4),
-                padding=ft.Padding(left=10, right=10, top=6, bottom=6),
-                border_radius=8,
-                bgcolor="#EF444422" if is_malicious else palette["button_secondary_bg"],
-                border=ft.Border.all(1, "#EF4444" if is_malicious else palette["card_border"]),
-                on_click=handle_vote("malicious"),
-                tooltip=STRINGS[lang].get("vote_malicious", "Vote Malicious")
-            )
-
-            controls.extend([harmless_btn, malicious_btn])
-
-        vote_buttons_container.controls = controls
+        vote_buttons_container.controls = build_vote_controls()
         safe_update_control(vote_buttons_container)
 
     def load_user_vote():
-        cached_val = _VOTE_CACHE.get(target_sha256)
-        if cached_val is not None:
-            user_vote_state[0] = cached_val
-            update_vote_ui()
+        if target_sha256 in _VOTE_CACHE:
             return
 
         api_key = get_api_key()
@@ -271,7 +268,6 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
         threading.Thread(target=worker, daemon=True).start()
 
     load_user_vote()
-    update_vote_ui()
 
     actions_row = ft.Row([
         ft.Button(STRINGS[lang].get("btn_reanalyze", "Re-analyze"), icon=ft.Icons.REFRESH_ROUNDED, on_click=handle_reanalyze, bgcolor=palette["button_secondary_bg"], color=palette["accent"]),
@@ -363,40 +359,42 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
     ], scroll=ft.ScrollMode.ALWAYS, expand=True)
 
     # Tab 2: Behavior & Sandbox Reports
-    behavior_loading_card = make_loading_card(STRINGS[lang].get("behavior_loading", "Loading sandbox execution reports..."), theme_mode=theme_mode)
-    behavior_container = ft.Column(controls=[behavior_loading_card], spacing=8, scroll=ft.ScrollMode.ALWAYS, expand=True)
-
-    def render_behaviours(behaviours):
-        behavior_container.controls.clear()
+    def build_behavior_item_controls(behaviours):
         if not behaviours:
-            behavior_container.controls.append(ft.Text(STRINGS[lang].get("behavior_empty", "No sandbox execution reports available for this file."), color=palette["text_muted"]))
-        else:
-            for idx, b in enumerate(behaviours):
-                attrs = b.get("attributes", {})
-                sandbox_name = attrs.get("sandbox_name", f"Sandbox #{idx+1}")
-                tags = attrs.get("tags", [])
-                mitre = attrs.get("mitre_attack_techniques", [])
-                
-                details = [
-                    ft.Text(f"Sandbox: {sandbox_name.upper()}", weight=ft.FontWeight.BOLD, color=palette["accent"], size=14),
-                    ft.Text(f"Tags: {', '.join(tags) if tags else 'None'}", color=palette["text_muted"], size=11)
-                ]
-                
-                if mitre:
-                    details.append(ft.Text(f"MITRE ATT&CK Techniques: {len(mitre)} detected", weight=ft.FontWeight.W_600, color="#FFD700" if theme_mode == "dark" else "#D97706", size=12))
-                    for m in mitre[:5]:
-                        tech_id = m.get("signature_description", m.get("id", ""))
-                        details.append(ft.Text(f" • {tech_id}", color=palette["text_secondary"], size=11))
+            return [ft.Text(STRINGS[lang].get("behavior_empty", "No sandbox execution reports available for this file."), color=palette["text_muted"])]
+        items = []
+        for idx, b in enumerate(behaviours):
+            attrs = b.get("attributes", {})
+            sandbox_name = attrs.get("sandbox_name", f"Sandbox #{idx+1}")
+            tags = attrs.get("tags", [])
+            mitre = attrs.get("mitre_attack_techniques", [])
+            
+            details = [
+                ft.Text(f"Sandbox: {sandbox_name.upper()}", weight=ft.FontWeight.BOLD, color=palette["accent"], size=14),
+                ft.Text(f"Tags: {', '.join(tags) if tags else 'None'}", color=palette["text_muted"], size=11)
+            ]
+            
+            if mitre:
+                details.append(ft.Text(f"MITRE ATT&CK Techniques: {len(mitre)} detected", weight=ft.FontWeight.W_600, color="#FFD700" if theme_mode == "dark" else "#D97706", size=12))
+                for m in mitre[:5]:
+                    tech_id = m.get("signature_description", m.get("id", ""))
+                    details.append(ft.Text(f" • {tech_id}", color=palette["text_secondary"], size=11))
 
-                behavior_container.controls.append(ft.Container(
-                    content=ft.Column(details, spacing=4),
-                    padding=12, border_radius=10, bgcolor=palette["card_bg"], border=ft.Border.all(1, palette["card_border"])
-                ))
-        safe_update_control(behavior_container)
+            items.append(ft.Container(
+                content=ft.Column(details, spacing=4),
+                padding=12, border_radius=10, bgcolor=palette["card_bg"], border=ft.Border.all(1, palette["card_border"])
+            ))
+        return items
+
+    behavior_loading_card = make_loading_card(STRINGS[lang].get("behavior_loading", "Loading sandbox execution reports..."), theme_mode=theme_mode)
+    
+    if target_sha256 in _BEHAVIORS_CACHE:
+        behavior_container = ft.Column(controls=build_behavior_item_controls(_BEHAVIORS_CACHE[target_sha256]), spacing=8, scroll=ft.ScrollMode.ALWAYS, expand=True)
+    else:
+        behavior_container = ft.Column(controls=[behavior_loading_card], spacing=8, scroll=ft.ScrollMode.ALWAYS, expand=True)
 
     def load_behavior(e=None):
         if target_sha256 in _BEHAVIORS_CACHE:
-            render_behaviours(_BEHAVIORS_CACHE[target_sha256])
             return
 
         behavior_container.controls = [behavior_loading_card]
@@ -410,15 +408,64 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
                 return
             behaviours = get_file_behaviours(last_completed_sha256, api_key)
             _BEHAVIORS_CACHE[target_sha256] = behaviours
-            render_behaviours(behaviours)
+            behavior_container.controls = build_behavior_item_controls(behaviours)
+            safe_update_control(behavior_container)
 
         threading.Thread(target=worker, daemon=True).start()
 
-    load_behavior()
+    if target_sha256 not in _BEHAVIORS_CACHE:
+        load_behavior()
 
     # Tab 3: Comments
+    def build_comment_item_controls(comms):
+        if not comms:
+            return [ft.Text(STRINGS[lang].get("comments_empty", "No community comments yet."), color=palette["text_muted"])]
+        items = []
+        for c in comms:
+            cid = c.get("id")
+            attrs = c.get("attributes", {})
+            txt = attrs.get("text", "")
+            date_val = attrs.get("date")
+            
+            date_str = ""
+            if date_val:
+                try:
+                    from datetime import datetime
+                    date_str = datetime.fromtimestamp(date_val).strftime("%d.%m.%Y %H:%M")
+                except Exception:
+                    pass
+
+            delete_btn = ft.IconButton(
+                icon=ft.Icons.DELETE_OUTLINE_ROUNDED,
+                icon_color="#EF4444",
+                icon_size=18,
+                tooltip=STRINGS[lang].get("btn_delete_comment", "Delete comment"),
+                on_click=lambda e, comment_id=cid: confirm_delete_comment(comment_id)
+            ) if cid else ft.Container()
+
+            content_controls = []
+            if date_str:
+                content_controls.append(ft.Text(date_str, color=palette["text_muted"], size=10))
+            content_controls.append(ft.Text(txt, color=palette["text_secondary"], size=12, selectable=True))
+
+            items.append(ft.Container(
+                content=ft.Row([
+                    ft.Column(content_controls, spacing=2, expand=True),
+                    delete_btn
+                ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN, vertical_alignment=ft.CrossAxisAlignment.CENTER),
+                padding=ft.Padding(left=12, right=8, top=8, bottom=8),
+                border_radius=8,
+                bgcolor=palette["card_bg"],
+                border=ft.Border.all(1, palette["card_border"])
+            ))
+        return items
+
     comments_loading_card = make_loading_card(STRINGS[lang].get("comments_loading", "Loading community comments..."), theme_mode=theme_mode)
-    comments_container = ft.Column(controls=[comments_loading_card], spacing=8, scroll=ft.ScrollMode.ALWAYS, expand=True)
+    
+    if target_sha256 in _COMMENTS_CACHE:
+        comments_container = ft.Column(controls=build_comment_item_controls(_COMMENTS_CACHE[target_sha256]), spacing=8, scroll=ft.ScrollMode.ALWAYS, expand=True)
+    else:
+        comments_container = ft.Column(controls=[comments_loading_card], spacing=8, scroll=ft.ScrollMode.ALWAYS, expand=True)
 
     send_progress = ft.ProgressRing(width=20, height=20, stroke_width=2.5, color=palette["accent"], visible=False)
     send_button = ft.IconButton(
@@ -578,53 +625,8 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
         page.overlay.append(overlay)
         safe_update_control()
 
-    def render_comments(comms):
-        comments_container.controls.clear()
-        if not comms:
-            comments_container.controls.append(ft.Text(STRINGS[lang].get("comments_empty", "No community comments yet."), color=palette["text_muted"]))
-        else:
-            for c in comms:
-                cid = c.get("id")
-                attrs = c.get("attributes", {})
-                txt = attrs.get("text", "")
-                date_val = attrs.get("date")
-                
-                date_str = ""
-                if date_val:
-                    try:
-                        from datetime import datetime
-                        date_str = datetime.fromtimestamp(date_val).strftime("%d.%m.%Y %H:%M")
-                    except Exception:
-                        pass
-
-                delete_btn = ft.IconButton(
-                    icon=ft.Icons.DELETE_OUTLINE_ROUNDED,
-                    icon_color="#EF4444",
-                    icon_size=18,
-                    tooltip=STRINGS[lang].get("btn_delete_comment", "Delete comment"),
-                    on_click=lambda e, comment_id=cid: confirm_delete_comment(comment_id)
-                ) if cid else ft.Container()
-
-                content_controls = []
-                if date_str:
-                    content_controls.append(ft.Text(date_str, color=palette["text_muted"], size=10))
-                content_controls.append(ft.Text(txt, color=palette["text_secondary"], size=12, selectable=True))
-
-                comments_container.controls.append(ft.Container(
-                    content=ft.Row([
-                        ft.Column(content_controls, spacing=2, expand=True),
-                        delete_btn
-                    ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN, vertical_alignment=ft.CrossAxisAlignment.CENTER),
-                    padding=ft.Padding(left=12, right=8, top=8, bottom=8),
-                    border_radius=8,
-                    bgcolor=palette["card_bg"],
-                    border=ft.Border.all(1, palette["card_border"])
-                ))
-        safe_update_control(comments_container)
-
     def load_comments(e=None, force=False):
         if not force and target_sha256 in _COMMENTS_CACHE:
-            render_comments(_COMMENTS_CACHE[target_sha256])
             return
 
         api_key = get_api_key()
@@ -636,11 +638,13 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
         def worker():
             comms = get_comments("files", last_completed_sha256, api_key)
             _COMMENTS_CACHE[target_sha256] = comms
-            render_comments(comms)
+            comments_container.controls = build_comment_item_controls(comms)
+            safe_update_control(comments_container)
 
         threading.Thread(target=worker, daemon=True).start()
 
-    load_comments()
+    if target_sha256 not in _COMMENTS_CACHE:
+        load_comments()
 
     comments_tab_view = ft.Column([
         ft.Row([
@@ -672,8 +676,8 @@ def build_results_view(current_scan_results, selected_target_file, last_complete
             expand=True
         ),
         transition=ft.AnimatedSwitcherTransition.FADE,
-        duration=250,
-        reverse_duration=200,
+        duration=200,
+        reverse_duration=150,
         switch_in_curve=ft.AnimationCurve.EASE_OUT,
         switch_out_curve=ft.AnimationCurve.EASE_IN,
         expand=True
