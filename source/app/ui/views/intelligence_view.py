@@ -256,7 +256,13 @@ class IntelligenceView:
                     threading.Thread(target=worker, daemon=True).start()
                 load_relations()
 
-            relations_view = ft.Container(content=rel_container, padding=12, bgcolor=self.palette["card_bg"], border_radius=10, border=ft.Border.all(1, self.palette["card_border"]))
+            relations_view = ft.Container(
+                content=rel_container,
+                padding=14,
+                bgcolor=self.palette["card_bg"],
+                border_radius=10,
+                border=ft.Border.all(1, self.palette["card_border"])
+            )
 
         main_items = [
             verdict_banner,
@@ -271,10 +277,13 @@ class IntelligenceView:
         if relations_view:
             main_items.append(ft.Divider(color=self.palette["divider"]))
             main_items.append(relations_view)
+            
+        main_items.append(ft.Container(height=10))
         
         return ft.Column(
             main_items,
             spacing=10,
+            scroll=ft.ScrollMode.AUTO,
             expand=True
         )
 
@@ -664,9 +673,10 @@ class IntelligenceView:
 
         buttons_row = [input_field, search_btn]
         
-        results_area = ft.Container(expand=True, alignment=ft.Alignment.CENTER)
+        results_area = ft.Container(expand=True)
         
         if state["status"] == "loading":
+            results_area.alignment = ft.Alignment.CENTER
             results_area.content = ft.Column(
                 [
                     ft.ProgressRing(color=self.palette["accent"], width=36, height=36),
@@ -677,6 +687,7 @@ class IntelligenceView:
                 spacing=10
             )
         elif state["status"] == "error":
+            results_area.alignment = ft.Alignment.CENTER
             error_items = [
                 ft.Icon(ft.Icons.ERROR_OUTLINE_ROUNDED, color="#EF4444", size=32),
                 ft.Text(state["error"], color="#EF4444", size=13, text_align=ft.TextAlign.CENTER),
@@ -696,11 +707,13 @@ class IntelligenceView:
                 spacing=10
             )
         elif state["status"] == "success" and state["results"] is not None:
+            results_area.alignment = ft.Alignment.TOP_LEFT
             if tab_key == "search":
                 results_area.content = self.build_search_results_view(state["results"])
             else:
                 results_area.content = self.build_lookup_results_view(state["results"], tab_key, state["input"].strip())
         else:
+            results_area.alignment = ft.Alignment.CENTER
             results_area.content = ft.Container(
                 content=ft.Text(helper_desc, color=self.palette["text_muted"], size=13, text_align=ft.TextAlign.CENTER),
                 alignment=ft.Alignment(0, 0)
