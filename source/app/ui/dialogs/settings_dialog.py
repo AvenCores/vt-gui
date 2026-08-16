@@ -12,7 +12,6 @@ def open_settings(page, lang, on_settings_saved, on_reinstall_cli=None, cli_sour
     palette = get_theme_palette(theme_mode)
     is_dark = (theme_mode == "dark")
     api_key = get_api_key() or ""
-    current_selected_theme = [theme_mode or get_app_theme()]
 
     api_key_field = ft.TextField(
         label=STRINGS[lang]["api_key_label"],
@@ -115,35 +114,10 @@ def open_settings(page, lang, on_settings_saved, on_reinstall_cli=None, cli_sour
         height=20,
     )
 
-    # Theme selection section
-    theme_dropdown = ft.Dropdown(
-        label=STRINGS[lang].get("theme_label", "Theme"),
-        value=current_selected_theme[0],
-        options=[
-            ft.dropdown.Option("dark", STRINGS[lang].get("theme_dark", "Dark")),
-            ft.dropdown.Option("light", STRINGS[lang].get("theme_light", "Light")),
-        ],
-        border_color=palette["input_border"],
-        focused_border_color=palette["accent"],
-        label_style=ft.TextStyle(color=palette["text_muted"]),
-        color=palette["text_primary"],
-        bgcolor=palette["input_bg"],
-    )
-
-    def on_theme_dropdown_change(e):
-        current_selected_theme[0] = theme_dropdown.value
-
-    theme_dropdown.on_change = on_theme_dropdown_change
-
     def save_settings(e):
         write_env_var("VT_APIKEY", api_key_field.value.strip())
-        new_theme = current_selected_theme[0]
-        set_app_theme(new_theme)
         page.pop_dialog()
-        if on_theme_change and new_theme != theme_mode:
-            on_theme_change(new_theme)
-        else:
-            on_settings_saved()
+        on_settings_saved()
 
     # Reinstall CLI section
     status_icon = ft.Icon(ft.Icons.SYNC_ROUNDED, color="transparent", size=14)
@@ -246,8 +220,6 @@ def open_settings(page, lang, on_settings_saved, on_reinstall_cli=None, cli_sour
         get_api_key_btn,
         ft.Row([api_check_btn, api_check_row], alignment=ft.MainAxisAlignment.START, spacing=5),
         ft.Column([quota_text, quota_progress], spacing=4),
-        ft.Divider(height=1, color=palette["divider"]),
-        theme_dropdown,
         ft.Divider(height=1, color=palette["divider"]),
         reinstall_row,
         system_warning_row,
