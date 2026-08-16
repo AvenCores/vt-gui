@@ -8,7 +8,7 @@ from ...core.config import STRINGS
 from ...utils.clipboard import safe_copy_to_clipboard
 from .theme import get_theme_palette
 
-APP_VERSION = "V1.0.8"
+APP_VERSION = "V1.0.9"
 GITHUB_REPO = "AvenCores/vt-gui"
 RELEASES_URL = f"https://github.com/{GITHUB_REPO}/releases"
 API_URL = f"https://api.github.com/repos/{GITHUB_REPO}/releases/latest"
