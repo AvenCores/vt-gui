@@ -36,8 +36,8 @@ def open_settings(page, lang, on_settings_saved, on_reinstall_cli=None, cli_sour
     api_check_icon = ft.Icon(ft.Icons.VERIFIED_ROUNDED, color="transparent", size=16)
     api_check_text = ft.Text(" ", size=12, color=palette["text_muted"])
 
-    # API Quota progress section
-    initial_quota_text = STRINGS[lang].get("api_checking", "Checking...") if api_key else STRINGS[lang].get("api_quota_click", "API Quota: Click 'Check API' to fetch usage")
+    # API Quota progress section (checked only on button click)
+    initial_quota_text = STRINGS[lang].get("api_quota_click", "API Quota: Click 'Check API' to fetch usage")
     quota_text = ft.Text(initial_quota_text, size=12, color=palette["text_muted"])
     quota_progress = ft.ProgressBar(value=0.0, color=palette["accent"], bgcolor=palette["card_border"], height=4, visible=False)
 
@@ -62,9 +62,6 @@ def open_settings(page, lang, on_settings_saved, on_reinstall_cli=None, cli_sour
         except Exception:
             quota_text.value = STRINGS[lang].get("api_quota_click", "API Quota: Click 'Check API' to fetch usage")
             page.update()
-
-    if api_key:
-        threading.Thread(target=lambda: update_quota_display(api_key), daemon=True).start()
 
     def on_check_api_click(e):
         key = api_key_field.value.strip()
