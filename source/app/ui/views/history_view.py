@@ -1,3 +1,4 @@
+import asyncio
 import flet as ft
 import os
 import webbrowser
@@ -31,6 +32,34 @@ def build_history_view(lang, page, on_back, on_rescan, on_open_in_app=None, on_i
     palette = get_theme_palette(theme_mode)
     history = load_history()
 
+    # Flet (0.86.x) сбрасывает позицию прокрутки ListView при открытии любого
+    # диалога/оверлея, поэтому запоминаем смещение и восстанавливаем его после.
+    last_scroll_offset = [0.0]
+    list_view_ref = [None]
+
+    def _on_history_scroll(e: ft.OnScrollEvent):
+        last_scroll_offset[0] = e.pixels
+
+    async def _restore_list_scroll():
+        lv = list_view_ref[0]
+        if lv is None:
+            return
+        try:
+            await asyncio.sleep(0.15)
+            await lv.scroll_to(offset=max(last_scroll_offset[0], 0), duration=0)
+        except Exception:
+            pass
+
+    def _schedule_scroll_restore():
+        try:
+            page.run_task(_restore_list_scroll)
+        except Exception:
+            pass
+
+    def _pop_dialog_and_restore(e=None):
+        page.pop_dialog()
+        _schedule_scroll_restore()
+
     def refresh_view():
         # Rebuild only the history list in place — do not navigate away or rebuild the whole app
         new_content = _build_content(load_history())
@@ -39,6 +68,7 @@ def build_history_view(lang, page, on_back, on_rescan, on_open_in_app=None, on_i
             content.update()
         except Exception:
             page.update()
+        _schedule_scroll_restore()
 
     def on_clear_click(e):
         def confirm_clear(e2):
@@ -50,7 +80,7 @@ def build_history_view(lang, page, on_back, on_rescan, on_open_in_app=None, on_i
             title=ft.Text(STRINGS[lang]["history_clear"], color=palette["text_primary"], weight=ft.FontWeight.BOLD),
             content=ft.Text(STRINGS[lang]["history_clear_confirm"], color=palette["text_secondary"]),
             actions=[
-                ft.TextButton(STRINGS[lang]["btn_no"], on_click=lambda _: page.pop_dialog(), style=ft.ButtonStyle(color=palette["text_muted"])),
+                ft.TextButton(STRINGS[lang]["btn_no"], on_click=_pop_dialog_and_restore, style=ft.ButtonStyle(color=palette["text_muted"])),
                 ft.Button(STRINGS[lang]["history_clear"], on_click=confirm_clear, bgcolor="#EF4444", color="#FFFFFF"),
             ],
             bgcolor=palette["dialog_bg"]
@@ -127,6 +157,7 @@ def build_history_view(lang, page, on_back, on_rescan, on_open_in_app=None, on_i
             else:
                 def open_report_from_missing(e_or):
                     page.pop_dialog()
+                    _schedule_scroll_restore()
                     on_open_report_click(e_or, rec=rec)
 
                 display_path = path if path else filename
@@ -148,7 +179,7 @@ def build_history_view(lang, page, on_back, on_rescan, on_open_in_app=None, on_i
                 btn_controls.append(
                     ft.TextButton(
                         content=ft.Text(STRINGS[lang].get("btn_close", "Закрыть"), color=palette["text_muted"], size=13),
-                        on_click=lambda _: page.pop_dialog(),
+                        on_click=_pop_dialog_and_restore,
                         width=440
                     )
                 )
@@ -182,6 +213,7 @@ def build_history_view(lang, page, on_back, on_rescan, on_open_in_app=None, on_i
                     bgcolor=palette["dialog_bg"]
                 )
                 page.show_dialog(missing_dlg)
+                _schedule_scroll_restore()
 
         def on_web_report(e, rt=record_type, lt=lookup_type, q=query, h=sha256):
             if rt == "lookup":
@@ -203,6 +235,7 @@ def build_history_view(lang, page, on_back, on_rescan, on_open_in_app=None, on_i
                     page.overlay.remove(ov)
                     page.update()
                 overlay_holder[0] = None
+                _schedule_scroll_restore()
 
             def open_in_browser(e_b):
                 close_overlay()
@@ -402,6 +435,7 @@ def build_history_view(lang, page, on_back, on_rescan, on_open_in_app=None, on_i
             overlay_holder[0] = report_overlay
             page.overlay.append(report_overlay)
             page.update()
+            _schedule_scroll_restore()
 
         detail_text = STRINGS[lang]["history_scanned_at"].format(date=date_str)
         if detections_text:
@@ -529,10 +563,12 @@ def build_history_view(lang, page, on_back, on_rescan, on_open_in_app=None, on_i
             return ft.Column([header, empty_placeholder], spacing=10, expand=True)
 
         cards = [make_history_card(record) for record in history]
+        history_list = ft.ListView(cards, spacing=8, expand=True, on_scroll=_on_history_scroll)
+        list_view_ref[0] = history_list
         return ft.Column([
             header,
             ft.Container(height=5),
-            ft.ListView(cards, spacing=8, expand=True),
+            history_list,
         ], expand=True)
 
     content = _build_content(history)
