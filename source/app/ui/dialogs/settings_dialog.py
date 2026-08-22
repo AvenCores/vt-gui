@@ -47,6 +47,7 @@ def open_settings(page, lang, on_settings_saved, on_reinstall_cli=None, cli_sour
             if q:
                 used = q.get("daily_used", 0)
                 allowed = q.get("daily_allowed", 0)
+                quota_text.color = palette["text_muted"]
                 if allowed > 0:
                     percent = min(used / allowed, 1.0)
                     quota_progress.value = percent
@@ -58,9 +59,11 @@ def open_settings(page, lang, on_settings_saved, on_reinstall_cli=None, cli_sour
                 page.update()
             else:
                 quota_text.value = STRINGS[lang].get("api_quota_click", "API Quota: Click 'Check API' to fetch usage")
+                quota_text.color = "#EF4444"
                 page.update()
         except Exception:
             quota_text.value = STRINGS[lang].get("api_quota_click", "API Quota: Click 'Check API' to fetch usage")
+            quota_text.color = "#EF4444"
             page.update()
 
     def on_check_api_click(e):

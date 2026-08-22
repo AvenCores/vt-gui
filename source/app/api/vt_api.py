@@ -17,6 +17,7 @@ def check_file_exists_direct(sha256, api_key):
     )
     try:
         with urllib.request.urlopen(req) as response:
+            increment_local_usage()
             return json.loads(response.read().decode('utf-8'))
     except urllib.error.HTTPError as e:
         if e.code == 404:
@@ -71,8 +72,62 @@ def check_file_exists_vt(vt_path, sha256):
     return None
 
 
+def _get_usage_counter_path():
+    """Path of the local daily API usage counter file."""
+    import os
+    if sys.platform == "win32":
+        base = os.environ.get("APPDATA") or os.path.expanduser("~")
+        cfg_dir = os.path.join(base, "VT-GUI")
+    else:
+        cfg_dir = os.path.join(os.path.expanduser("~"), ".config", "vt-gui")
+    return os.path.join(cfg_dir, "api_usage.json")
+
+
+def increment_local_usage(count=1):
+    """Increment the local daily API request counter. Resets automatically each day."""
+    import os
+    import datetime
+    path = _get_usage_counter_path()
+    today = datetime.date.today().isoformat()
+    try:
+        data = {}
+        if os.path.exists(path):
+            with open(path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+        if data.get("date") != today:
+            data = {"date": today, "used": 0}
+        data["used"] = int(data.get("used", 0)) + count
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(data, f)
+    except Exception:
+        pass
+
+
+def get_local_usage():
+    """Return the locally tracked number of API requests used today (0 if none)."""
+    import os
+    import datetime
+    path = _get_usage_counter_path()
+    today = datetime.date.today().isoformat()
+    try:
+        if os.path.exists(path):
+            with open(path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            if data.get("date") == today:
+                return int(data.get("used", 0))
+    except Exception:
+        pass
+    return 0
+
+
 def get_user_quota(api_key):
-    """Fetch user account info and overall API quota usage from VirusTotal API."""
+    """Fetch user account info and overall API quota usage from VirusTotal API.
+
+    Note: VirusTotal only returns the "quotas" section for PREMIUM accounts.
+    For free-tier keys we fall back to a local usage counter so the UI still
+    shows meaningful numbers instead of a misleading 0.
+    """
     url = "https://www.virustotal.com/api/v3/users/me"
     req = urllib.request.Request(
         url,
@@ -81,22 +136,38 @@ def get_user_quota(api_key):
     try:
         with urllib.request.urlopen(req) as response:
             res = json.loads(response.read().decode('utf-8'))
-            data = res.get("data", {}).get("attributes", {})
-            user_id = data.get("id") or data.get("username", "User")
-            quotas = data.get("quotas", {})
-            
-            # Extract daily / monthly request quotas
-            api_requests_daily = quotas.get("api_requests_daily", {})
-            api_requests_monthly = quotas.get("api_requests_monthly", {})
-            
-            used_daily = api_requests_daily.get("user", {}).get("used", 0)
-            allowed_daily = api_requests_daily.get("user", {}).get("allowed", 0)
-            
-            used_monthly = api_requests_monthly.get("user", {}).get("used", 0)
-            allowed_monthly = api_requests_monthly.get("user", {}).get("allowed", 0)
-            
-            user_group = data.get("user_group", {}).get("id", "standard")
-            
+            payload = res.get("data", {}) or {}
+            attrs = payload.get("attributes", {}) or {}
+            # "id" lives next to "attributes", not inside it
+            user_id = payload.get("id") or attrs.get("username", "User")
+            quotas = attrs.get("quotas", {}) or {}
+
+            def _quota_pair(quota_dict):
+                # /users/me returns a FLAT quota object: {"used": N, "allowed": M}.
+                # Nested "user"/"group" scopes only appear in group endpoints,
+                # so check the flat form first, then fall back to nested scopes.
+                used = quota_dict.get("used")
+                allowed = quota_dict.get("allowed")
+                if used is not None or allowed is not None:
+                    return int(used or 0), int(allowed or 0)
+                for scope in ("user", "group"):
+                    entry = quota_dict.get(scope) or {}
+                    u = entry.get("used")
+                    a = entry.get("allowed")
+                    if u is not None or a is not None:
+                        return int(u or 0), int(a or 0)
+                return 0, 0
+
+            used_daily, allowed_daily = _quota_pair(quotas.get("api_requests_daily", {}) or {})
+            used_monthly, allowed_monthly = _quota_pair(quotas.get("api_requests_monthly", {}) or {})
+
+            user_group = attrs.get("user_group", {}).get("id", "standard")
+
+            # Free-tier keys: no quotas section in the response — use local counter
+            if not quotas:
+                used_daily = get_local_usage()
+                used_monthly = used_daily
+
             return {
                 "user_id": user_id,
                 "user_group": user_group,

@@ -8,7 +8,7 @@ from ..core.constants import CLI_BINARY_NAME
 from ..core.config import STRINGS, get_api_key
 from ..api.cli_manager import get_installed_binary_path
 from ..utils.hashing import compute_sha256
-from ..api.vt_api import check_file_exists_direct, check_file_exists_vt
+from ..api.vt_api import check_file_exists_direct, check_file_exists_vt, increment_local_usage
 from .history_service import add_scan_record
 
 _NO_WINDOW = subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0
@@ -131,6 +131,7 @@ class ScanService:
             )
             if proc.returncode != 0:
                 raise ValueError(f"vt CLI upload failed: {proc.stderr or proc.stdout}")
+            increment_local_usage()  # file upload consumes 1 API request
             
             stdout_lines = proc.stdout.strip().split('\n')
             for line in stdout_lines:
