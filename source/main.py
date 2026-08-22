@@ -226,7 +226,20 @@ def main(page: ft.Page):
 
         threading.Thread(target=delayed_finish, daemon=True).start()
 
+    # Optional diagnostics: run with VT_UI_DEBUG=1 to log every full UI rebuild
+    # with its call stack into ~/.vt-gui-ui-debug.log
+    _ui_debug_enabled = os.environ.get("VT_UI_DEBUG") == "1"
+    _ui_debug_log_path = os.path.join(os.path.expanduser("~"), ".vt-gui-ui-debug.log")
+
     def build_ui():
+        if _ui_debug_enabled:
+            try:
+                import traceback
+                with open(_ui_debug_log_path, "a", encoding="utf-8") as _f:
+                    _f.write("build_ui called from:\n")
+                    _f.write("".join(traceback.format_stack(limit=10)) + "\n")
+            except Exception:
+                pass
         if not _build_lock.acquire(blocking=False):
             return
         try:
@@ -245,6 +258,10 @@ def main(page: ft.Page):
         # Header Language Switcher
         def change_language(lang_code):
             nonlocal current_lang
+            if lang_code == current_lang:
+                # Same language re-selected (e.g. closing the menu by picking
+                # the current item) — nothing to rebuild
+                return
             current_lang = lang_code
             write_env_var("LANGUAGE", lang_code)
             page.title = STRINGS[current_lang]["app_title"]
@@ -260,6 +277,8 @@ def main(page: ft.Page):
         def toggle_theme(target_theme=None):
             nonlocal current_theme
             if target_theme in ("dark", "light"):
+                if target_theme == current_theme:
+                    return
                 current_theme = target_theme
             else:
                 current_theme = "light" if current_theme == "dark" else "dark"
@@ -269,6 +288,11 @@ def main(page: ft.Page):
             page.window.bgcolor = p["bg_gradient_colors"][0]
             page.theme_mode = ft.ThemeMode.DARK if current_theme == "dark" else ft.ThemeMode.LIGHT
             build_ui()
+
+        # Settings save callback — nothing on the main screen depends on the API key,
+        # so avoid a full UI rebuild (which visually refreshes the current tab)
+        def on_settings_saved():
+            pass
 
         # Settings CLI Reinstall callback
         def on_reinstall_cli(status_text_widget, status_icon, set_button_disabled):
@@ -301,7 +325,7 @@ def main(page: ft.Page):
         header = build_header(
             current_lang=current_lang,
             on_language_change=change_language,
-            on_settings_click=lambda _: open_settings(page, current_lang, build_ui, on_reinstall_cli, cli_source, theme_mode=current_theme, on_theme_change=toggle_theme),
+            on_settings_click=lambda _: open_settings(page, current_lang, on_settings_saved, on_reinstall_cli, cli_source, theme_mode=current_theme, on_theme_change=toggle_theme),
             theme_mode=current_theme,
             on_theme_toggle=lambda _: toggle_theme()
         )
@@ -1250,10 +1274,8 @@ def main(page: ft.Page):
 
     # Show API key setup dialog on first launch if no key is configured
     if not get_api_key():
-        def on_api_key_saved():
-            build_ui()
         _, _, _cli_source = check_installed_binary()
-        open_api_key_dialog(page, current_lang, on_api_key_saved, _cli_source, theme_mode=current_theme)
+        open_api_key_dialog(page, current_lang, lambda: None, _cli_source, theme_mode=current_theme)
     elif init_file_path and os.path.exists(init_file_path):
         api_key = get_api_key()
         cli_status, _, _ = check_installed_binary()

@@ -32,7 +32,13 @@ def build_history_view(lang, page, on_back, on_rescan, on_open_in_app=None, on_i
     history = load_history()
 
     def refresh_view():
-        on_back()
+        # Rebuild only the history list in place — do not navigate away or rebuild the whole app
+        new_content = _build_content(load_history())
+        content.controls = new_content.controls
+        try:
+            content.update()
+        except Exception:
+            page.update()
 
     def on_clear_click(e):
         def confirm_clear(e2):
@@ -486,46 +492,48 @@ def build_history_view(lang, page, on_back, on_rescan, on_open_in_app=None, on_i
         style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8))
     ) if on_import_click else None
 
-    header_controls = [
-        back_button_wrapper,
-        ft.Text(STRINGS[lang]["tab_history"], size=20, weight=ft.FontWeight.BOLD, color=palette["text_primary"], expand=True)
-    ]
-    if import_btn:
-        header_controls.append(import_btn)
-    if history:
-        header_controls.append(
-            ft.TextButton(
-                content=ft.Text(STRINGS[lang]["history_clear"], color="#EF4444", size=13),
-                icon=ft.Icons.DELETE_SWEEP_ROUNDED,
-                icon_color="#EF4444",
-                on_click=on_clear_click,
+    def _build_content(history):
+        header_controls = [
+            back_button_wrapper,
+            ft.Text(STRINGS[lang]["tab_history"], size=20, weight=ft.FontWeight.BOLD, color=palette["text_primary"], expand=True)
+        ]
+        if import_btn:
+            header_controls.append(import_btn)
+        if history:
+            header_controls.append(
+                ft.TextButton(
+                    content=ft.Text(STRINGS[lang]["history_clear"], color="#EF4444", size=13),
+                    icon=ft.Icons.DELETE_SWEEP_ROUNDED,
+                    icon_color="#EF4444",
+                    on_click=on_clear_click,
+                )
             )
-        )
 
-    # Header
-    header = ft.Row(header_controls, alignment=ft.MainAxisAlignment.START, spacing=8)
+        # Header
+        header = ft.Row(header_controls, alignment=ft.MainAxisAlignment.START, spacing=8)
 
-    if not history:
-        empty_placeholder = ft.Container(
-            content=ft.Column(
-                [
-                    ft.Icon(ft.Icons.HISTORY_ROUNDED, size=64, color=palette["card_border"]),
-                    ft.Text(STRINGS[lang]["history_empty"], size=16, color=palette["text_muted"], text_align=ft.TextAlign.CENTER)
-                ],
-                alignment=ft.MainAxisAlignment.CENTER,
-                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                spacing=12
-            ),
-            alignment=ft.Alignment.CENTER,
-            expand=True
-        )
-        content = ft.Column([header, empty_placeholder], spacing=10, expand=True)
-    else:
+        if not history:
+            empty_placeholder = ft.Container(
+                content=ft.Column(
+                    [
+                        ft.Icon(ft.Icons.HISTORY_ROUNDED, size=64, color=palette["card_border"]),
+                        ft.Text(STRINGS[lang]["history_empty"], size=16, color=palette["text_muted"], text_align=ft.TextAlign.CENTER)
+                    ],
+                    alignment=ft.MainAxisAlignment.CENTER,
+                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                    spacing=12
+                ),
+                alignment=ft.Alignment.CENTER,
+                expand=True
+            )
+            return ft.Column([header, empty_placeholder], spacing=10, expand=True)
+
         cards = [make_history_card(record) for record in history]
-        content = ft.Column([
+        return ft.Column([
             header,
             ft.Container(height=5),
             ft.ListView(cards, spacing=8, expand=True),
         ], expand=True)
 
+    content = _build_content(history)
     return content
