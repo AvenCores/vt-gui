@@ -38,7 +38,7 @@ def verify_api_key(api_key):
         headers={"x-apikey": api_key, "User-Agent": "Mozilla/5.0"}
     )
     try:
-        with urllib.request.urlopen(req) as response:
+        with urllib.request.urlopen(req, timeout=8) as response:
             json.loads(response.read().decode('utf-8'))
             return True, None
     except urllib.error.HTTPError as e:
@@ -121,6 +121,53 @@ def get_local_usage():
     return 0
 
 
+_QUOTA_CACHE_MAX_AGE_SECONDS = 24 * 60 * 60
+
+
+def _get_quota_cache_path():
+    """Path of the cached API quota payload file."""
+    import os
+    if sys.platform == "win32":
+        base = os.environ.get("APPDATA") or os.path.expanduser("~")
+        cfg_dir = os.path.join(base, "VT-GUI")
+    else:
+        cfg_dir = os.path.join(os.path.expanduser("~"), ".config", "vt-gui")
+    return os.path.join(cfg_dir, "api_quota_cache.json")
+
+
+def save_quota_cache(quota):
+    """Store fetched quota data with a timestamp so the UI can show it instantly."""
+    import os
+    import time
+    try:
+        path = _get_quota_cache_path()
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump({"timestamp": time.time(), "quota": quota}, f)
+    except Exception:
+        pass
+
+
+def get_cached_quota(max_age_seconds=_QUOTA_CACHE_MAX_AGE_SECONDS):
+    """Return cached quota dict, or None when missing or older than 24 hours."""
+    import os
+    import time
+    try:
+        path = _get_quota_cache_path()
+        if not os.path.exists(path):
+            return None
+        with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        ts = float(data.get("timestamp", 0))
+        quota = data.get("quota")
+        if isinstance(quota, dict) and (time.time() - ts) <= max_age_seconds:
+            return quota
+        os.remove(path)
+    except Exception:
+        pass
+    return None
+
+
 def get_user_quota(api_key):
     """Fetch user account info and overall API quota usage from VirusTotal API.
 
@@ -134,7 +181,7 @@ def get_user_quota(api_key):
         headers={"x-apikey": api_key, "User-Agent": "Mozilla/5.0"}
     )
     try:
-        with urllib.request.urlopen(req) as response:
+        with urllib.request.urlopen(req, timeout=8) as response:
             res = json.loads(response.read().decode('utf-8'))
             payload = res.get("data", {}) or {}
             attrs = payload.get("attributes", {}) or {}
@@ -168,14 +215,17 @@ def get_user_quota(api_key):
                 used_daily = get_local_usage()
                 used_monthly = used_daily
 
-            return {
+            result = {
                 "user_id": user_id,
                 "user_group": user_group,
+                "free_tier": not quotas,
                 "daily_used": used_daily,
                 "daily_allowed": allowed_daily,
                 "monthly_used": used_monthly,
                 "monthly_allowed": allowed_monthly
             }
+            save_quota_cache(result)
+            return result
     except Exception:
         return None
 

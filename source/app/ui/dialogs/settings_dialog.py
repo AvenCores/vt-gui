@@ -3,7 +3,7 @@ import webbrowser
 import threading
 
 from ...core.config import write_env_var, STRINGS, get_api_key, get_app_theme, set_app_theme
-from ...api.vt_api import get_user_quota, verify_api_key
+from ...api.vt_api import get_user_quota, verify_api_key, get_cached_quota, get_local_usage
 from ..components.theme import get_theme_palette
 
 
@@ -36,35 +36,64 @@ def open_settings(page, lang, on_settings_saved, on_reinstall_cli=None, cli_sour
     api_check_icon = ft.Icon(ft.Icons.VERIFIED_ROUNDED, color="transparent", size=16)
     api_check_text = ft.Text(" ", size=12, color=palette["text_muted"])
 
-    # API Quota progress section (checked only on button click)
-    initial_quota_text = STRINGS[lang].get("api_quota_click", "API Quota: Click 'Check API' to fetch usage")
-    quota_text = ft.Text(initial_quota_text, size=12, color=palette["text_muted"])
+    # API Quota progress section (local/cached value renders instantly, refreshed in background)
+    quota_click_text = STRINGS[lang].get("api_quota_click", "API Quota: Click 'Check API' to fetch usage")
+    quota_text = ft.Text(quota_click_text, size=12, color=palette["text_muted"])
     quota_progress = ft.ProgressBar(value=0.0, color=palette["accent"], bgcolor=palette["card_border"], height=4, visible=False)
+    quota_shown = {"value": False}
+
+    def apply_quota(q):
+        used = q.get("daily_used", 0)
+        allowed = q.get("daily_allowed", 0)
+        quota_shown["value"] = True
+        quota_text.color = palette["text_muted"]
+        if allowed > 0:
+            percent = min(used / allowed, 1.0)
+            quota_progress.value = percent
+            quota_progress.color = "#FF3131" if percent > 0.9 else palette["accent"]
+            quota_progress.visible = True
+            quota_text.value = STRINGS[lang].get("api_quota_daily", "Daily API Quota: {used} / {allowed} requests ({percent}%)").format(used=used, allowed=allowed, percent=int(percent*100))
+        else:
+            quota_text.value = STRINGS[lang].get("api_quota_usage", "Daily API Usage: {used} requests used").format(used=used)
 
     def update_quota_display(key):
         try:
             q = get_user_quota(key)
             if q:
-                used = q.get("daily_used", 0)
-                allowed = q.get("daily_allowed", 0)
-                quota_text.color = palette["text_muted"]
-                if allowed > 0:
-                    percent = min(used / allowed, 1.0)
-                    quota_progress.value = percent
-                    quota_progress.color = "#FF3131" if percent > 0.9 else palette["accent"]
-                    quota_progress.visible = True
-                    quota_text.value = STRINGS[lang].get("api_quota_daily", "Daily API Quota: {used} / {allowed} requests ({percent}%)").format(used=used, allowed=allowed, percent=int(percent*100))
-                else:
-                    quota_text.value = STRINGS[lang].get("api_quota_usage", "Daily API Usage: {used} requests used").format(used=used)
+                apply_quota(q)
                 page.update()
-            else:
-                quota_text.value = STRINGS[lang].get("api_quota_click", "API Quota: Click 'Check API' to fetch usage")
+            elif not quota_shown["value"]:
+                quota_text.value = quota_click_text
                 quota_text.color = "#EF4444"
                 page.update()
         except Exception:
-            quota_text.value = STRINGS[lang].get("api_quota_click", "API Quota: Click 'Check API' to fetch usage")
-            quota_text.color = "#EF4444"
-            page.update()
+            if not quota_shown["value"]:
+                quota_text.value = quota_click_text
+                quota_text.color = "#EF4444"
+                page.update()
+
+    def refresh_quota_async():
+        key = api_key_field.value.strip()
+        if key:
+            threading.Thread(target=update_quota_display, args=(key,), daemon=True).start()
+
+    def local_quota_snapshot():
+        used = get_local_usage()
+        return {
+            "daily_used": used,
+            "daily_allowed": 0,
+            "monthly_used": used,
+            "monthly_allowed": 0,
+            "free_tier": True,
+        }
+
+    cached_quota = get_cached_quota() if api_key else None
+    if cached_quota and cached_quota.get("free_tier"):
+        used_now = get_local_usage()
+        cached_quota["daily_used"] = used_now
+        cached_quota["monthly_used"] = used_now
+    if api_key:
+        apply_quota(cached_quota or local_quota_snapshot())
 
     def on_check_api_click(e):
         key = api_key_field.value.strip()
@@ -290,3 +319,4 @@ def open_settings(page, lang, on_settings_saved, on_reinstall_cli=None, cli_sour
     )
 
     page.show_dialog(dlg)
+    refresh_quota_async()
