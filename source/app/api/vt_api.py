@@ -83,20 +83,28 @@ def _get_usage_counter_path():
     return os.path.join(cfg_dir, "api_usage.json")
 
 
-def increment_local_usage(count=1):
-    """Increment the local daily API request counter. Resets automatically each day."""
+def _load_usage_data():
+    """Load local usage history, migrating the legacy single-day format."""
     import os
-    import datetime
     path = _get_usage_counter_path()
-    today = datetime.date.today().isoformat()
     try:
-        data = {}
         if os.path.exists(path):
             with open(path, "r", encoding="utf-8") as f:
                 data = json.load(f)
-        if data.get("date") != today:
-            data = {"date": today, "used": 0}
-        data["used"] = int(data.get("used", 0)) + count
+            if isinstance(data, dict):
+                if "days" not in data and data.get("date"):
+                    return {"days": {str(data["date"]): int(data.get("used", 0))}}
+                if isinstance(data.get("days"), dict):
+                    return data
+    except Exception:
+        pass
+    return {"days": {}}
+
+
+def _save_usage_data(data):
+    import os
+    try:
+        path = _get_usage_counter_path()
         os.makedirs(os.path.dirname(path), exist_ok=True)
         with open(path, "w", encoding="utf-8") as f:
             json.dump(data, f)
@@ -104,68 +112,65 @@ def increment_local_usage(count=1):
         pass
 
 
+def _prune_usage_days(days, keep_days=40):
+    """Drop day buckets older than ~a month so stored history stays small."""
+    import datetime
+    cutoff = datetime.date.today() - datetime.timedelta(days=keep_days)
+    kept = {}
+    for d, v in days.items():
+        try:
+            if datetime.date.fromisoformat(str(d)) >= cutoff:
+                kept[str(d)] = int(v)
+        except Exception:
+            continue
+    return kept
+
+
+def increment_local_usage(count=1):
+    """Increment the local API request counter for today.
+
+    Usage is tracked per calendar day; the weekly counter resets every Monday
+    and the monthly counter clears on the 1st of each month automatically.
+    """
+    import datetime
+    today = datetime.date.today().isoformat()
+    data = _load_usage_data()
+    days = data.get("days", {})
+    days[today] = int(days.get(today, 0)) + count
+    data["days"] = _prune_usage_days(days)
+    _save_usage_data(data)
+
+
 def get_local_usage():
     """Return the locally tracked number of API requests used today (0 if none)."""
-    import os
     import datetime
-    path = _get_usage_counter_path()
     today = datetime.date.today().isoformat()
-    try:
-        if os.path.exists(path):
-            with open(path, "r", encoding="utf-8") as f:
-                data = json.load(f)
-            if data.get("date") == today:
-                return int(data.get("used", 0))
-    except Exception:
-        pass
-    return 0
+    return int(_load_usage_data().get("days", {}).get(today, 0))
 
 
-_QUOTA_CACHE_MAX_AGE_SECONDS = 24 * 60 * 60
+def get_local_usage_periods():
+    """Return locally tracked API usage for today, the current week and the current month.
 
-
-def _get_quota_cache_path():
-    """Path of the cached API quota payload file."""
-    import os
-    if sys.platform == "win32":
-        base = os.environ.get("APPDATA") or os.path.expanduser("~")
-        cfg_dir = os.path.join(base, "VT-GUI")
-    else:
-        cfg_dir = os.path.join(os.path.expanduser("~"), ".config", "vt-gui")
-    return os.path.join(cfg_dir, "api_quota_cache.json")
-
-
-def save_quota_cache(quota):
-    """Store fetched quota data with a timestamp so the UI can show it instantly."""
-    import os
-    import time
-    try:
-        path = _get_quota_cache_path()
-        os.makedirs(os.path.dirname(path), exist_ok=True)
-        with open(path, "w", encoding="utf-8") as f:
-            json.dump({"timestamp": time.time(), "quota": quota}, f)
-    except Exception:
-        pass
-
-
-def get_cached_quota(max_age_seconds=_QUOTA_CACHE_MAX_AGE_SECONDS):
-    """Return cached quota dict, or None when missing or older than 24 hours."""
-    import os
-    import time
-    try:
-        path = _get_quota_cache_path()
-        if not os.path.exists(path):
-            return None
-        with open(path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        ts = float(data.get("timestamp", 0))
-        quota = data.get("quota")
-        if isinstance(quota, dict) and (time.time() - ts) <= max_age_seconds:
-            return quota
-        os.remove(path)
-    except Exception:
-        pass
-    return None
+    The week starts on Monday; the month is the calendar month, so counters
+    reset on the 1st of each month.
+    """
+    import datetime
+    today = datetime.date.today()
+    week_start = today - datetime.timedelta(days=today.weekday())
+    daily = weekly = monthly = 0
+    for d, v in _load_usage_data().get("days", {}).items():
+        try:
+            date = datetime.date.fromisoformat(str(d))
+        except Exception:
+            continue
+        val = int(v)
+        if date == today:
+            daily += val
+        if date >= week_start:
+            weekly += val
+        if date.year == today.year and date.month == today.month:
+            monthly += val
+    return {"daily": daily, "weekly": weekly, "monthly": monthly}
 
 
 def get_user_quota(api_key):
@@ -215,17 +220,14 @@ def get_user_quota(api_key):
                 used_daily = get_local_usage()
                 used_monthly = used_daily
 
-            result = {
+            return {
                 "user_id": user_id,
                 "user_group": user_group,
-                "free_tier": not quotas,
                 "daily_used": used_daily,
                 "daily_allowed": allowed_daily,
                 "monthly_used": used_monthly,
                 "monthly_allowed": allowed_monthly
             }
-            save_quota_cache(result)
-            return result
     except Exception:
         return None
 

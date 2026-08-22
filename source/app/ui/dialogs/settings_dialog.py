@@ -1,9 +1,8 @@
 import flet as ft
 import webbrowser
-import threading
 
 from ...core.config import write_env_var, STRINGS, get_api_key, get_app_theme, set_app_theme
-from ...api.vt_api import get_user_quota, verify_api_key, get_cached_quota, get_local_usage
+from ...api.vt_api import get_local_usage_periods
 from ..components.theme import get_theme_palette
 
 
@@ -36,104 +35,73 @@ def open_settings(page, lang, on_settings_saved, on_reinstall_cli=None, cli_sour
     api_check_icon = ft.Icon(ft.Icons.VERIFIED_ROUNDED, color="transparent", size=16)
     api_check_text = ft.Text(" ", size=12, color=palette["text_muted"])
 
-    # API Quota progress section (local/cached value renders instantly, refreshed in background)
+    # API usage section (fully local: today / week / month counters)
     quota_click_text = STRINGS[lang].get("api_quota_click", "API Quota: Click 'Check API' to fetch usage")
-    quota_text = ft.Text(quota_click_text, size=12, color=palette["text_muted"])
-    quota_progress = ft.ProgressBar(value=0.0, color=palette["accent"], bgcolor=palette["card_border"], height=4, visible=False)
-    quota_shown = {"value": False}
+    quota_icon = ft.Icon(ft.Icons.DATA_USAGE_ROUNDED, color=palette["accent"], size=16)
+    quota_prompt = ft.Text(quota_click_text, size=12, color=palette["text_muted"])
+    usage_values = {
+        name: ft.Text("0", size=12, weight=ft.FontWeight.W_600, color=palette["text_primary"])
+        for name in ("daily", "weekly", "monthly")
+    }
 
-    def apply_quota(q):
-        used = q.get("daily_used", 0)
-        allowed = q.get("daily_allowed", 0)
-        quota_shown["value"] = True
-        quota_text.color = palette["text_muted"]
-        if allowed > 0:
-            percent = min(used / allowed, 1.0)
-            quota_progress.value = percent
-            quota_progress.color = "#FF3131" if percent > 0.9 else palette["accent"]
-            quota_progress.visible = True
-            quota_text.value = STRINGS[lang].get("api_quota_daily", "Daily API Quota: {used} / {allowed} requests ({percent}%)").format(used=used, allowed=allowed, percent=int(percent*100))
+    def quota_separator():
+        return ft.Container(width=1, height=12, bgcolor=palette["divider"], border_radius=1)
+
+    quota_segments = ft.Row(
+        [
+            ft.Text(STRINGS[lang].get("usage_title", "API usage"), size=11, weight=ft.FontWeight.W_600, color=palette["text_muted"]),
+            quota_separator(),
+            ft.Text(STRINGS[lang].get("usage_today", "Today"), size=11, color=palette["text_muted"]),
+            usage_values["daily"],
+            quota_separator(),
+            ft.Text(STRINGS[lang].get("usage_7days", "7 days"), size=11, color=palette["text_muted"]),
+            usage_values["weekly"],
+            quota_separator(),
+            ft.Text(STRINGS[lang].get("usage_month", "Month"), size=11, color=palette["text_muted"]),
+            usage_values["monthly"],
+        ],
+        spacing=5,
+    )
+    quota_segments.visible = False
+    quota_holder = ft.Column([quota_prompt, quota_segments], spacing=0, tight=True)
+
+    def show_quota_segments():
+        quota_prompt.visible = False
+        quota_segments.visible = True
+
+    def apply_local_quota():
+        periods = get_local_usage_periods()
+        usage_values["daily"].value = str(periods["daily"])
+        usage_values["weekly"].value = str(periods["weekly"])
+        usage_values["monthly"].value = str(periods["monthly"])
+
+    def is_plausible_api_key(key):
+        return len(key) == 64 and all(c in "0123456789abcdefABCDEF" for c in key)
+
+    def set_key_status(ok):
+        if ok:
+            api_check_text.value = STRINGS[lang].get("api_check_local_ok", "Key format is valid (local check)")
+            api_check_text.color = "#10B981"
+            api_check_icon.color = "#10B981"
+            api_check_icon.name = ft.Icons.CHECK_CIRCLE_ROUNDED
         else:
-            quota_text.value = STRINGS[lang].get("api_quota_usage", "Daily API Usage: {used} requests used").format(used=used)
-
-    def update_quota_display(key):
-        try:
-            q = get_user_quota(key)
-            if q:
-                apply_quota(q)
-                page.update()
-            elif not quota_shown["value"]:
-                quota_text.value = quota_click_text
-                quota_text.color = "#EF4444"
-                page.update()
-        except Exception:
-            if not quota_shown["value"]:
-                quota_text.value = quota_click_text
-                quota_text.color = "#EF4444"
-                page.update()
-
-    def refresh_quota_async():
-        key = api_key_field.value.strip()
-        if key:
-            threading.Thread(target=update_quota_display, args=(key,), daemon=True).start()
-
-    def local_quota_snapshot():
-        used = get_local_usage()
-        return {
-            "daily_used": used,
-            "daily_allowed": 0,
-            "monthly_used": used,
-            "monthly_allowed": 0,
-            "free_tier": True,
-        }
-
-    cached_quota = get_cached_quota() if api_key else None
-    if cached_quota and cached_quota.get("free_tier"):
-        used_now = get_local_usage()
-        cached_quota["daily_used"] = used_now
-        cached_quota["monthly_used"] = used_now
-    if api_key:
-        apply_quota(cached_quota or local_quota_snapshot())
-
-    def on_check_api_click(e):
-        key = api_key_field.value.strip()
-        if not key:
             api_check_text.value = STRINGS[lang]["api_key_hint"]
             api_check_text.color = "#F59E0B"
             api_check_icon.color = "#F59E0B"
             api_check_icon.name = ft.Icons.WARNING_ROUNDED
-            page.update()
-            return
-
-        api_check_btn.disabled = True
-        api_check_text.value = STRINGS[lang]["api_checking"]
-        api_check_text.color = palette["text_muted"]
-        api_check_icon.color = "transparent"
         page.update()
 
-        def run_check():
-            try:
-                success, error = verify_api_key(key)
-                if success:
-                    api_check_text.value = STRINGS[lang]["api_check_success"]
-                    api_check_text.color = "#10B981"
-                    api_check_icon.color = "#10B981"
-                    api_check_icon.name = ft.Icons.CHECK_CIRCLE_ROUNDED
-                    update_quota_display(key)
-                else:
-                    api_check_text.value = STRINGS[lang]["api_check_fail"].format(e=error)
-                    api_check_text.color = "#EF4444"
-                    api_check_icon.color = "#EF4444"
-                    api_check_icon.name = ft.Icons.ERROR_ROUNDED
-            except Exception as ex:
-                api_check_text.value = STRINGS[lang]["api_check_fail"].format(e=str(ex))
-                api_check_text.color = "#EF4444"
-                api_check_icon.color = "#EF4444"
-                api_check_icon.name = ft.Icons.ERROR_ROUNDED
-            api_check_btn.disabled = False
-            page.update()
+    def on_check_api_click(e):
+        key = api_key_field.value.strip()
+        ok = is_plausible_api_key(key)
+        if ok:
+            show_quota_segments()
+            apply_local_quota()
+        set_key_status(ok)
 
-        threading.Thread(target=run_check, daemon=True).start()
+    if api_key:
+        show_quota_segments()
+        apply_local_quota()
 
     api_check_btn = ft.TextButton(
         content=ft.Text(STRINGS[lang]["btn_check_api"], color=palette["accent"], size=13),
@@ -253,7 +221,7 @@ def open_settings(page, lang, on_settings_saved, on_reinstall_cli=None, cli_sour
         api_key_field,
         get_api_key_btn,
         ft.Row([api_check_btn, api_check_row], alignment=ft.MainAxisAlignment.START, spacing=5),
-        ft.Column([quota_text, quota_progress], spacing=4),
+        ft.Row([quota_icon, quota_holder], spacing=6),
         ft.Divider(height=1, color=palette["divider"]),
         reinstall_row,
         system_warning_row,
@@ -319,4 +287,3 @@ def open_settings(page, lang, on_settings_saved, on_reinstall_cli=None, cli_sour
     )
 
     page.show_dialog(dlg)
-    refresh_quota_async()
